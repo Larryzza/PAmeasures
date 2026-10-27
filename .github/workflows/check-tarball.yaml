@@ -1,0 +1,84 @@
+name: PAmeasures 2.0.0 source-tarball checks
+
+on:
+  push:
+    branches: ['cran-check-2.0.0-*']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: ${{ matrix.os }} (R ${{ matrix.r }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        r: [release, devel]
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      _R_CHECK_CRAN_INCOMING_REMOTE_: true
+      _R_CHECK_FORCE_SUGGESTS_: true
+      _R_CHECK_LIMIT_CORES_: true
+      OMP_NUM_THREADS: 1
+      OPENBLAS_NUM_THREADS: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.r }}
+          use-public-rspm: true
+      - name: Verify and extract the exact source tarball
+        shell: Rscript {0}
+        run: |
+          expected <- strsplit(readLines("SHA256SUMS"), "  ", fixed = TRUE)[[1L]][1L]
+          actual <- as.character(tools::sha256sum("PAmeasures_2.0.0.tar.gz"))
+          stopifnot(identical(unname(actual), expected))
+          cat("Source SHA256:", actual, "\n")
+          untar("PAmeasures_2.0.0.tar.gz")
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: PAmeasures
+          extra-packages: |
+            any::rcmdcheck
+            any::tinytex
+            any::jsonlite
+          needs: check
+      - name: Prepare PDF manual toolchain
+        shell: Rscript {0}
+        run: |
+          root <- file.path(Sys.getenv("RUNNER_TEMP"), "TinyTeX")
+          tinytex::install_tinytex(dir = root, add_path = FALSE, extra_packages = NULL)
+          bins <- unique(c(file.path(root, "bin", "windows"),
+                           list.dirs(file.path(root, "bin"), recursive = FALSE)))
+          bins <- bins[dir.exists(bins)]
+          Sys.setenv(PATH = paste(c(bins, Sys.getenv("PATH")), collapse = .Platform$path.sep))
+          writeLines(bins, Sys.getenv("GITHUB_PATH"), useBytes = TRUE)
+          tinytex::tlmgr_install(c("inconsolata", "helvetic", "times", "courier",
+                                  "ec", "cm-super", "ae", "texinfo"))
+          stopifnot(nzchar(Sys.which("pdflatex")))
+      - name: Full CRAN-style check including PDF manual and remote checks
+        shell: Rscript {0}
+        run: |
+          cat(R.version.string, "\n")
+          result <- rcmdcheck::rcmdcheck(
+            path = "PAmeasures_2.0.0.tar.gz",
+            args = c("--as-cran", "--run-donttest"),
+            check_dir = "check", error_on = "never", quiet = FALSE)
+          summary <- list(R = R.version.string, platform = R.version$platform,
+            source_sha256 = as.character(tools::sha256sum("PAmeasures_2.0.0.tar.gz")),
+            errors = result$errors, warnings = result$warnings, notes = result$notes)
+          jsonlite::write_json(summary, "check-summary.json", pretty = TRUE, auto_unbox = TRUE)
+          stopifnot(length(result$errors) == 0L, length(result$warnings) == 0L)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: check-${{ matrix.os }}-${{ matrix.r }}
+          path: |
+            check/**
+            check-summary.json
+            SHA256SUMS
+          retention-days: 14
