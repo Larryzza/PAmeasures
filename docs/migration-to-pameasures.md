@@ -46,9 +46,7 @@ credentials with repository access. Alternatively, clone using an authorized
 SSH key and run `remotes::install_local("/path/to/PAmeasures")` locally.
 
 The package is distributed under GPL-3 with the original TimeMetric MIT
-notices preserved. Xiaoyan Wang's original authorship is retained. The current
-TimeMetric maintainer is carried forward provisionally; the GitHub owner is
-Larryzza, and this does not assert that CRAN has approved a maintainer change.
+notices preserved. Xiaoyan Wang's original authorship is retained.
 
 ## Function coverage decisions
 
@@ -77,20 +75,3 @@ No full simulations or clinical analyses are rerun as part of this rename.
 
 Validation results for this migration are recorded in
 `docs/validation/pameasures-migration-2026-10-26.md`.
-
-## Pending release decisions
-
-* Confirm withdrawal/status of the separate TimeMetric CRAN submission.
-* Complete the PAmeasures maintainer handover and choose the monitored email;
-  update Authors@R when that decision is made.
-* Finalize the remaining feature scope; the primary `pa_` naming decision is implemented.
-* Review the inherited JOSS draft: update the metric-availability table,
-  remove historical claims for retired metrics, and finalize AI usage
-  disclosure and publication authorship with the human authors.
-* Verify current R release/devel across Linux, macOS and Windows using CI.
-* Finalize release metadata and cran-comments.md before CRAN submission.
-* Decide when to make the repository public and how to document continuity
-  with the prior public project for JOSS.
-
-No CRAN submission, maintainer change or public release is performed by this
-initial migration.

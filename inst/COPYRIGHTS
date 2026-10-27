@@ -16,7 +16,3 @@ Authors: Tong Zhu, Zian Zhuang, Wen Su, Xiaowu Dai and Gang Li
 The TimeMetric source declared MIT + file LICENSE. The original full MIT
 notice is preserved in licenses/TimeMetric-MIT.txt and LICENSE.md. That
 notice does not replace GPL-3 obligations for inherited PAmeasures material.
-
-Repository ownership does not determine the designated CRAN maintainer.
-The existing maintainer entry is provisional until the authors complete
-the separate CRAN handover.

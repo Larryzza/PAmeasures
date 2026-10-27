@@ -18,7 +18,7 @@ through `pa_nlm()` and the supported historical `pam.nlm()` entry point.
 The survival interfaces and statistical implementations are retained.
 Full compatibility with all PAmeasures 0.1.0 interfaces is not promised.
 See the [migration record](docs/migration-to-pameasures.md)
-for provenance, validation and the remaining release decisions.
+for source provenance and validation.
 
 Historical R workspace snapshots were removed before public release. Existing
 clones made before this cleanup must be replaced with a fresh clone; do not
@@ -318,8 +318,7 @@ an explicit manuscript directory and saved-result paths; see
 [`manuscript/README.md`](manuscript/README.md). Historical results and clinical
 inputs are not distributed in this repository. Existing TimeMetric checkpoint
 signatures differ after migration, so use a new output directory for new runs.
-The inherited `paper.md` is a working JOSS draft and still needs a publication
-review before submission.
+`paper.md` contains the software-paper draft.
 
 Local outputs, excluded from Git:
 
@@ -384,8 +383,7 @@ contributions are retained in the package authorship and provenance records.
 
 PAmeasures is distributed under GPL-3. Historical TimeMetric MIT notices are
 preserved in `LICENSE.md` and `inst/licenses/TimeMetric-MIT.txt`; see
-`inst/COPYRIGHTS` for the source lineage. The maintainer entry is carried
-forward from TimeMetric provisionally, pending the separate CRAN handover.
+`inst/COPYRIGHTS` for the source lineage.
 
 ## References
 

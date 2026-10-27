@@ -28,3 +28,6 @@ results/
 /paper.code_cache/
 # Regenerated validation outputs
 docs/validation/results/
+
+# Local submission correspondence
+/cran-comments.md

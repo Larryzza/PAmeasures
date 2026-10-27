@@ -41,8 +41,7 @@
 * Move development to Larryzza/PAmeasures, update package help, installation
   instructions and citation metadata, and retain historical audit records.
 * Distribute the revival under GPL-3, preserving TimeMetric MIT notices and
-  original PAmeasures author attribution. Maintainer handover and CRAN
-  submission remain separate pending actions.
+  original PAmeasures author attribution.
 * Include the current manuscript figure-refresh driver with explicit input
   paths, plus archived copies of earlier helpers. Generated results and
   clinical data are not included.
