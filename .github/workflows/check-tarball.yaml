@@ -51,10 +51,10 @@ jobs:
             c(key, system2(file.path(R.home("bin"), "R"), c("CMD", "config", key), stdout = TRUE))
           }))
           writeLines(config, "compiler-config.txt")
-          writeLines("void c_probe(double *x) { *x = 1.0; }", "compiler-probe.c")
-          writeLines(c("subroutine f_probe(x)", "real(8) :: x", "x = 1.0d0", "end subroutine"), "compiler-probe.f90")
+          writeLines("void c_probe(double *x) { *x = 1.0; }", "c-compiler-probe.c")
+          writeLines(c("subroutine f_probe(x)", "real(8) :: x", "x = 1.0d0", "end subroutine"), "fortran-compiler-probe.f90")
           output <- system2(file.path(R.home("bin"), "R"),
-            c("CMD", "SHLIB", "compiler-probe.c", "compiler-probe.f90"), stdout = TRUE, stderr = TRUE)
+            c("CMD", "SHLIB", "c-compiler-probe.c", "fortran-compiler-probe.f90"), stdout = TRUE, stderr = TRUE)
           writeLines(output, "compiler-probe.log")
           status <- attr(output, "status")
           if (!is.null(status) && status != 0L) {
@@ -67,8 +67,9 @@ jobs:
         id: dependencies-cache
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: macos-devel-source-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}
+          key: macos-devel-source-v2-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}
       - name: Install source dependencies with complete compiler diagnostics
+        id: install-source-dependencies
         shell: bash
         run: |
           set +e
@@ -135,10 +136,10 @@ jobs:
           }
           stopifnot(length(result$errors) == 0L, length(result$warnings) == 0L)
       - uses: actions/cache/save@v4
-        if: always() && steps.dependencies-cache.outputs.cache-hit != 'true'
+        if: always() && (steps.install-source-dependencies.outcome == 'success' || steps.install-source-dependencies.outcome == 'failure') && steps.dependencies-cache.outputs.cache-hit != 'true'
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: macos-devel-source-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}
+          key: macos-devel-source-v2-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}
       - uses: actions/upload-artifact@v5
         if: always()
         with:
