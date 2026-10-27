@@ -26,7 +26,7 @@
 # pec::ipcw() rather than against values this package produced. This file keeps
 # the boundary, tie and validation coverage.
 
-gt_ <- function(...) TimeMetric:::Gt(...)
+gt_ <- function(...) PAmeasures:::Gt(...)
 
 test_that("Gt is pinned on ordinary right-censored data", {
   d  <- fx_surv()

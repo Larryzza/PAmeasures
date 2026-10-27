@@ -12,31 +12,31 @@ tombstone_re <- "withdrawn before the first CRAN release"
 
 test_that("every removed spelling raises the tombstone error", {
   for (nm in c("r_e", "r_sh", "R_E", "R_sh", "R_sph", "R_SH", "r e", "R_sPh")) {
-    expect_error(TimeMetric:::tm_normalize_metrics(nm), tombstone_re,
+    expect_error(PAmeasures:::tm_normalize_metrics(nm), tombstone_re,
                  info = paste0("spelling: ", nm))
   }
 })
 
 test_that("the tombstone fires even when mixed with valid metrics", {
   expect_error(
-    TimeMetric:::tm_normalize_metrics(c("harrell_c", "r_e", "brier_score")),
+    PAmeasures:::tm_normalize_metrics(c("harrell_c", "r_e", "brier_score")),
     tombstone_re
   )
 })
 
 test_that("surviving metric names still normalise unchanged", {
-  expect_identical(TimeMetric:::tm_normalize_metrics("harrell_c"), "harrell_c")
+  expect_identical(PAmeasures:::tm_normalize_metrics("harrell_c"), "harrell_c")
   expect_identical(
-    suppressWarnings(TimeMetric:::tm_normalize_metrics("Harrells_C")),
+    suppressWarnings(PAmeasures:::tm_normalize_metrics("Harrells_C")),
     "harrell_c"
   )
-  expect_null(TimeMetric:::tm_normalize_metrics(NULL))
+  expect_null(PAmeasures:::tm_normalize_metrics(NULL))
 })
 
 test_that("an unrelated unknown name is NOT claimed by the tombstone", {
   # falls through unchanged, for the caller's own validation to report
   expect_identical(
-    TimeMetric:::tm_normalize_metrics("not_a_metric", warn = FALSE),
+    PAmeasures:::tm_normalize_metrics("not_a_metric", warn = FALSE),
     "not_a_metric"
   )
 })
@@ -144,7 +144,7 @@ test_that("tm_fit_and_eval rejects the removed metrics by name", {
 })
 
 test_that("the borrowed implementations are gone from the namespace", {
-  ns <- asNamespace("TimeMetric")
+  ns <- asNamespace("PAmeasures")
   for (nm in c("pam.rsph", "pam.rsph.coxph", "pam.rsph.aareg",
                "pam.rsph.survreg", "print.rsph", "summary.rsph",
                "pam.schemper", "my.survfit", "pam.re")) {

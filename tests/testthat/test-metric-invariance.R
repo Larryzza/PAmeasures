@@ -83,7 +83,7 @@ inv_survival_point_reference <- function(p = inv_surv_pred()) {
   G <- vapply(time, function(t) prod(factors[censor_times < t]), numeric(1))
   q <- observed / G
   w <- q / sum(q)
-  k <- TimeMetric:::tm_nearest_time_index(p$times, t_star)
+  k <- PAmeasures:::tm_nearest_time_index(p$times, t_star)
   prediction <- 1 - p$surv_prob[, k]
   y <- as.numeric(p$times <= t_star & p$status == 1)
   ybar <- sum(w * y)

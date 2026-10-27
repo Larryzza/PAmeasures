@@ -2,7 +2,7 @@ simulation_calibration_helpers <- function() {
   root <- skip_without_source_tree()
   path <- file.path(root, "analysis", "simulation_calibration.R")
   skip_if_not(file.exists(path), "simulation helpers are excluded from installed builds")
-  e <- new.env(parent = asNamespace("TimeMetric"))
+  e <- new.env(parent = asNamespace("PAmeasures"))
   sys.source(path, envir = e)
   e
 }

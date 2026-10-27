@@ -1,0 +1,21 @@
+Warning message:
+package ‘testthat’ was built under R version 4.5.2
+Package version: 2.0.0.9000
+Exports: 34
+To cite PAmeasures in publications, please use:
+
+  Zhu T, Zhuang Z, Su W, Dai X, Wang X, Li G (2026). _PAmeasures:
+  Unified Performance Metrics for Survival Models with Right-Censoring,
+  Competing Risks, and Two-Phase Designs_. R package version
+  2.0.0.9000, <https://github.com/Larryzza/PAmeasures>.
+
+A BibTeX entry for LaTeX users is
+
+  @Manual{,
+    title = {{PAmeasures}: Unified Performance Metrics for Survival Models with Right-Censoring, Competing Risks, and Two-Phase Designs},
+    author = {Tong Zhu and Zian Zhuang and Wen Su and Xiaowu Dai and Xiaoyan Wang and Gang Li},
+    year = {2026},
+    note = {R package version 2.0.0.9000},
+    url = {https://github.com/Larryzza/PAmeasures},
+  }
+Workflow and R entry-point parsing passed.

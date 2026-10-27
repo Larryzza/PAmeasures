@@ -5,8 +5,8 @@
 # retain; those packages are not required to run an already installed package.
 db <- installed.packages()
 db <- db[!duplicated(db[, "Package"]), , drop = FALSE]
-required <- unique(c("TimeMetric", unlist(tools::package_dependencies(
-  "TimeMetric", db = db, which = c("Depends", "Imports"),
+required <- unique(c("PAmeasures", unlist(tools::package_dependencies(
+  "PAmeasures", db = db, which = c("Depends", "Imports"),
   recursive = TRUE))))
 required <- setdiff(required, "R")
 missing <- setdiff(required, db[, "Package"])
@@ -20,7 +20,7 @@ check <- function() {
   paths <- file.path(db[required, "LibPath"], required)
   stopifnot(all(file.symlink(paths, file.path(lib, required))))
   .libPaths(c(lib, .Library), include.site = FALSE)
-  library(TimeMetric)
+  library(PAmeasures)
   d <- tm_sim_cox_weibull(120, pi_c = .3, v = 2,
                           beta = c(.5, -.5), seed = 1051)
   fit <- survival::coxph(survival::Surv(time, status) ~ x1 + x2,

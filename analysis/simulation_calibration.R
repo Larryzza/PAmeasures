@@ -6,10 +6,10 @@ paper_simulation_risk_at <- function(model, new_data, t_star) {
   if (inherits(model, "coxph")) {
     lp <- as.numeric(stats::predict(model, newdata = new_data,
       type = "lp", reference = "sample"))
-    survival_at <- getFromNamespace("tm_cox_survival", "TimeMetric")
+    survival_at <- getFromNamespace("tm_cox_survival", "PAmeasures")
     survival_probability <- survival_at(model, new_data, lp, t_star)
   } else if (inherits(model, "survreg")) {
-    survival_at <- getFromNamespace("predictSurvProb2survreg", "TimeMetric")
+    survival_at <- getFromNamespace("predictSurvProb2survreg", "PAmeasures")
     survival_probability <- survival_at(model, new_data, t_star)
   } else {
     survival_probability <- pec::predictSurvProb(model, newdata = new_data,

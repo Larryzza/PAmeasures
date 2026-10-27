@@ -21,7 +21,7 @@ test_that("CR concordance uses reciprocal products for both types of pair", {
   left <- c(1, 1, rep(6/7, 3), rep(9/14, 3))
   right <- c(1, rep(6/7, 3), rep(9/14, 4))
   expected <- cr_concordance_reference(time, status, prediction, 7, left, right)
-  actual <- TimeMetric:::C_cr(time, status, prediction, tau = 7)
+  actual <- PAmeasures:::C_cr(time, status, prediction, tau = 7)
   expect_equal(actual, expected, tolerance = 1e-12)
   expect_equal(actual, 0.951123807367981, tolerance = 1e-7)
   # The old product weighting returned 0.9170195 for these same pairs.
@@ -36,7 +36,7 @@ test_that("CR concordance includes the horizon and ignores unused zero G", {
   right <- c(1, rep(6/7, 3), rep(9/14, 3), 0)
   for (tau in c(3, 6, 7)) {
     expected <- cr_concordance_reference(time, status, prediction, tau, left, right)
-    actual <- TimeMetric:::C_cr(time, status, prediction, tau = tau)
+    actual <- PAmeasures:::C_cr(time, status, prediction, tau = tau)
     expect_true(is.finite(actual))
     expect_equal(actual, expected, tolerance = 1e-12)
   }
@@ -48,9 +48,9 @@ test_that("uncensored CR concordance reduces to unweighted comparable pairs", {
   prediction <- c(2, 1, 4, 3, 6, 5)
   expected <- cr_concordance_reference(time, status, prediction, 3,
                                       rep(1, 6), rep(1, 6))
-  expect_equal(TimeMetric:::C_cr(time, status, prediction, tau = 3), expected)
+  expect_equal(PAmeasures:::C_cr(time, status, prediction, tau = 3), expected)
   order <- c(6, 3, 1, 5, 2, 4)
-  expect_equal(TimeMetric:::C_cr(time[order], status[order], prediction[order], tau = 3),
+  expect_equal(PAmeasures:::C_cr(time[order], status[order], prediction[order], tau = 3),
                expected)
 })
 
@@ -59,7 +59,7 @@ test_that("public CR evaluation and summary use the corrected concordance", {
   status <- c(1, 0, 1, 2, 0, 1, 2, 0)
   grid <- c(1, 3, 6)
   cif <- outer(c(.1, .3, .5), c(.2, .4, .1, .8, .3, .5, .7, .6))
-  prediction <- apply(cif, 2, TimeMetric:::m_cif, time.cif = grid, tau = 6)
+  prediction <- apply(cif, 2, PAmeasures:::m_cif, time.cif = grid, tau = 6)
   left <- c(1, 1, rep(6/7, 3), rep(9/14, 3))
   right <- c(1, rep(6/7, 3), rep(9/14, 3), 0)
   expected <- round(cr_concordance_reference(time, status, prediction, 6,

@@ -1,4 +1,4 @@
-#' TimeMetric: Predictive Performance Metrics for Survival Models
+#' PAmeasures: Predictive Performance Metrics for Survival Models
 #'
 #' Unified performance metrics for survival models with right-censoring,
 #' competing risks, and two-phase designs such as nested case-control and
@@ -15,8 +15,8 @@
 #' informative error naming the package to install.
 #'
 #' @keywords internal
-#' @name TimeMetric-package
-#' @aliases TimeMetric
+#' @name PAmeasures-package
+#' @aliases PAmeasures
 #'
 #' @importFrom survival Surv survfit concordancefit
 #' @importFrom stats median na.omit pnorm predict uniroot sd runif rnorm

@@ -8,7 +8,7 @@ paper_load(root)
 out <- file.path(root, "results", "matched_ncc")
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 code <- paper_git(root, "show", "426272c2bdcbf94079c035166fc7e3804ad2b632:R/pam.weighted_param.R")
-e <- new.env(parent = asNamespace("TimeMetric")); eval(parse(text = code), e)
+e <- new.env(parent = asNamespace("PAmeasures")); eval(parse(text = code), e)
 d <- data.frame(time = c(1,4,5,2,4,5), status = c(1,0,0,1,0,0),
                  strata = c("A","A","A","B","B","B"))
 d$before <- e$weighted_param(d$time, d$status, design = "matched_ncc", strata = d$strata, m = 2)

@@ -77,7 +77,7 @@ test_that("explained variation keeps predictions and weights aligned when sortin
   p <- c(1.2, 2.3, 3.8, 7.5, 9.7)
   w <- c(1, 2, 1, 3, 2)
   i <- c(5, 3, 1, 4, 2)
-  evaluate <- function(idx) TimeMetric:::pam.r2_metrics(
+  evaluate <- function(idx) PAmeasures:::pam.r2_metrics(
     p[idx], y[idx], rep(1, length(idx)), case_weight = w[idx])
   expect_equal(evaluate(i), evaluate(seq_along(y)))
 })

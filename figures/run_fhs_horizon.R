@@ -120,7 +120,7 @@ utils::write.csv(metrics, file.path(out, "metrics.csv"), row.names = FALSE)
 paper_write_md(metrics, file.path(out, "metrics.md"))
 utils::write.csv(checks, file.path(out, "prediction_checks.csv"), row.names = FALSE)
 utils::write.csv(cohort, file.path(out, "cohort_and_split.csv"), row.names = FALSE)
-ipcw <- getFromNamespace("tm_cr_event_ipcw", "TimeMetric")(
+ipcw <- getFromNamespace("tm_cr_event_ipcw", "PAmeasures")(
   test$time, test$status, censoring = "cox")
 r2_weights <- data.frame(RANDID = cohort$RANDID[cohort$Split == "Test"],
   time = test$time, status = test$status,

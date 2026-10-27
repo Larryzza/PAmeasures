@@ -39,7 +39,7 @@ mean across the 100 uncensored `n=3000` repetitions at the same horizon.
 
 ## Terminal
 
-Run from the `TimeMetric-paper` directory:
+Run from the `PAmeasures-paper` directory:
 
 ```sh
 # Print the job plan only. No model fitting or evaluation occurs.
@@ -77,7 +77,7 @@ Optional selectors can be appended to the full-run command:
 
 ## RStudio console
 
-Set the working directory to `TimeMetric-paper`, then run:
+Set the working directory to `PAmeasures-paper`, then run:
 
 ```r
 # Include the development dependency library if it exists.

@@ -7,7 +7,7 @@ testthat::test_that("pre-ICI saved runs migrate completely before publication", 
   withr::defer(unlink(scratch, recursive = TRUE))
   # Run the actual entry points in an isolated checkout, never publish fixtures
   # into the user's manuscript folder. No clinical data or network required.
-  files <- c("R", "man", "data", "analysis", "figures", "DESCRIPTION", "NAMESPACE", "LICENSE")
+  files <- c("R", "man", "data", "analysis", "figures", "DESCRIPTION", "NAMESPACE", "inst")
   stopifnot(all(file.copy(file.path(root, files), scratch, recursive = TRUE)))
   old <- file.path(scratch, "old")
   for (d in c("pbc", "framingham", "gbsg", "tables"))

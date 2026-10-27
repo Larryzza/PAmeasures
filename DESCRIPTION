@@ -1,14 +1,15 @@
-Package: TimeMetric
+Package: PAmeasures
 Type: Package
 Title: Unified Performance Metrics for Survival Models with Right-Censoring,
     Competing Risks, and Two-Phase Designs
-Version: 0.2.1
-Date: 2026-10-19
+Version: 2.0.0.9000
+Date: 2026-10-26
 Authors@R: c(
     person("Tong", "Zhu", email = "toz015@ucla.edu", role = c("aut", "cre")),
     person("Zian", "Zhuang", role = "aut"),
     person("Wen", "Su", role = "aut"),
     person("Xiaowu", "Dai", role = "aut"),
+    person("Xiaoyan", "Wang", role = "aut"),
     person("Gang", "Li", role = "aut"))
 Description: Evaluates the predictive performance of survival models in a
     unified framework. Implements the pseudo R-squared and related explained
@@ -26,7 +27,8 @@ Description: Evaluates the predictive performance of survival models in a
     <doi:10.48550/arXiv.2507.15040>; and two-phase sampling designs such as
     case-cohort and nested case-control studies, following Lee,
     Zeleniuch-Jacquotte and Liu (2021) <doi:10.1080/02664763.2020.1861225>.
-    Extends and generalizes the 'PAmeasures' package.
+    Revives and expands the original 'PAmeasures' package with a unified
+    interface for survival prediction assessment.
 Depends: R (>= 4.1.0)
 Imports:
     Hmisc,
@@ -46,9 +48,9 @@ Imports:
     pec,
     pmcalibration (>= 0.2.0),
     prodlim
-URL: https://github.com/toz015/TimeMetric
-BugReports: https://github.com/toz015/TimeMetric/issues
-License: MIT + file LICENSE
+URL: https://github.com/Larryzza/PAmeasures
+BugReports: https://github.com/Larryzza/PAmeasures/issues
+License: GPL-3
 Encoding: UTF-8
 Language: en-US
 LazyData: true

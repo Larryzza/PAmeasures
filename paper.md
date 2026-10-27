@@ -1,5 +1,5 @@
 ---
-title: 'TimeMetric: A Comprehensive R Package for Evaluating Predictive Performance with Survival Data'
+title: 'PAmeasures: A Comprehensive R Package for Evaluating Predictive Performance with Survival Data'
 tags:
   - R
   - Survival
@@ -47,11 +47,11 @@ and calibration measures, which assess the agreement between predicted
 probabilities and observed event rates (e.g., Brier score) (Brier 1950;
 Graf et al. 1999).
 
-`TimeMetric` addresses these challenges by delivering a unified
+`PAmeasures` addresses these challenges by delivering a unified
 framework for performance evaluation across diverse survival data
 scenarios, including right-censored data, competing risks, and special
 designs such as nested case-control and case-cohort studies. 
-Designed for ease of implementation, `TimeMetric` allows researchers to
+Designed for ease of implementation, `PAmeasures` allows researchers to
 compute a suite of metrics for evaluating the predictive performance of
 a model or algorithm.
 
@@ -59,10 +59,10 @@ a model or algorithm.
 
 Existing packages offer implementations for some of
 these metrics, and none provide a comprehensive solution. 
-The target audience of `TimeMetric` includes statistical method developers,
+The target audience of `PAmeasures` includes statistical method developers,
 machine learning researchers, and applied investigators who develop,
 implement, or compare prediction models for time-to-event outcomes. Rather
-than being restricted to a particular modeling approach, `TimeMetric`
+than being restricted to a particular modeling approach, `PAmeasures`
 provides a unified framework for evaluating the predictive or prognostic
 performance of any model or algorithm that produces predicted survival
 probabilities or cumulative incidence functions.
@@ -84,7 +84,7 @@ packages.
 %--- new grouping row ---
  & \multicolumn{9}{c}{\textbf{Packages}} \\ % blank first cell + span 9 cols
 \cmidrule(lr){2-10}  
-\textbf{Metric} & TimeMetric & PAmeasure & survival & survcomp & survAUC & BP & SurvMetrics & pec & timeROC \\
+\textbf{Metric} & PAmeasures 2.0 & PAmeasures 0.1 & survival & survcomp & survAUC & BP & SurvMetrics & pec & timeROC \\
 \midrule
 
 \multicolumn{10}{l}{\emph{Right-Censored Data}} \\
@@ -129,19 +129,18 @@ Time-Dependent AUC & \times &  &  &  &  &  &   &  &  \\
 
 Although several existing `R` packages implement selected predictive
 performance measures for survival data, these tools are often limited to
-specific metrics or data settings. The unique contribution of `TimeMetric`
+specific metrics or data settings. The unique contribution of `PAmeasures`
 is to provide a comprehensive framework that brings together $R^2$-type
 measures, C-index, Brier score, and time-dependent AUC across right-censored
 data, competing risks data, case-cohort studies, and nested case-control
-studies. A standalone package is therefore more appropriate than adding
-individual functions to existing packages, because the goal of `TimeMetric`
-is not only to implement selected metrics, but also to provide a unified
-workflow for evaluating and comparing models across multiple performance
-measures and survival data structures.
+studies. This development line revives the original PAmeasures package and integrates
+the TimeMetric implementation into its continued development. Its goal is a
+unified workflow for evaluating and comparing models across multiple
+performance measures and survival data structures.
 
 # Software Design
 
-For each type of survival data, `TimeMetric`
+For each type of survival data, `PAmeasures`
 provides two key modules. First, it incorporates a comprehensive suite
 of performance evaluation metrics, implemented in the
 `Performance Metric Module`, including $R^2$-type measures (pseudo $R^2$
@@ -163,19 +162,19 @@ models to calculate predicted survival probabilities (or cumulative
 incidence functions for competing risks data) over the observation times
 for all individuals in a test dataset.
 
-The design of `TimeMetric` separates prediction generation from performance
+The design of `PAmeasures` separates prediction generation from performance
 metric evaluation. This modular design allows users to use the prediction
-functions provided by `TimeMetric` or to supply predictions from external
+functions provided by `PAmeasures` or to supply predictions from external
 models or algorithms. As a result, the same evaluation framework can be
 used across different performance measures and survival data settings.
 
 # Research Impact Statement
 
-`TimeMetric` has been used to support ongoing methodological work on
+`PAmeasures` has been used to support ongoing methodological work on
 time-dependent pseudo $R^2$ for competing risks data, which provides one
 of the motivating applications for the package (Zhuang et al. 2025). In
 addition, we are preparing a tutorial and simulation-based study that uses
-`TimeMetric` to compare commonly used prediction performance metrics across
+`PAmeasures` to compare commonly used prediction performance metrics across
 different survival data scenarios using simulated and real-world datasets.
 Together, these efforts highlight the package's role in both implementing
 recent methodological developments and supporting broader comparative
@@ -183,9 +182,12 @@ evaluation of survival prediction models.
 
 # AI Usage Disclosure
 
-Generative AI tools were used only to assist with language polishing.
-All scientific content, software implementation, references, and 
-conclusions were reviewed and verified by the authors.
+Draft disclosure, to be finalized by the authors before submission:
+generative AI assistance was used for the PAmeasures repository migration,
+including package and namespace renaming, development documentation, and
+validation orchestration. The authors must verify the complete historical
+scope of AI assistance, record the tools and versions used, and review and
+validate all assisted outputs before making a final disclosure.
 
 # Reference
 

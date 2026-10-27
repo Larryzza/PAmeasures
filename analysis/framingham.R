@@ -142,7 +142,7 @@ paper_run_framingham <- function(root, out = file.path(root, "results", "framing
   utils::write.csv(support, file.path(out, "followup_support.csv"), row.names = FALSE)
   # Event-observation R2 weights can depend on censoring AFTER the horizon.
   # G(12y) alone is therefore not a diagnostic for this weighting strategy.
-  r2_ipcw <- getFromNamespace("tm_cr_event_ipcw", "TimeMetric")(
+  r2_ipcw <- getFromNamespace("tm_cr_event_ipcw", "PAmeasures")(
     test$time, test$status, censoring = "cox")
   r2_weights <- data.frame(RANDID = cohort$RANDID[-idx],
     original_time = test$time, original_status = test$status,

@@ -1,4 +1,4 @@
 library(testthat)
-library(TimeMetric)
+library(PAmeasures)
 
-test_check("TimeMetric")
+test_check("PAmeasures")

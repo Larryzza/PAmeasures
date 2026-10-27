@@ -1,7 +1,7 @@
-# TimeMetric function and usage guide
+# PAmeasures function and usage guide
 
-Updated 18 October 2026 for TimeMetric 0.2.1 with the paper branch integration.
-The package name is **TimeMetric**, singular. There are **17 current exported
+Updated 18 October 2026 for PAmeasures 0.2.1 with the paper branch integration.
+The package name is **PAmeasures**, singular. There are **17 current exported
 functions**, **15 deprecated compatibility wrappers**, and **11 metric names**.
 Internal `pam.*` helpers are implementation details, not supported public APIs.
 Read [the validation report](cran-resubmission-2026-10-18.md) before interpreting manuscript results.
@@ -10,8 +10,8 @@ Read [the validation report](cran-resubmission-2026-10-18.md) before interpretin
 
 ```r
 # Install the integrated paper branch.
-remotes::install_github("toz015/TimeMetric@paper")
-library(TimeMetric)
+remotes::install_github("Larryzza/PAmeasures@paper")
+library(PAmeasures)
 
 # To use the revised working tree instead, run from its root:
 pkgload::load_all(".")
@@ -90,7 +90,7 @@ silently drop subjects while retaining the original weight vector.
 ## Minimal right-censored example
 
 ```r
-library(TimeMetric)
+library(PAmeasures)
 d <- tm_sim_cox_weibull(240, pi_c = 0.3, v = 2,
                         beta = c(0.5, -0.5), seed = 6201)
 d <- d[, c("time", "status", "x1", "x2")]

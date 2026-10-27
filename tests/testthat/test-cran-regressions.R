@@ -23,7 +23,7 @@ test_that("WLS failure is reported as a warning without console output", {
   fit <- fx_survreg()
   d <- fx_surv()
   local_mocked_bindings(lm = function(...) stop("fixture WLS failure"),
-                       .package = "TimeMetric")
+                       .package = "PAmeasures")
   evaluate <- function() tm_predict_survreg(fit, fx_covs(), new_data = d,
                                             predict = FALSE)
   expect_warning(evaluate(), "Error in WLS fitting: fixture WLS failure")
@@ -34,8 +34,8 @@ test_that("CIF fit failures use suppressible warning conditions", {
   fit <- fx_cox()
   d <- fx_surv()
   local_mocked_bindings(survfit = function(...) stop("fixture CIF failure"),
-                       .package = "TimeMetric")
-  evaluate <- function() TimeMetric:::get_CIF(fit, list(fit), d)
+                       .package = "PAmeasures")
+  evaluate <- function() PAmeasures:::get_CIF(fit, list(fit), d)
   expect_warning(result <- evaluate(), "fixture CIF failure")
   expect_null(result)
   expect_output(suppressWarnings(evaluate()), NA)
@@ -81,7 +81,7 @@ test_that("plot sampling respects the caller's stream and explicit seeds", {
 })
 
 test_that("two-phase default AUC has a required runtime dependency", {
-  desc <- utils::packageDescription("TimeMetric")
+  desc <- utils::packageDescription("PAmeasures")
   imports <- trimws(strsplit(desc$Imports, ",", fixed = TRUE)[[1]])
   expect_true("tidyr" %in% sub("[[:space:]]*\\(.*", "", imports))
   d <- fx_surv()

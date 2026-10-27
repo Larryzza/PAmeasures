@@ -69,7 +69,7 @@ saveRDS(list(train = train, test = test, models = fits, before = before, after =
          file.path(out, "pbc_comparison.rds"))
 settings <- paper_support(fits$Cox, test, 10e10)
 settings$probability_time_requested <- median(test$time)
-settings$probability_time_used <- sort(test$time)[TimeMetric:::tm_nearest_time_index(sort(test$time), median(test$time))]
+settings$probability_time_used <- sort(test$time)[PAmeasures:::tm_nearest_time_index(sort(test$time), median(test$time))]
 settings$calibration_time <- median(test$time)
 settings$calibration_prediction_time <- max(test$time[test$time <= settings$calibration_time])
 settings$calibration_method <- "pmcalibration restricted cubic spline; five knots"

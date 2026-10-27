@@ -1,7 +1,7 @@
 # Deterministic fixtures shared by all characterization tests.
 # Seeds are fixed; never change them without regenerating every snapshot.
 
-# survival is deliberately NOT attached here. TimeMetric calls concordancefit()
+# survival is deliberately NOT attached here. PAmeasures calls concordancefit()
 # unqualified without importing it (findings.md #11), and a global attach would
 # hide that defect from the whole suite. Tests that genuinely need it use
 # withr::local_package("survival"), which scopes the attach to one test and

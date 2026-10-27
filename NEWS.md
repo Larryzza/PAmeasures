@@ -1,3 +1,20 @@
+# PAmeasures 2.0.0.9000 (development)
+
+* Begin the PAmeasures 2.0.0 revival from TimeMetric's `paper` branch at
+  f9fd19f73d7abefc8cb1c54c415ce99c1fd96ba0. Preserve its Git history and
+  record that commit with the `timemetric-paper-baseline-2026-10-26` tag.
+* Rename the package and active namespace references to PAmeasures; retain
+  the `tm_` API, existing script aliases and statistical implementations.
+  Original PAmeasures 0.1.0 API compatibility is not promised.
+* Move development to Larryzza/PAmeasures, update package help, installation
+  instructions and citation metadata, and retain historical audit records.
+* Distribute the revival under GPL-3, preserving TimeMetric MIT notices and
+  original PAmeasures author attribution. Maintainer handover and CRAN
+  submission remain separate pending actions.
+* Include the current manuscript figure-refresh driver with explicit input
+  paths, plus archived copies of earlier helpers. Generated results and
+  clinical data are not included.
+
 # TimeMetric 0.2.1
 
 * Correct cause-specific AFT CIF integration near time zero using adaptive quadrature on the target-event probability scale. Fixed-scale Weibull models with scale greater than one no longer lose the initial probability mass.

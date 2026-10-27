@@ -1,0 +1,15 @@
+Warning message:
+package ‘testthat’ was built under R version 4.5.2
+                      data             cox_prediction
+                      TRUE                       TRUE
+            aft_prediction             cohort_summary
+                      TRUE                       TRUE
+               calibration                 cc_weights
+                      TRUE                       TRUE
+               ncc_weights                  two_phase
+                      TRUE                       TRUE
+      weighted_calibration  competing_risk_prediction
+                      TRUE                       TRUE
+    competing_risk_summary competing_risk_calibration
+                      TRUE                       TRUE
+All 12 result groups are exactly identical before and after migration.

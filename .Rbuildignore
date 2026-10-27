@@ -11,12 +11,14 @@
 ^Screenshot.*$
 ^.*\.Rcheck$
 ^TimeMetric_.*\.tar\.gz$
+^PAmeasures_.*\.tar\.gz$
 
 ^tests/testthat/Rplots\.pdf$
 ^CONTRIBUTING\.md$
 ^cran-comments\.md$
 ^analysis$
 ^figures$
+^manuscript$
 ^results$
 ^\.paper-library$
 

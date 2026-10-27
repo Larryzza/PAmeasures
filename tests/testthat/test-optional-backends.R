@@ -43,7 +43,7 @@ test_that("neither optional backend is imported into the namespace", {
   # They are reached through their own predict() methods on the fitted object,
   # so no importFrom is needed -- and importing randomForestSRC previously made
   # the package impossible to install (findings.md #6).
-  imported <- unlist(getNamespaceImports("TimeMetric"), use.names = FALSE)
+  imported <- unlist(getNamespaceImports("PAmeasures"), use.names = FALSE)
 
   expect_false("predict.rfsrc" %in% imported)
   expect_false("crr" %in% imported)

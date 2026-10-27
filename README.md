@@ -1,14 +1,23 @@
-# TimeMetric
+# PAmeasures
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/toz015/TimeMetric/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/toz015/TimeMetric/actions/workflows/R-CMD-check.yaml)
-[![test-coverage](https://github.com/toz015/TimeMetric/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/toz015/TimeMetric/actions/workflows/test-coverage.yaml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://www.r-project.org/Licenses/MIT)
+[![R-CMD-check](https://github.com/Larryzza/PAmeasures/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Larryzza/PAmeasures/actions/workflows/R-CMD-check.yaml)
+[![test-coverage](https://github.com/Larryzza/PAmeasures/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/Larryzza/PAmeasures/actions/workflows/test-coverage.yaml)
+[![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.r-project.org/Licenses/GPL-3)
 <!-- badges: end -->
 
-`TimeMetric` evaluates the predictive performance of survival models under a
+`PAmeasures` evaluates the predictive performance of survival models under a
 single interface, across right-censored data, competing risks, and two-phase
 sampling designs (case-cohort and nested case-control).
+
+This is the development repository for the planned **PAmeasures 2.0.0**
+revival, starting from the TimeMetric `paper` branch at
+`f9fd19f73d7abefc8cb1c54c415ce99c1fd96ba0`. The development version is
+`2.0.0.9000`; it is not a CRAN release. The `tm_` interfaces and statistical
+implementations are retained. Compatibility with PAmeasures 0.1.0 interfaces
+is not a goal of this migration, and its nonlinear-regression interface
+`pam.nlm()` is not included. See the [migration record](docs/migration-to-pameasures.md)
+for provenance, validation and the remaining release decisions.
 
 It separates **prediction** from **evaluation**: the evaluation functions take
 predicted survival probabilities or cumulative incidence functions from any
@@ -19,13 +28,13 @@ metrics as one fitted by it.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("toz015/TimeMetric")
+remotes::install_github("Larryzza/PAmeasures")
 ```
 
 ## Quick start
 
 ```r
-library(TimeMetric)
+library(PAmeasures)
 
 # simulate right-censored data and fit a model
 d   <- tm_sim_cox_weibull(n = 200, pi_c = 0.3, v = 2,
@@ -224,14 +233,15 @@ needed and absent.
 
 ## Renamed functions
 
-Every exported function previously used a `pam.` prefix inherited from
-PAmeasures. Those names still work and forward to their replacements with a
-deprecation warning — see `?"TimeMetric-deprecated"` for the full mapping.
+The primary interfaces retain the `tm_` prefix used by the TimeMetric `paper`
+branch. Its earlier script aliases remain available with deprecation warnings;
+see `?"PAmeasures-deprecated"` for the mapping. These aliases do not provide
+compatibility with the original CRAN PAmeasures 0.1.0 API.
 
 ## Paper analyses and figures
 
 Run these commands from this checkout. They load its local package code rather
-than an older installed TimeMetric version. The analyses also need `pkgload`,
+than an older installed PAmeasures version. The analyses also need `pkgload`,
 `cmprsk`, `randomForestSRC`, and `riskCommunicator` (the Framingham data source).
 
 ```sh
@@ -274,6 +284,15 @@ exports; smoke or incomplete results are rejected. See
 [the current development record](docs/development-2026-10-18.md) for method
 changes and validation. Earlier development/audit records are preserved under
 `docs/superpowers/`.
+
+The migrated manuscript figure-refresh driver is
+[`manuscript/update_all_figures.R`](manuscript/update_all_figures.R). It accepts
+an explicit manuscript directory and saved-result paths; see
+[`manuscript/README.md`](manuscript/README.md). Historical results and clinical
+inputs are not distributed in this repository. Existing TimeMetric checkpoint
+signatures differ after migration, so use a new output directory for new runs.
+The inherited `paper.md` is a working JOSS draft and still needs a publication
+review before submission.
 
 Local outputs, excluded from Git:
 
@@ -330,6 +349,16 @@ Rscript --vanilla -e 'testthat::test_local(".", reporter="summary")'
 
 Developed by **Li's Lab** (UCLA): Tong Zhu, Zian Zhuang, Wen Su, Xiaowu Dai and
 Gang Li.
+
+The original PAmeasures 0.1.0 was authored by Xiaoyan Wang and Gang Li; their
+contributions are retained in the package authorship and provenance records.
+
+## License
+
+PAmeasures is distributed under GPL-3. Historical TimeMetric MIT notices are
+preserved in `LICENSE.md` and `inst/licenses/TimeMetric-MIT.txt`; see
+`inst/COPYRIGHTS` for the source lineage. The maintainer entry is carried
+forward from TimeMetric provisionally, pending the separate CRAN handover.
 
 ## References
 

@@ -69,13 +69,13 @@ test_that("concordancefit is imported (FINDING 11 fixed)", {
   # R/pam.predicted_survial_eval.R:162,169 call concordancefit() unqualified.
   # It is now imported explicitly, so the call resolves from the namespace
   # rather than depending on survival happening to be attached.
-  imported <- unlist(getNamespaceImports("TimeMetric"), use.names = FALSE)
+  imported <- unlist(getNamespaceImports("PAmeasures"), use.names = FALSE)
 
   expect_true("concordancefit" %in% imported)
 })
 
 test_that("a clean session without survival attached now succeeds (FINDING 11)", {
-  # The definitive check: a fresh R subprocess that loads TimeMetric and nothing
+  # The definitive check: a fresh R subprocess that loads PAmeasures and nothing
   # else -- the state a first-time user is in. This previously died with
   # "could not find function concordancefit"; it must now produce metrics.
   skip_on_cran()

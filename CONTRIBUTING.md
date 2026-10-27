@@ -1,16 +1,16 @@
-# Contributing to TimeMetric
+# Contributing to PAmeasures
 
-Thanks for your interest in TimeMetric. This document covers how to report
+Thanks for your interest in PAmeasures. This document covers how to report
 problems, how to propose changes, and how to run the checks a change is expected
 to pass.
 
-TimeMetric is maintained by a small academic group. Contributions are reviewed as
+PAmeasures is maintained by a small academic group. Contributions are reviewed as
 time allows, and no response time or level of support is promised.
 
 ## Reporting a bug
 
 Open an issue at
-<https://github.com/toz015/TimeMetric/issues>.
+<https://github.com/Larryzza/PAmeasures/issues>.
 
 A report is most useful when it includes:
 
@@ -31,7 +31,7 @@ between them.
 or private data committed to a repository, and any defect that could expose data
 belonging to someone else.
 
-Email the maintainer directly at <toz015@ucla.edu> with "TimeMetric security" in
+Email the maintainer directly at <toz015@ucla.edu> with "PAmeasures security" in
 the subject line, and include enough detail to reproduce the problem. Please
 allow time for the issue to be assessed before discussing it publicly.
 
@@ -49,13 +49,14 @@ than one that also reformats unrelated code.
 
 ## Local development setup
 
-TimeMetric requires R >= 4.1.0.
+PAmeasures requires R >= 4.1.0.
 
 ```r
 # runtime and check dependencies
 install.packages(c(
-  "survival", "stats", "utils", "tdROC", "yardstick", "ggplot2",
-  "patchwork", "dplyr", "magrittr", "purrr", "tibble", "pec", "expint"
+  "survival", "stats", "utils", "tdROC", "survivalROC", "yardstick",
+  "ggplot2", "patchwork", "dplyr", "magrittr", "purrr", "tibble",
+  "tidyr", "pec", "Hmisc", "pmcalibration", "prodlim"
 ))
 
 # development and test dependencies
@@ -93,10 +94,10 @@ spelling::spell_check_package(".")
 ```bash
 # the full check, against a built tarball rather than the source directory
 R CMD build .
-R CMD check --as-cran TimeMetric_*.tar.gz
+R CMD check --as-cran PAmeasures_*.tar.gz
 
 # run examples that are skipped by default
-R CMD check --as-cran --run-donttest TimeMetric_*.tar.gz
+R CMD check --as-cran --run-donttest PAmeasures_*.tar.gz
 ```
 
 A change is expected to leave `R CMD check` with no errors and no warnings, and
@@ -149,8 +150,11 @@ Document exported functions with roxygen, including `@examples` that run.
 
 ## Licence
 
-TimeMetric is released under the MIT licence. By contributing, you agree that
+PAmeasures is released under the GPL-3 licence. By contributing, you agree that
 your contribution is licensed under the same terms. Do not contribute code
 copied from another project unless its licence permits it and you say so
 explicitly in the pull request, so that provenance and licensing can be
 recorded.
+
+The TimeMetric MIT notices are retained for inherited code. Preserve existing
+copyright and author attributions when contributing changes.

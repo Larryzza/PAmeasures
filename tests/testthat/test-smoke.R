@@ -1,5 +1,5 @@
 test_that("package exports the tm_ API", {
-  exports <- getNamespaceExports("TimeMetric")
+  exports <- getNamespaceExports("PAmeasures")
 
   expect_true(all(c(
     "tm_survival_eval", "tm_survival_eval_cr", "tm_evaluate_two_phase",
@@ -18,7 +18,7 @@ test_that("package exports the tm_ API", {
 test_that("the deleted Cluster C duplicates are gone", {
   # pam.Brier_metric, pam.rsh_metric and pam.rsph_metric were removed after the
   # equivalence gate and the R_E audit. See docs/superpowers/ for the evidence.
-  ns <- asNamespace("TimeMetric")
+  ns <- asNamespace("PAmeasures")
 
   expect_false(exists("pam.Brier_metric", envir = ns, inherits = FALSE))
   expect_false(exists("pam.rsh_metric", envir = ns, inherits = FALSE))
@@ -26,7 +26,7 @@ test_that("the deleted Cluster C duplicates are gone", {
 })
 
 test_that("functions this suite reaches with ::: are genuinely internal", {
-  exports <- getNamespaceExports("TimeMetric")
+  exports <- getNamespaceExports("PAmeasures")
 
   expect_false(any(c(
     "Gt", "pam.Brier", "m_cif"

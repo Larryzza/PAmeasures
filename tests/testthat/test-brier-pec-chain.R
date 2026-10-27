@@ -2,7 +2,7 @@ test_that("Gt returns a censoring survival probability in [0, 1]", {
   d <- fx_surv()
   sv <- survival::Surv(d$time, d$status)
 
-  res <- TimeMetric:::Gt(sv, stats::median(d$time))
+  res <- PAmeasures:::Gt(sv, stats::median(d$time))
 
   expect_length(res, 1L)
   expect_true(is.finite(res))
@@ -16,14 +16,14 @@ test_that("Gt is non-increasing in the timepoint", {
   sv <- survival::Surv(d$time, d$status)
   qs <- stats::quantile(d$time, c(0.2, 0.4, 0.6, 0.8))
 
-  vals <- vapply(qs, function(tp) TimeMetric:::Gt(sv, tp), numeric(1))
+  vals <- vapply(qs, function(tp) PAmeasures:::Gt(sv, tp), numeric(1))
 
   expect_true(all(diff(vals) <= 1e-8))
   expect_snapshot_value(snap_num(vals), style = "serialize")
 })
 
 test_that("Gt rejects non-Surv input", {
-  expect_error(TimeMetric:::Gt(1:10, 5), "not of class Surv")
+  expect_error(PAmeasures:::Gt(1:10, 5), "not of class Surv")
 })
 
 test_that("pam.Brier on a coxph fit returns a finite scalar in [0, 1]", {
@@ -31,7 +31,7 @@ test_that("pam.Brier on a coxph fit returns a finite scalar in [0, 1]", {
   d <- fx_surv()
   fit <- fx_cox()
 
-  res <- TimeMetric:::pam.Brier(fit, d, stats::median(d$time))
+  res <- PAmeasures:::pam.Brier(fit, d, stats::median(d$time))
 
   expect_length(res, 1L)
   expect_true(is.finite(res))
@@ -52,8 +52,8 @@ test_that("pam.Brier default t_star is the median of TRAINING event times", {
   expected_t <- stats::median(distime)
 
   expect_equal(
-    TimeMetric:::pam.Brier(fit, d),
-    TimeMetric:::pam.Brier(fit, d, expected_t),
+    PAmeasures:::pam.Brier(fit, d),
+    PAmeasures:::pam.Brier(fit, d, expected_t),
     tolerance = 1e-6
   )
 

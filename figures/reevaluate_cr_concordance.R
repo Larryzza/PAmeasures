@@ -75,7 +75,7 @@ for (file in files) {
   for (model in names(result$predictions)) {
     p <- result$predictions[[model]]
     prediction <- apply(p$cif_pred[, -1, drop = FALSE], 2,
-      getFromNamespace("m_cif", "TimeMetric"), time.cif = p$cif_pred[, 1], tau = tau)
+      getFromNamespace("m_cif", "PAmeasures"), time.cif = p$cif_pred[, 1], tau = tau)
     independent <- round(reference(p$times, p$status, prediction, tau), 4)
     stopifnot(updated[[model]] == independent)
     changes[[length(changes) + 1L]] <- data.frame(Horizon_days = tau, Model = model,

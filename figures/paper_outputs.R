@@ -110,7 +110,7 @@ paper_publish_real_outputs <- function(root, run_dir,
     "LaTeX fragments use the manuscript's existing rev macro for blue revision text.",
     "Point-version metrics, model files and diagnostics remain in the source run folders.",
     "See source_manifest.csv for the source run of each dataset and file_checksums.csv for integrity.", "",
-    "Recompute and refresh: Rscript --vanilla figures/run_real_data.R (from TimeMetric-paper)."),
+    "Recompute and refresh: Rscript --vanilla figures/run_real_data.R (from PAmeasures-paper)."),
     file.path(destination, "README.md"))
   invisible(manifest)
 }

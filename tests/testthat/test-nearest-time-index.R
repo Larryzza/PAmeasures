@@ -10,7 +10,7 @@
 # The rule is now: nearest observed time, ties broken toward the EARLIER event
 # time -- which also makes the choice independent of input row order.
 
-nti <- function(...) TimeMetric:::tm_nearest_time_index(...)
+nti <- function(...) PAmeasures:::tm_nearest_time_index(...)
 
 test_that("an exact midpoint between two times resolves to the earlier one", {
   et <- c(1, 2, 3, 4)
@@ -106,6 +106,6 @@ test_that("the default t_star really does sit exactly between two times", {
   # the two middle times are equidistant to within a few ulp
   expect_lt(abs(abs(lo - ts) - abs(hi - ts)), 1e-12)
   # and the rule picks the earlier of them
-  expect_identical(TimeMetric:::tm_nearest_time_index(sort(d$time), ts),
+  expect_identical(PAmeasures:::tm_nearest_time_index(sort(d$time), ts),
                    as.integer(n / 2))
 })

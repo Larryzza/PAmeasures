@@ -4,7 +4,7 @@ paper_root <- function(script) normalizePath(file.path(dirname(script), ".."), m
 paper_load <- function(root) {
   if (!requireNamespace("pkgload", quietly = TRUE)) stop("Install pkgload first.")
   suppressPackageStartupMessages(pkgload::load_all(root, quiet = TRUE))
-  actual <- normalizePath(getNamespaceInfo(asNamespace("TimeMetric"), "path"))
+  actual <- normalizePath(getNamespaceInfo(asNamespace("PAmeasures"), "path"))
   stopifnot(identical(actual, normalizePath(root)))
   invisible(actual)
 }
@@ -26,7 +26,7 @@ paper_signature <- function(root, settings) {
   paths <- c(list.files(file.path(root, "R"), full.names = TRUE),
              list.files(file.path(root, "analysis"), pattern = "\\.R$", full.names = TRUE),
              file.path(root, "DESCRIPTION"))
-  packages <- c("TimeMetric", "survival", "tdROC", "yardstick", "randomForestSRC",
+  packages <- c("PAmeasures", "survival", "tdROC", "yardstick", "randomForestSRC",
                 "cmprsk", "riskCommunicator", "expint", "pec", "dplyr", "pkgload",
                 "pmcalibration", "prodlim", "Hmisc")
   versions <- setNames(vapply(packages, function(p) {
@@ -51,7 +51,7 @@ paper_manifest <- function(root, out, settings) {
 
 paper_legacy_cox <- function(root) {
   code <- paper_git(root, "show", "426272c2bdcbf94079c035166fc7e3804ad2b632:R/tm_predict_coxph.R")
-  e <- new.env(parent = asNamespace("TimeMetric"))
+  e <- new.env(parent = asNamespace("PAmeasures"))
   eval(parse(text = code), envir = e)
   e$tm_predict_coxph
 }

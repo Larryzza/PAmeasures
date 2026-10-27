@@ -22,7 +22,7 @@ test_that("censoring left limit is shared within tied times", {
   status <- c(1, 0, 0, 1, 0, 1, 1)
   fit <- survival::survfit(survival::Surv(time, 1 - status) ~ 1)
   # Censoring KM: 6/7 after t = 1, then 6/7 * 4/6 after t = 2 (2 of 6 at risk).
-  expect_equal(TimeMetric:::tm_censoring_left_limit(fit, time),
+  expect_equal(PAmeasures:::tm_censoring_left_limit(fit, time),
     c(4 / 7, 1, 6 / 7, 6 / 7, 6 / 7, 4 / 7, 6 / 7))
 })
 
@@ -60,7 +60,7 @@ test_that("point R2 matches the KM reference when censored at t*", {
     1 - sum(time == t & observed == 0) / sum(time >= t), numeric(1))
   G <- vapply(time, function(t) prod(factors[censor_times < t]), numeric(1))
   w <- (observed / G) / sum(observed / G)
-  k <- TimeMetric:::tm_nearest_time_index(p$times, t_star)
+  k <- PAmeasures:::tm_nearest_time_index(p$times, t_star)
   prediction <- 1 - p$surv_prob[, k]
   y <- as.numeric(p$times <= t_star & p$status == 1)
   ybar <- sum(w * y); pbar <- sum(w * prediction)
@@ -85,7 +85,7 @@ test_that("null Cox censoring equals exp(-Nelson-Aalen) with tied censoring", {
   jumps <- vapply(ct, function(t) sum(time == t & status == 0) / sum(time >= t),
     numeric(1))
   G <- vapply(time, function(t) exp(-sum(jumps[ct < t])), numeric(1))
-  out <- TimeMetric:::tm_cr_event_ipcw(time, status, censoring = "cox")
+  out <- PAmeasures:::tm_cr_event_ipcw(time, status, censoring = "cox")
   expect_equal(out$probability, G)
 })
 

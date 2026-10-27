@@ -51,10 +51,10 @@ test_that("Gt() is invariant to row permutation", {
 
   ts <- c(1.5, 2.5, 4.5, 5.5, 7.5, 9.5, 3, 7)
   for (t in ts) {
-    expect_identical(TimeMetric:::Gt(sv, t), TimeMetric:::Gt(svp, t),
+    expect_identical(PAmeasures:::Gt(sv, t), PAmeasures:::Gt(svp, t),
                      info = paste("G(t) at t =", t))
-    expect_identical(TimeMetric:::Gt(sv, t, left = TRUE),
-                     TimeMetric:::Gt(svp, t, left = TRUE),
+    expect_identical(PAmeasures:::Gt(sv, t, left = TRUE),
+                     PAmeasures:::Gt(svp, t, left = TRUE),
                      info = paste("G(t-) at t =", t))
   }
 })
@@ -66,8 +66,8 @@ test_that("the Brier score is invariant to row permutation", {
   f  <- survival::coxph(survival::Surv(time, status) ~ x1 + x2, data = d,  x = TRUE, y = TRUE)
   fp <- survival::coxph(survival::Surv(time, status) ~ x1 + x2, data = dp, x = TRUE, y = TRUE)
 
-  expect_equal(as.numeric(TimeMetric:::pam.Brier(f,  d,  5.5)),
-               as.numeric(TimeMetric:::pam.Brier(fp, dp, 5.5)),
+  expect_equal(as.numeric(PAmeasures:::pam.Brier(f,  d,  5.5)),
+               as.numeric(PAmeasures:::pam.Brier(fp, dp, 5.5)),
                tolerance = 1e-12)
 })
 
@@ -79,8 +79,8 @@ test_that("censoring survival values are in [0, 1] and non-increasing", {
   # is NA beyond it -- both are separately tested below.
   grid <- seq(0.5, 9.75, by = 0.25)
 
-  g  <- vapply(grid, function(t) TimeMetric:::Gt(sv, t), numeric(1))
-  gl <- vapply(grid, function(t) TimeMetric:::Gt(sv, t, left = TRUE), numeric(1))
+  g  <- vapply(grid, function(t) PAmeasures:::Gt(sv, t), numeric(1))
+  gl <- vapply(grid, function(t) PAmeasures:::Gt(sv, t, left = TRUE), numeric(1))
 
   expect_true(all(g  >= 0 & g  <= 1), info = "G(t) outside [0, 1]")
   expect_true(all(gl >= 0 & gl <= 1), info = "G(t-) outside [0, 1]")
@@ -94,7 +94,7 @@ test_that("with no censoring, G(t) is 1 across the supported range", {
   d <- data.frame(time = 1:10, status = rep(1L, 10))
   sv <- survival::Surv(d$time, d$status)
   for (t in c(1, 2, 5, 8, 9.5, 10)) {
-    expect_equal(TimeMetric:::Gt(sv, t), 1,
+    expect_equal(PAmeasures:::Gt(sv, t), 1,
                  info = paste("G(t) at t =", t, "with no censoring"))
   }
 })
@@ -108,7 +108,7 @@ test_that("Gt() agrees with pec::ipcw IPCW.times for the evaluation-time weight"
   ref <- pec::ipcw(survival::Surv(time, status) ~ 1, data = d, method = "marginal",
                    times = ts, subjectTimes = d$time, subjectTimesLag = 1,
                    what = "IPCW.times")$IPCW.times
-  obs <- vapply(ts, function(t) TimeMetric:::Gt(sv, t), numeric(1))
+  obs <- vapply(ts, function(t) PAmeasures:::Gt(sv, t), numeric(1))
 
   expect_equal(obs, as.numeric(ref), tolerance = 1e-12)
 })
@@ -121,7 +121,7 @@ test_that("Gt(left = TRUE) agrees with pec::ipcw IPCW.subjectTimes", {
   ref <- pec::ipcw(survival::Surv(time, status) ~ 1, data = d, method = "marginal",
                    times = sort(unique(d$time)), subjectTimes = d$time,
                    subjectTimesLag = 1, what = "IPCW.subjectTimes")$IPCW.subjectTimes
-  obs <- vapply(d$time, function(t) TimeMetric:::Gt(sv, t, left = TRUE), numeric(1))
+  obs <- vapply(d$time, function(t) PAmeasures:::Gt(sv, t, left = TRUE), numeric(1))
 
   expect_equal(obs, as.numeric(ref), tolerance = 1e-12)
 })
@@ -132,8 +132,8 @@ test_that("Gt() errors rather than substituting when censoring survival is zero"
   d <- data.frame(time = 1:10, status = c(rep(1L, 9), 0L))
   sv <- survival::Surv(d$time, d$status)
 
-  expect_error(TimeMetric:::Gt(sv, 10), "censoring distribution")
-  expect_error(TimeMetric:::pam.Brier(
+  expect_error(PAmeasures:::Gt(sv, 10), "censoring distribution")
+  expect_error(PAmeasures:::pam.Brier(
     survival::coxph(survival::Surv(time, status) ~ 1, data = d, x = TRUE, y = TRUE),
     d, 10), "censoring distribution")
 })
@@ -148,7 +148,7 @@ test_that("Gt() is NA beyond the last observed time, as pec::ipcw is", {
                    times = beyond, subjectTimes = d$time, subjectTimesLag = 1,
                    what = "IPCW.times")$IPCW.times
   expect_true(is.na(ref))
-  expect_true(is.na(TimeMetric:::Gt(sv, beyond)))
+  expect_true(is.na(PAmeasures:::Gt(sv, beyond)))
 })
 
 test_that("tm_fit_and_eval gives the corrected Brier score on the exposed fixture", {

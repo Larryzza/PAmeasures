@@ -22,7 +22,7 @@ test_that("m_cif reduces a CIF column to a scalar risk", {
   cif <- seq(0, 0.6, length.out = 50)
   times <- seq(1, 50, length.out = 50)
 
-  res <- TimeMetric:::m_cif(cif, time.cif = times, tau = 50)
+  res <- PAmeasures:::m_cif(cif, time.cif = times, tau = 50)
 
   expect_length(res, 1L)
   expect_true(is.finite(res))
@@ -32,9 +32,9 @@ test_that("m_cif reduces a CIF column to a scalar risk", {
 test_that("m_cif is monotone in the CIF magnitude", {
   times <- seq(1, 50, length.out = 50)
 
-  low  <- TimeMetric:::m_cif(seq(0, 0.3, length.out = 50),
+  low  <- PAmeasures:::m_cif(seq(0, 0.3, length.out = 50),
                              time.cif = times, tau = 50)
-  high <- TimeMetric:::m_cif(seq(0, 0.9, length.out = 50),
+  high <- PAmeasures:::m_cif(seq(0, 0.9, length.out = 50),
                              time.cif = times, tau = 50)
 
   expect_false(isTRUE(all.equal(low, high, tolerance = 1e-6)))

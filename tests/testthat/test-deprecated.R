@@ -21,7 +21,7 @@ DEPRECATED_MAP <- c(
 )
 
 test_that("every previously-exported name is still exported", {
-  exports <- getNamespaceExports("TimeMetric")
+  exports <- getNamespaceExports("PAmeasures")
 
   expect_true(all(names(DEPRECATED_MAP) %in% exports))
   expect_true(all(unname(DEPRECATED_MAP) %in% exports))
@@ -30,7 +30,7 @@ test_that("every previously-exported name is still exported", {
 test_that("each deprecated name warns and names its replacement", {
   for (old in names(DEPRECATED_MAP)) {
     new <- DEPRECATED_MAP[[old]]
-    fn <- get(old, envir = asNamespace("TimeMetric"))
+    fn <- get(old, envir = asNamespace("PAmeasures"))
 
     # calling with no arguments is enough to reach .Deprecated
     cond <- tryCatch(
@@ -64,7 +64,7 @@ test_that("deprecated wrappers forward arguments and return identical results", 
 
 test_that("the misspelled names are gone from the new API", {
   # survial -> survival, surverg -> survreg
-  exports <- getNamespaceExports("TimeMetric")
+  exports <- getNamespaceExports("PAmeasures")
   new_api <- grep("^tm_", exports, value = TRUE)
 
   expect_false(any(grepl("survial", new_api)))
