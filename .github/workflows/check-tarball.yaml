@@ -26,7 +26,7 @@ jobs:
       - name: Prepare Linux build dependencies
         run: |
           apt-get update -qq
-          apt-get install -y sudo git curl ca-certificates pkg-config make g++ gfortran libcurl4-openssl-dev libssl-dev libxml2-dev libv8-dev tidy
+          apt-get install -y sudo git curl ca-certificates pkg-config make g++ gfortran perl unzip xz-utils libcurl4-openssl-dev libssl-dev libxml2-dev libv8-dev tidy
       - name: Configure the R installation already provided by the container
         shell: Rscript {0}
         run: |
@@ -85,8 +85,9 @@ jobs:
             stop("Check dependency-install.log and dependency-status files.")
           }
       - name: Prepare PDF manual toolchain
-        shell: Rscript {0}
+        shell: bash
         run: |
+          cat > toolchain.R <<'RSCRIPT'
           root <- file.path(Sys.getenv("RUNNER_TEMP"), "TinyTeX")
           tinytex::install_tinytex(dir = root, add_path = FALSE, extra_packages = NULL)
           bins <- unique(c(file.path(root, "bin", "windows"),
@@ -101,6 +102,16 @@ jobs:
           status <- system2(Sys.which("makeindex"), "index-smoke.idx",
                             stdout = "index-smoke.stdout", stderr = "index-smoke.stderr")
           stopifnot(status == 0L, file.exists("index-smoke.ind"))
+          RSCRIPT
+          set +e
+          Rscript toolchain.R > toolchain-install.log 2>&1
+          status=$?
+          set -e
+          cat toolchain-install.log
+          if [ "$status" -ne 0 ]; then
+            Rscript -e 's <- readLines("toolchain-install.log", warn = FALSE); s <- s[grepl("error|fail|cannot|not found|not installed|locate", s, ignore.case = TRUE)]; s <- paste(tail(s, 12L), collapse = " | "); s <- gsub("%", "%25", s, fixed = TRUE); cat("::error title=PDF toolchain setup::", s, "\n", sep = "")'
+          fi
+          exit "$status"
       - name: Full CRAN-style check including PDF manual and remote checks
         shell: Rscript {0}
         run: |
@@ -138,4 +149,6 @@ jobs:
             dependency-*.txt
             dependency-install.log
             index-smoke.*
+            toolchain-install.log
+            toolchain.R
           retention-days: 14
