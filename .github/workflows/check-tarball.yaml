@@ -1,4 +1,4 @@
-name: PAmeasures 2.0.0 Linux release container check
+name: PAmeasures 2.0.0 macOS devel source-dependency check
 
 on:
   push:
@@ -9,10 +9,14 @@ permissions:
 
 jobs:
   check:
-    name: ubuntu-24.04 (R release, container)
-    runs-on: ubuntu-24.04
-    container: rocker/r-ver:4.6.1
+    name: ${{ matrix.os }} (R ${{ matrix.r }})
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+        r: [devel]
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
@@ -23,18 +27,10 @@ jobs:
       OPENBLAS_NUM_THREADS: 1
     steps:
       - uses: actions/checkout@v5
-      - name: Prepare Linux build dependencies
-        run: |
-          apt-get update -qq
-          apt-get install -y sudo git curl ca-certificates pkg-config make g++ gfortran perl unzip xz-utils libcurl4-openssl-dev libssl-dev libxml2-dev libv8-dev tidy
-      - name: Configure the R installation already provided by the container
-        shell: Rscript {0}
-        run: |
-          stopifnot(getRversion() == "4.6.1")
-          cat(R.version.string, "\n")
-          profile <- file.path(Sys.getenv("RUNNER_TEMP"), "release-Rprofile")
-          writeLines('options(repos = c(CRAN = "https://packagemanager.posit.co/cran/__linux__/noble/latest"), Ncpus = 2L)', profile)
-          cat("R_PROFILE_USER=", profile, "\n", file = Sys.getenv("GITHUB_ENV"), append = TRUE, sep = "")
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.r }}
+          use-public-rspm: true
       - uses: r-lib/actions/setup-pandoc@v2
       - name: Verify and extract the exact source tarball
         shell: Rscript {0}
@@ -44,50 +40,61 @@ jobs:
           stopifnot(identical(unname(actual), expected))
           cat("Source SHA256:", actual, "\n")
           untar("PAmeasures_2.0.0.tar.gz")
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        id: dependencies
-        continue-on-error: true
-        with:
-          working-directory: PAmeasures
-          extra-packages: |
-            any::rcmdcheck
-            any::tinytex
-            any::jsonlite
-            any::V8
-          needs: check
-      - name: Verify dependencies and retain fallback installation diagnostics
+      - name: Record compiler configuration and probe C/Fortran compilation
         shell: Rscript {0}
         run: |
-          d <- read.dcf("PAmeasures/DESCRIPTION")
-          fields <- intersect(c("Depends", "Imports", "LinkingTo", "Suggests"), colnames(d))
-          dependencies <- trimws(unlist(strsplit(paste(d[1L, fields], collapse = ","), ",")))
-          dependencies <- unique(sub("[[:space:]]*[(].*$", "", dependencies))
-          dependencies <- setdiff(dependencies[nzchar(dependencies)], "R")
-          required <- unique(c(dependencies, "rcmdcheck", "tinytex", "jsonlite", "V8"))
-          available <- vapply(required, requireNamespace, logical(1), quietly = TRUE)
-          writeLines(paste(required, available), "dependency-status-before.txt")
-          missing <- required[!available]
-          if (length(missing)) {
-            cat("::notice title=Dependency setup fallback::Installing missing packages:",
-                paste(missing, collapse = ", "), "\n")
-            connection <- file("dependency-install.log", open = "wt")
-            sink(connection, split = TRUE)
-            sink(connection, type = "message")
-            options(Ncpus = 2L)
-            tryCatch(install.packages(missing, repos = "https://cloud.r-project.org"),
-              finally = {sink(type = "message"); sink(); close(connection)})
+          writeLines(R.version.string, "dependency-R-version.txt")
+          library <- file.path(Sys.getenv("RUNNER_TEMP"), "Library")
+          dir.create(library, recursive = TRUE, showWarnings = FALSE)
+          cat("R_LIBS_USER=", library, "\n", file = Sys.getenv("GITHUB_ENV"), append = TRUE, sep = "")
+          config <- unlist(lapply(c("CC", "CFLAGS", "CXX17", "FC", "FFLAGS", "FLIBS"), function(key) {
+            c(key, system2(file.path(R.home("bin"), "R"), c("CMD", "config", key), stdout = TRUE))
+          }))
+          writeLines(config, "compiler-config.txt")
+          writeLines("void c_probe(double *x) { *x = 1.0; }", "compiler-probe.c")
+          writeLines(c("subroutine f_probe(x)", "real(8) :: x", "x = 1.0d0", "end subroutine"), "compiler-probe.f90")
+          output <- system2(file.path(R.home("bin"), "R"),
+            c("CMD", "SHLIB", "compiler-probe.c", "compiler-probe.f90"), stdout = TRUE, stderr = TRUE)
+          writeLines(output, "compiler-probe.log")
+          status <- attr(output, "status")
+          if (!is.null(status) && status != 0L) {
+            message <- paste(output, collapse = " | ")
+            message <- gsub("%", "%25", message, fixed = TRUE)
+            cat("::error title=C and Fortran preflight::", message, "\n", sep = "")
+            stop("Compiler preflight failed; see compiler-probe.log")
           }
-          available <- vapply(required, requireNamespace, logical(1), quietly = TRUE)
-          writeLines(paste(required, available), "dependency-status-after.txt")
-          if (any(!available)) {
-            cat("::error title=Unavailable dependencies::",
-                paste(required[!available], collapse = ", "), "\n", sep = "")
-            stop("Check dependency-install.log and dependency-status files.")
-          }
-      - name: Prepare PDF manual toolchain
+      - uses: actions/cache/restore@v4
+        id: dependencies-cache
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: macos-devel-source-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}
+      - name: Install source dependencies with complete compiler diagnostics
         shell: bash
         run: |
-          cat > toolchain.R <<'RSCRIPT'
+          set +e
+          Rscript macos-devel-dependencies.R > dependency-install-complete.log 2>&1
+          status=$?
+          set -e
+          cat dependency-install-complete.log
+          if [ "$status" -ne 0 ]; then
+            python3 summarize-install-errors.py
+          fi
+          exit "$status"
+      - name: Prepare HTML validation tool
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y tidy
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install tidy-html5
+            echo "$(brew --prefix tidy-html5)/bin" >> "$GITHUB_PATH"
+          elif ! command -v tidy >/dev/null; then
+            choco install html-tidy -y --no-progress
+          fi
+      - name: Prepare PDF manual toolchain
+        shell: Rscript {0}
+        run: |
           root <- file.path(Sys.getenv("RUNNER_TEMP"), "TinyTeX")
           tinytex::install_tinytex(dir = root, add_path = FALSE, extra_packages = NULL)
           bins <- unique(c(file.path(root, "bin", "windows"),
@@ -102,21 +109,10 @@ jobs:
           status <- system2(Sys.which("makeindex"), "index-smoke.idx",
                             stdout = "index-smoke.stdout", stderr = "index-smoke.stderr")
           stopifnot(status == 0L, file.exists("index-smoke.ind"))
-          RSCRIPT
-          set +e
-          Rscript toolchain.R > toolchain-install.log 2>&1
-          status=$?
-          set -e
-          cat toolchain-install.log
-          if [ "$status" -ne 0 ]; then
-            Rscript -e 's <- readLines("toolchain-install.log", warn = FALSE); s <- s[grepl("error|fail|cannot|not found|not installed|locate", s, ignore.case = TRUE)]; s <- paste(tail(s, 12L), collapse = " | "); s <- gsub("%", "%25", s, fixed = TRUE); cat("::error title=PDF toolchain setup::", s, "\n", sep = "")'
-          fi
-          exit "$status"
       - name: Full CRAN-style check including PDF manual and remote checks
         shell: Rscript {0}
         run: |
           cat(R.version.string, "\n")
-          stopifnot(getRversion() == "4.6.1")
           print(Sys.which(c("pdflatex", "makeindex", "pandoc", "tidy")))
           stopifnot(nzchar(Sys.which("pandoc")), nzchar(Sys.which("tidy")),
                     requireNamespace("V8", quietly = TRUE))
@@ -138,17 +134,26 @@ jobs:
             }
           }
           stopifnot(length(result$errors) == 0L, length(result$warnings) == 0L)
+      - uses: actions/cache/save@v4
+        if: always() && steps.dependencies-cache.outputs.cache-hit != 'true'
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: macos-devel-source-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}
       - uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: check-ubuntu-release-container
+          name: check-${{ matrix.os }}-${{ matrix.r }}
           path: |
             check/**
             check-summary.json
             SHA256SUMS
             dependency-*.txt
-            dependency-install.log
+            dependency-install-complete.log
+            dependency-install-logs/**
+            dependency-namespace-errors.txt
+            dependency-sessionInfo.txt
+            dependency-error-summary.txt
+            compiler-config.txt
+            compiler-probe.log
             index-smoke.*
-            toolchain-install.log
-            toolchain.R
           retention-days: 14
