@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 
 matches = []
-pattern = re.compile(r"error:|fatal error|undefined symbols|library not loaded|"
+pattern = re.compile(r"error[: ]|fatal error|undefined symbols|library not loaded|"
                      r"cannot find|not found|ERROR:|make.*Error|symbol not found|"
                      r"unable to load|Reason:", re.I)
 for file in sorted(Path("dependency-install-logs").glob("*.out")):
@@ -21,8 +21,9 @@ if namespaces.exists():
 if not matches:
     log = Path("dependency-install-complete.log")
     if log.exists():
-        matches = [s for s in log.read_text(errors="replace").splitlines()
-                   if pattern.search(s)][-30:]
+        matches = log.read_text(errors="replace").splitlines()[-60:]
+if not matches:
+    matches = ["The dependency command returned nonzero without a captured transcript."]
 text = "\n".join(matches)[-18000:]
 Path("dependency-error-summary.txt").write_text(text)
 if text:
