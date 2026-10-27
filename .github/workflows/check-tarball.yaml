@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-24.04, windows-latest, macos-latest]
         r: [release, devel]
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -26,11 +26,12 @@ jobs:
       OMP_NUM_THREADS: 1
       OPENBLAS_NUM_THREADS: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.r }}
           use-public-rspm: true
+      - uses: r-lib/actions/setup-pandoc@v2
       - name: Verify and extract the exact source tarball
         shell: Rscript {0}
         run: |
@@ -40,13 +41,57 @@ jobs:
           cat("Source SHA256:", actual, "\n")
           untar("PAmeasures_2.0.0.tar.gz")
       - uses: r-lib/actions/setup-r-dependencies@v2
+        id: dependencies
+        continue-on-error: true
         with:
           working-directory: PAmeasures
           extra-packages: |
             any::rcmdcheck
             any::tinytex
             any::jsonlite
+            any::V8
           needs: check
+      - name: Verify dependencies and retain fallback installation diagnostics
+        shell: Rscript {0}
+        run: |
+          d <- read.dcf("PAmeasures/DESCRIPTION")
+          fields <- intersect(c("Depends", "Imports", "LinkingTo", "Suggests"), colnames(d))
+          dependencies <- trimws(unlist(strsplit(paste(d[1L, fields], collapse = ","), ",")))
+          dependencies <- unique(sub("[[:space:]]*[(].*$", "", dependencies))
+          dependencies <- setdiff(dependencies[nzchar(dependencies)], "R")
+          required <- unique(c(dependencies, "rcmdcheck", "tinytex", "jsonlite", "V8"))
+          available <- vapply(required, requireNamespace, logical(1), quietly = TRUE)
+          writeLines(paste(required, available), "dependency-status-before.txt")
+          missing <- required[!available]
+          if (length(missing)) {
+            cat("::notice title=Dependency setup fallback::Installing missing packages:",
+                paste(missing, collapse = ", "), "\n")
+            connection <- file("dependency-install.log", open = "wt")
+            sink(connection, split = TRUE)
+            sink(connection, type = "message")
+            options(Ncpus = 2L)
+            tryCatch(install.packages(missing, repos = "https://cloud.r-project.org"),
+              finally = {sink(type = "message"); sink(); close(connection)})
+          }
+          available <- vapply(required, requireNamespace, logical(1), quietly = TRUE)
+          writeLines(paste(required, available), "dependency-status-after.txt")
+          if (any(!available)) {
+            cat("::error title=Unavailable dependencies::",
+                paste(required[!available], collapse = ", "), "\n", sep = "")
+            stop("Check dependency-install.log and dependency-status files.")
+          }
+      - name: Prepare HTML validation tool
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y tidy
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install tidy-html5
+            echo "$(brew --prefix tidy-html5)/bin" >> "$GITHUB_PATH"
+          elif ! command -v tidy >/dev/null; then
+            choco install html-tidy -y --no-progress
+          fi
       - name: Prepare PDF manual toolchain
         shell: Rscript {0}
         run: |
@@ -58,12 +103,19 @@ jobs:
           Sys.setenv(PATH = paste(c(bins, Sys.getenv("PATH")), collapse = .Platform$path.sep))
           writeLines(bins, Sys.getenv("GITHUB_PATH"), useBytes = TRUE)
           tinytex::tlmgr_install(c("inconsolata", "helvetic", "times", "courier",
-                                  "ec", "cm-super", "ae", "texinfo"))
-          stopifnot(nzchar(Sys.which("pdflatex")))
+                                  "ec", "cm-super", "ae", "texinfo", "makeindex"))
+          stopifnot(nzchar(Sys.which("pdflatex")), nzchar(Sys.which("makeindex")))
+          writeLines("\\indexentry{PAmeasures}{1}", "index-smoke.idx")
+          status <- system2(Sys.which("makeindex"), "index-smoke.idx",
+                            stdout = "index-smoke.stdout", stderr = "index-smoke.stderr")
+          stopifnot(status == 0L, file.exists("index-smoke.ind"))
       - name: Full CRAN-style check including PDF manual and remote checks
         shell: Rscript {0}
         run: |
           cat(R.version.string, "\n")
+          print(Sys.which(c("pdflatex", "makeindex", "pandoc", "tidy")))
+          stopifnot(nzchar(Sys.which("pandoc")), nzchar(Sys.which("tidy")),
+                    requireNamespace("V8", quietly = TRUE))
           result <- rcmdcheck::rcmdcheck(
             path = "PAmeasures_2.0.0.tar.gz",
             args = c("--as-cran", "--run-donttest"),
@@ -72,8 +124,17 @@ jobs:
             source_sha256 = as.character(tools::sha256sum("PAmeasures_2.0.0.tar.gz")),
             errors = result$errors, warnings = result$warnings, notes = result$notes)
           jsonlite::write_json(summary, "check-summary.json", pretty = TRUE, auto_unbox = TRUE)
+          for (kind in c("errors", "warnings", "notes")) {
+            values <- summary[[kind]]
+            for (value in values) {
+              value <- gsub("%", "%25", value, fixed = TRUE)
+              value <- gsub("\r", "%0D", value, fixed = TRUE)
+              value <- gsub("\n", "%0A", value, fixed = TRUE)
+              cat("::notice title=R CMD check ", kind, "::", value, "\n", sep = "")
+            }
+          }
           stopifnot(length(result$errors) == 0L, length(result$warnings) == 0L)
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: check-${{ matrix.os }}-${{ matrix.r }}
@@ -81,4 +142,7 @@ jobs:
             check/**
             check-summary.json
             SHA256SUMS
+            dependency-*.txt
+            dependency-install.log
+            index-smoke.*
           retention-days: 14
