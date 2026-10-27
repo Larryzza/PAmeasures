@@ -1,4 +1,4 @@
-name: PAmeasures 2.0.0 source-tarball checks
+name: PAmeasures 2.0.0 Linux release container check
 
 on:
   push:
@@ -9,14 +9,10 @@ permissions:
 
 jobs:
   check:
-    name: ${{ matrix.os }} (R ${{ matrix.r }})
-    runs-on: ${{ matrix.os }}
+    name: ubuntu-24.04 (R release, container)
+    runs-on: ubuntu-24.04
+    container: rocker/r-ver:4.6.1
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-24.04, windows-latest, macos-latest]
-        r: [release, devel]
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
@@ -27,9 +23,14 @@ jobs:
       OPENBLAS_NUM_THREADS: 1
     steps:
       - uses: actions/checkout@v5
+      - name: Prepare Linux build dependencies
+        run: |
+          apt-get update -qq
+          apt-get install -y sudo git curl ca-certificates pkg-config make g++ gfortran libcurl4-openssl-dev libssl-dev libxml2-dev libv8-dev tidy
       - uses: r-lib/actions/setup-r@v2
         with:
-          r-version: ${{ matrix.r }}
+          r-version: release
+          install-r: false
           use-public-rspm: true
       - uses: r-lib/actions/setup-pandoc@v2
       - name: Verify and extract the exact source tarball
@@ -113,6 +114,7 @@ jobs:
         shell: Rscript {0}
         run: |
           cat(R.version.string, "\n")
+          stopifnot(getRversion() == "4.6.1")
           print(Sys.which(c("pdflatex", "makeindex", "pandoc", "tidy")))
           stopifnot(nzchar(Sys.which("pandoc")), nzchar(Sys.which("tidy")),
                     requireNamespace("V8", quietly = TRUE))
@@ -137,7 +139,7 @@ jobs:
       - uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: check-${{ matrix.os }}-${{ matrix.r }}
+          name: check-ubuntu-release-container
           path: |
             check/**
             check-summary.json
