@@ -1,5 +1,6 @@
 # Install released dependencies from source and retain each compiler transcript.
-options(warn = 1, Ncpus = 2L, timeout = 300)+d <- read.dcf("PAmeasures/DESCRIPTION")
+options(warn = 1, Ncpus = 2L, timeout = 300)
+d <- read.dcf("PAmeasures/DESCRIPTION")
 fields <- intersect(c("Depends", "Imports", "LinkingTo", "Suggests"), colnames(d))
 required <- trimws(unlist(strsplit(paste(d[1L, fields], collapse = ","), ",")))
 required <- unique(sub("[[:space:]]*[(].*$", "", required))

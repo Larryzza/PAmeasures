@@ -67,7 +67,8 @@ jobs:
         id: dependencies-cache
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: macos-devel-source-v2-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}
+          key: macos-devel-source-v3-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: macos-devel-source-v3-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}-
       - name: Install source dependencies with complete compiler diagnostics
         id: install-source-dependencies
         shell: bash
@@ -139,7 +140,7 @@ jobs:
         if: always() && (steps.install-source-dependencies.outcome == 'success' || steps.install-source-dependencies.outcome == 'failure') && steps.dependencies-cache.outputs.cache-hit != 'true'
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: macos-devel-source-v2-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}
+          key: macos-devel-source-v3-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}-${{ github.run_id }}-${{ github.run_attempt }}
       - uses: actions/upload-artifact@v5
         if: always()
         with:
