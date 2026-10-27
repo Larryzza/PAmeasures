@@ -1,0 +1,30 @@
+{
+  "repository": "Larryzza/PAmeasures",
+  "repository_was_empty_before_upload": true,
+  "fresh_download_verified": true,
+  "verified_head": "bcbcd79c36d3ebd5d2256e647cf2f675148d8199",
+  "verified_refs": {
+    "refs/heads/main": "bcbcd79c36d3ebd5d2256e647cf2f675148d8199",
+    "refs/tags/before-pa-api-2026-10-26": "5a791aacef9d378e632bc49d256c0b0e8409c625",
+    "refs/tags/timemetric-paper-baseline-2026-10-26": "c6523260dea0f48923149418dd8989be4e50654f"
+  },
+  "commit_count": 154,
+  "forbidden_session_paths": 0,
+  "removed_session_objects_in_fresh_download": 0,
+  "visibility_not_changed": true,
+  "old_commit_probes": [
+    {
+      "old_commit": "e850f173ef00706f4adaed0db9e33986330d444f",
+      "fetch_succeeded": false,
+      "rejected_as_unavailable": true,
+      "return_code": 128
+    },
+    {
+      "old_commit": "7bd1648c69327a4e596e20dc7e965b0d97e49993",
+      "fetch_succeeded": false,
+      "rejected_as_unavailable": true,
+      "return_code": 128
+    }
+  ],
+  "scope": "Authenticated Git endpoint and fresh clone of the newly empty repository; previous repository storage, other clones and upstream TimeMetric are outside this check."
+}

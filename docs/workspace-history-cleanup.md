@@ -50,13 +50,22 @@ complete history back into this cleaned repository.
 
 ## GitHub storage and visibility
 
+Follow-up: a newly created empty repository at the same owner/name now holds
+only the cleaned history. A fresh download contains none of the removed
+session objects, and the two tested pre-cleanup commits cannot be fetched
+from the replacement repository. See
+[the fresh-repository verification](validation/fresh-repository-2026-10-26.md).
+Any earlier GitHub repository retained as a backup must remain private.
+The limitations below explain the original history-rewrite operation and
+remain relevant to that earlier repository and other existing copies.
+
 History rewriting removes the sessions from advertised branch/tag ancestry.
 It does not guarantee immediate physical deletion from GitHub storage,
 cached commit URLs, prior Actions runs, artifacts, forks or other clones.
 GitHub documents further cleanup through Support for sensitive data; Support
 does not remove non-sensitive data on request.
 
-The repository remains private during this operation. If the historical data
+The repository remained private during the history-rewrite operation. If the historical data
 must be inaccessible even through old commit URLs, resolve cached-object
 removal with GitHub Support before changing visibility. A clean clone cannot
 establish server-side cache deletion. No support ticket or external message
