@@ -2,7 +2,9 @@
 
 export(cc_weights)
 export(ncc_weights)
+export(pa_nlm)
 export(pam.coxph_restricted)
+export(pam.nlm)
 export(pam.predict_cr)
 export(pam.predicted_survial_eval)
 export(pam.predicted_survial_eval_cr)

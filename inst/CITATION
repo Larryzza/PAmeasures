@@ -2,7 +2,7 @@ citHeader("To cite PAmeasures in publications, please use:")
 
 bibentry(
   bibtype = "Manual",
-  title   = "{PAmeasures}: Unified Performance Metrics for Survival Models with Right-Censoring, Competing Risks, and Two-Phase Designs",
+  title   = paste("{PAmeasures}:", meta$Title),
   author  = c(
     person("Tong",   "Zhu"),
     person("Zian",   "Zhuang"),

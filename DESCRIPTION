@@ -1,8 +1,7 @@
 Package: PAmeasures
 Type: Package
-Title: Unified Performance Metrics for Survival Models with Right-Censoring,
-    Competing Risks, and Two-Phase Designs
-Version: 2.0.0.9000
+Title: Performance Assessment for Continuous and Survival Outcomes
+Version: 2.0.0.9001
 Date: 2026-10-26
 Authors@R: c(
     person("Tong", "Zhu", email = "toz015@ucla.edu", role = c("aut", "cre")),
@@ -11,8 +10,9 @@ Authors@R: c(
     person("Xiaowu", "Dai", role = "aut"),
     person("Xiaoyan", "Wang", role = "aut"),
     person("Gang", "Li", role = "aut"))
-Description: Evaluates the predictive performance of survival models in a
-    unified framework. Implements the pseudo R-squared and related explained
+Description: Evaluates prediction accuracy for continuous outcomes and the
+    predictive performance of survival models in a unified framework.
+    Implements the R-squared, L-squared, pseudo R-squared and related explained
     variation measures of Li and Wang (2019)
     <doi:10.1080/01621459.2018.1515079>, the concordance indices of Harrell
     et al. (1982) <doi:10.1001/jama.1982.03320430047030> and Uno et al.

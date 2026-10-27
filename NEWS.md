@@ -1,3 +1,18 @@
+# PAmeasures 2.0.0.9001 (development)
+
+* Restore continuous-outcome R-squared and L-squared assessment with
+  `pa_nlm()`, returning unrounded numeric results. The supported `pam.nlm()`
+  entry retains the historical field names and four-decimal character format,
+  using the same calculation core. The archived 0.1.0 implementation is kept
+  as a test reference, including its original Moore's Law example.
+* Validate paired finite vectors explicitly. Constant predictions use an
+  intercept-only correction; undefined denominators return NA with a warning
+  while retaining any other defined measure. Overflow and underflow in
+  squared deviations require rescaling. These explicit edge rules replace
+  historical incidental NaN/Inf or missing-value behavior.
+* Broaden package positioning to include continuous outcomes. Existing
+  survival estimators, metric definitions and numerical references are unchanged.
+
 # PAmeasures 2.0.0.9000 (development)
 
 * Begin the PAmeasures 2.0.0 revival from TimeMetric's `paper` branch at

@@ -6,17 +6,18 @@
 [![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.r-project.org/Licenses/GPL-3)
 <!-- badges: end -->
 
-`PAmeasures` evaluates the predictive performance of survival models under a
-single interface, across right-censored data, competing risks, and two-phase
-sampling designs (case-cohort and nested case-control).
+`PAmeasures` evaluates prediction accuracy for continuous outcomes and
+predictive performance across right-censored survival data, competing risks,
+and two-phase sampling designs (case-cohort and nested case-control).
 
 This is the development repository for the planned **PAmeasures 2.0.0**
 revival, starting from the TimeMetric `paper` branch at
 `f9fd19f73d7abefc8cb1c54c415ce99c1fd96ba0`. The development version is
-`2.0.0.9000`; it is not a CRAN release. The `tm_` interfaces and statistical
-implementations are retained. Compatibility with PAmeasures 0.1.0 interfaces
-is not a goal of this migration, and its nonlinear-regression interface
-`pam.nlm()` is not included. See the [migration record](docs/migration-to-pameasures.md)
+`2.0.0.9001`; it is not a CRAN release. Continuous-outcome accuracy is available
+through `pa_nlm()` and the supported historical `pam.nlm()` entry point.
+The survival interfaces and statistical implementations are retained.
+Full compatibility with all PAmeasures 0.1.0 interfaces is not promised.
+See the [migration record](docs/migration-to-pameasures.md)
 for provenance, validation and the remaining release decisions.
 
 It separates **prediction** from **evaluation**: the evaluation functions take
@@ -32,6 +33,23 @@ remotes::install_github("Larryzza/PAmeasures")
 ```
 
 ## Quick start
+
+For observed and predicted continuous outcomes from any regression model:
+
+```r
+library(PAmeasures)
+y <- c(1, 2, 4, 5)
+prediction <- c(1, 2, 3, 4)
+pa_nlm(y, prediction)   # unrounded numeric R.squared and L.squared
+pam.nlm(y, prediction)  # historical four-decimal character format
+```
+
+These functions use affine correction of the supplied predictions, retaining
+the original PAmeasures R-squared and L-squared definitions. Undefined
+denominators produce a warning and an NA for the affected measure; see
+`?pa_nlm` for constant predictions, perfect predictions and input requirements.
+
+For right-censored survival predictions:
 
 ```r
 library(PAmeasures)
