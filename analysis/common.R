@@ -32,7 +32,7 @@ paper_signature <- function(root, settings) {
   versions <- setNames(vapply(packages, function(p) {
     if (requireNamespace(p, quietly = TRUE)) as.character(utils::packageVersion(p)) else NA_character_
   }, character(1)), packages)
-  list(upstream = "426272c2bdcbf94079c035166fc7e3804ad2b632",
+  list(upstream = "e925507a30c4f56dcd3ef6693676f18128dd8767",
        source_md5 = tools::md5sum(paths), settings = settings,
        R = R.version.string, RNG = RNGkind(), packages = versions)
 }
@@ -50,7 +50,7 @@ paper_manifest <- function(root, out, settings) {
 }
 
 paper_legacy_cox <- function(root) {
-  code <- paper_git(root, "show", "426272c2bdcbf94079c035166fc7e3804ad2b632:R/tm_predict_coxph.R")
+  code <- paper_git(root, "show", "e925507a30c4f56dcd3ef6693676f18128dd8767:R/tm_predict_coxph.R")
   e <- new.env(parent = asNamespace("PAmeasures"))
   # Historical source keeps its original git path; adapt identifiers only in
   # the isolated legacy environment so it can use this checkout's helpers.

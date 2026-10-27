@@ -20,6 +20,10 @@ Full compatibility with all PAmeasures 0.1.0 interfaces is not promised.
 See the [migration record](docs/migration-to-pameasures.md)
 for provenance, validation and the remaining release decisions.
 
+Historical R workspace snapshots were removed before public release. Existing
+clones made before this cleanup must be replaced with a fresh clone; do not
+merge their old history. See [the cleanup record](docs/workspace-history-cleanup.md).
+
 It separates **prediction** from **evaluation**: the evaluation functions take
 predicted survival probabilities or cumulative incidence functions from any
 source, so a model fitted outside the package can be assessed with the same

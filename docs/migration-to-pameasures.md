@@ -11,6 +11,11 @@ continuous-outcome calls. See [the API transition guide](pa-api-transition.md)
 for current names and compatibility rules. The initial migration validation
 report describes the earlier 2.0.0.9000 state.
 
+Historical commit IDs in older reports refer to the pre-cleanup history or
+the original TimeMetric repository. Local baseline tags have been rewritten
+to exclude R workspaces; the old-to-new mapping is in
+`docs/provenance/workspace-history-map-2026-10-26.tsv`.
+
 ## Baselines and provenance
 
 * TimeMetric `paper` commit:

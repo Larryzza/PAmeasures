@@ -72,7 +72,7 @@ survival capabilities are accessed through the current API. The `moore`
 dataset remains available.
 
 The baseline before this step is tagged `before-pa-api-2026-10-26`, pointing to
-69a69df78e3e746a2b63a076c466dcd291eaab65. The prior migration report describes
+5a791aacef9d378e632bc49d256c0b0e8409c625. The prior migration report describes
 that earlier state; current validation is in
 `validation/pa-api-2026-10-26.md`. Historical audit reports and archived
 manuscript helpers keep their original names and results.

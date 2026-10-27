@@ -1,0 +1,13 @@
+{
+  "commits_before": 153,
+  "commits_preserved": 153,
+  "rewritten_commits": 148,
+  "removed_blobs": 19,
+  "removed_workspace_blobs": 9,
+  "removed_command_history_blobs": 10,
+  "source_tree_identical_before_followup_edits": true,
+  "all_other_historical_file_contents_preserved": true,
+  "authors_dates_messages_topology_preserved": true,
+  "rewritten_main": "da9e706ea93d095623436f81367354d33951ac93",
+  "analysis_baseline": "e925507a30c4f56dcd3ef6693676f18128dd8767"
+}

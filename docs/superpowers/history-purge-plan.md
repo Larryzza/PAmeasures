@@ -1,3 +1,8 @@
+> Historical plan from 2026-09-24. Its "not executed" status describes that
+> document's preparation date, not the current repository state. Current
+> public-release cleanup and verification are recorded in
+> [workspace-history-cleanup.md](../workspace-history-cleanup.md).
+
 # History Purge Plan — combined borrowed-code and key-material purge
 
 **Date prepared:** 2026-09-24

@@ -7,7 +7,7 @@ root <- paper_root(script)
 paper_load(root)
 out <- file.path(root, "results", "matched_ncc")
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
-code <- paper_git(root, "show", "426272c2bdcbf94079c035166fc7e3804ad2b632:R/pam.weighted_param.R")
+code <- paper_git(root, "show", "e925507a30c4f56dcd3ef6693676f18128dd8767:R/pam.weighted_param.R")
 e <- new.env(parent = asNamespace("PAmeasures")); eval(parse(text = code), e)
 d <- data.frame(time = c(1,4,5,2,4,5), status = c(1,0,0,1,0,0),
                  strata = c("A","A","A","B","B","B"))

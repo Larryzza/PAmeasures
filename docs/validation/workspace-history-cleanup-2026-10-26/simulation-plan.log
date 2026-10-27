@@ -1,0 +1,8 @@
+           part   id
+           sim1 1600
+    sim2_linear  100
+ sim2_nonlinear  100
+           sim3 1200
+PLAN ONLY. Full settings: train=10000; test=3000; repetitions=100.
+ The complete design contains 3000 prediction/evaluation jobs.
+ Use --mode=smoke for a small execution; --mode=full explicitly starts the full workload.

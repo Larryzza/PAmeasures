@@ -1,0 +1,7 @@
+{
+  "reachable_history_blobs_scanned": 1084,
+  "credential_pattern_matches": [],
+  "removed_session_blob_count": 19,
+  "removed_blobs_absent_from_reachable_history": true,
+  "scan_is_not_a_guarantee_against_all_secret_types": true
+}

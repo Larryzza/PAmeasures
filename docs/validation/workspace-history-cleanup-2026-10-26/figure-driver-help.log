@@ -1,0 +1,3 @@
+Usage: Rscript --vanilla manuscript/update_all_figures.R --manuscript-dir=PATH [--sim-output=PATH] [--real-output=PATH]
+ Required: --manuscript-dir. Defaults: simulation results/simulations/ici_crn; real-data published manifest.
+ Redraws saved results only. Existing figures are backed up before replacement.

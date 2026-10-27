@@ -1,0 +1,19 @@
+name: repository-hygiene
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check reachable history for R session artifacts
+        run: python3 .github/scripts/check-history-hygiene.py
