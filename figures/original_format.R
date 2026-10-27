@@ -23,12 +23,12 @@ paper_original_save <- function(plot, dir, stem, width, height) {
 
 paper_original_real_plot <- function(dataset, predictions, tau = 3650) {
   if (dataset == "pbc") {
-    return(PAmeasures::tm_plot_summary(predictions, ncol = 3,
+    return(PAmeasures::pa_plot_summary(predictions, ncol = 3,
       titles = c("Cox PH", "Cox PH (Reduced)", "Weibull AFT"),
       invert_linear = c(FALSE, FALSE, TRUE)))
   }
   if (dataset == "framingham") {
-    return(PAmeasures::tm_plot_summary(predictions,
+    return(PAmeasures::pa_plot_summary(predictions,
       titles = c("Fine\u2013Gray", "Fine\u2013Gray (Reduced)",
                  "CSH Weibull AFT", "CSH Weibull AFT (Scale = 5)"),
       invert_linear = c(FALSE, FALSE, TRUE, TRUE),
@@ -36,7 +36,7 @@ paper_original_real_plot <- function(dataset, predictions, tau = 3650) {
       ncol = 2, sample_size = 200, restrict_time = tau, seed = 1234567))
   }
   if (dataset == "gbsg") {
-    return(PAmeasures::tm_plot_summary(predictions,
+    return(PAmeasures::pa_plot_summary(predictions,
       titles = c("Cox (Case-cohort)", "Cox (Random sample)"), ncol = 2,
       tag_levels = "a", invert_linear = c(FALSE, FALSE)))
   }
@@ -93,7 +93,7 @@ paper_original_real <- function(root, out, datasets = c("pbc", "framingham", "gb
       }
     }
     records[[d]] <- data.frame(Dataset = d, Figure = paste0(stems[[d]], ".pdf"),
-      Function = "PAmeasures::tm_plot_summary", Width_inches = sizes[[d]][1],
+      Function = "PAmeasures::pa_plot_summary", Width_inches = sizes[[d]][1],
       Height_inches = sizes[[d]][2], Units = "Days", Source_predictions = path,
       Plot_format = "Original manuscript", stringsAsFactors = FALSE)
   }

@@ -1,3 +1,20 @@
+# PAmeasures 2.0.0.9002 (development)
+
+* Standardize all twenty primary exported interfaces on `pa_`. The nineteen
+  former `tm_` survival interfaces retain their arguments and computations
+  under the new prefix. Update internal helpers, tests, analysis and plotting
+  scripts, generated help and active usage documentation together.
+* Remove the fifteen earlier TimeMetric script aliases. No `tm_` entry is
+  exported. `pam.nlm()` is the sole supported historical name.
+* Keep original numerical fixture values and serialized snapshots; update
+  snapshot headings only to match renamed test descriptions. Historical
+  development reports and archived manuscript helpers retain their old names.
+* Adapt the isolated historical Cox comparison to the renamed internal helpers
+  while preserving its original git-object path. Use fresh output directories
+  when source fingerprints differ from old simulation checkpoints.
+* Make the executable scientific audit call this PAmeasures namespace
+  explicitly, rather than an unrelated installed TimeMetric version.
+
 # PAmeasures 2.0.0.9001 (development)
 
 * Restore continuous-outcome R-squared and L-squared assessment with

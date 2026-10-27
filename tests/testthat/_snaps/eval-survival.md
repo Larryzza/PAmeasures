@@ -1,4 +1,4 @@
-# tm_survival_eval returns a Metric/Value data frame
+# pa_survival_eval returns a Metric/Value data frame
 
     WAoAAAACAAQFAwACAwAAAAAQAAAABgAEAAkAAAAJcHNldWRvX3IyAAQACQAAAA9wc2V1ZG9f
     cjJfcG9pbnQABAAJAAAACWhhcnJlbGxfYwAEAAkAAAAFdW5vX2MABAAJAAAAC2JyaWVyX3Nj
@@ -9,7 +9,7 @@
     WAoAAAACAAQFAwACAwAAAAAOAAAABj/OXJHRTjvNP8TjvNNahYg/5S5I6Kcd5z/k/SH/Lkjp
     P8pKjBVMmF8/57SiM5wOvw==
 
-# tm_summarize pivots one model into a Metric column table
+# pa_summarize pivots one model into a Metric column table
 
     WAoAAAACAAQFAwACAwAAAAAQAAAABgAEAAkAAAAJcHNldWRvX3IyAAQACQAAAA9wc2V1ZG9f
     cjJfcG9pbnQABAAJAAAACWhhcnJlbGxfYwAEAAkAAAAFdW5vX2MABAAJAAAAC2JyaWVyX3Nj
@@ -20,7 +20,7 @@
     WAoAAAACAAQFAwACAwAAAAAOAAAABj/OuFHrhR64P8R64UeuFHs/5R64UeuFHz/lHrhR64Uf
     P8rhR64UeuE/564UeuFHrg==
 
-# tm_summarize puts one column per model and rounds to digits
+# pa_summarize puts one column per model and rounds to digits
 
     WAoAAAACAAQFAwACAwAAAAAOAAAABj/OuFHrhR64P8R64UeuFHs/5R64UeuFHz/lHrhR64Uf
     P8rhR64UeuE/564UeuFHrg==
@@ -30,7 +30,7 @@
     WAoAAAACAAQFAwACAwAAAAAOAAAABj/K4UeuFHrhP8R64UeuFHs/5R64UeuFHz/lHrhR64Uf
     P8rhR64UeuE/564UeuFHrg==
 
-# tm_fit_and_eval fits and evaluates from raw data (FINDING 12 fixed)
+# pa_fit_and_eval fits and evaluates from raw data (FINDING 12 fixed)
 
     WAoAAAACAAQFAwACAwAAAAAQAAAACAAEAAkAAAAFTW9kZWwABAAJAAAAC2JyaWVyX3Njb3Jl
     AAQACQAAAAloYXJyZWxsX2MABAAJAAAACGxfc3F1YXJlAAQACQAAAAlwc2V1ZG9fcjIABAAJ

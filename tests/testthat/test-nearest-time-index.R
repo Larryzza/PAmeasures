@@ -10,7 +10,7 @@
 # The rule is now: nearest observed time, ties broken toward the EARLIER event
 # time -- which also makes the choice independent of input row order.
 
-nti <- function(...) PAmeasures:::tm_nearest_time_index(...)
+nti <- function(...) PAmeasures:::pa_nearest_time_index(...)
 
 test_that("an exact midpoint between two times resolves to the earlier one", {
   et <- c(1, 2, 3, 4)
@@ -64,9 +64,9 @@ tie_data <- function() {
 eval_with <- function(d, t_star = NULL) {
   fit <- survival::coxph(survival::Surv(time, status) ~ x1 + x2,
                          data = d, x = TRUE, y = TRUE)
-  pred <- tm_predict_coxph(model = fit, covs = c("x1", "x2"),
+  pred <- pa_predict_coxph(model = fit, covs = c("x1", "x2"),
                            new_data = d, tau = 10e10)
-  suppressMessages(tm_survival_eval(
+  suppressMessages(pa_survival_eval(
     model = fit, event_time = pred$times,
     predicted_probability = pred$surv_prob, status = pred$status,
     covariates = c("x1", "x2"), new_data = d, tau = 10e10,
@@ -106,6 +106,6 @@ test_that("the default t_star really does sit exactly between two times", {
   # the two middle times are equidistant to within a few ulp
   expect_lt(abs(abs(lo - ts) - abs(hi - ts)), 1e-12)
   # and the rule picks the earlier of them
-  expect_identical(PAmeasures:::tm_nearest_time_index(sort(d$time), ts),
+  expect_identical(PAmeasures:::pa_nearest_time_index(sort(d$time), ts),
                    as.integer(n / 2))
 })

@@ -17,7 +17,7 @@ fit, which is now the seed-1234 model. Small differences across v can remain
 for beta = 1.5 at 1/v = 2, where the C-index and calibration backends apply
 their own default tie correction to test times.
 
-ICI uses `tm_calibration()` with `nk = 5`. Its outcome horizon is the existing
+ICI uses `pa_calibration()` with `nk = 5`. Its outcome horizon is the existing
 `t_star` for each job. Predicted risks are requested directly from the fitted
 model at exactly that horizon, rather than selected from the test-follow-up
 grid. Cox probabilities use the fitted training baseline; AFT probabilities

@@ -13,7 +13,7 @@ and two-phase sampling designs (case-cohort and nested case-control).
 This is the development repository for the planned **PAmeasures 2.0.0**
 revival, starting from the TimeMetric `paper` branch at
 `f9fd19f73d7abefc8cb1c54c415ce99c1fd96ba0`. The development version is
-`2.0.0.9001`; it is not a CRAN release. Continuous-outcome accuracy is available
+`2.0.0.9002`; it is not a CRAN release. Continuous-outcome accuracy is available
 through `pa_nlm()` and the supported historical `pam.nlm()` entry point.
 The survival interfaces and statistical implementations are retained.
 Full compatibility with all PAmeasures 0.1.0 interfaces is not promised.
@@ -55,17 +55,17 @@ For right-censored survival predictions:
 library(PAmeasures)
 
 # simulate right-censored data and fit a model
-d   <- tm_sim_cox_weibull(n = 200, pi_c = 0.3, v = 2,
+d   <- pa_sim_cox_weibull(n = 200, pi_c = 0.3, v = 2,
                           beta = c(0.5, -0.5), seed = 1001)
 d   <- d[, c("time", "status", "x1", "x2")]
 fit <- survival::coxph(survival::Surv(time, status) ~ x1 + x2,
                        data = d, x = TRUE, y = TRUE)
 
 # predicted survival probabilities over the observed time grid
-pred <- tm_predict_coxph(model = fit, covs = c("x1", "x2"), new_data = d)
+pred <- pa_predict_coxph(model = fit, covs = c("x1", "x2"), new_data = d)
 
 # evaluate
-tm_summarize(list(cox = pred))
+pa_summarize(list(cox = pred))
 #>            Metric  cox
 #> 1       pseudo_r2 0.24
 #> 2 pseudo_r2_point 0.16
@@ -78,7 +78,7 @@ tm_summarize(list(cox = pred))
 
 ## Metrics
 
-`tm_metric_names()` returns the canonical identifiers used by the evaluation
+`pa_metric_names()` returns the canonical identifiers used by the evaluation
 interfaces and emitted in the `Metric` column; each setting supports a subset:
 
 | Name | Measure |
@@ -109,12 +109,12 @@ calibration error across subjects, not across follow-up time.
 # Ordinary right-censoring: p = 1 - S(t_star) for each subject.
 t_star <- 1
 p <- 1 - as.numeric(pec::predictSurvProb(fit, newdata = d, times = t_star))
-cal <- tm_calibration(p, d$time, d$status, t_star)
+cal <- pa_calibration(p, d$time, d$status, t_star)
 cal$metrics                   # ici, e50, e90, without display rounding
 head(cal$curve)               # predicted and calibrated, in subject order
 
 # Add all three to a model comparison table.
-tm_summarize(list(cox = pred), t_star = t_star,
+pa_summarize(list(cox = pred), t_star = t_star,
              metrics = c("ici", "e50", "e90"), digits = 4)
 ```
 
@@ -133,7 +133,7 @@ cr_status <- ifelse(censor < pmin(target, competing), 0L,
                     ifelse(target <= competing, 1L, 2L))
 t_star <- 1
 p_cif <- rate1 / (rate1 + .4) * (1 - exp(-(rate1 + .4) * t_star))
-cal_cr <- tm_calibration_cr(p_cif, cr_time, cr_status,
+cal_cr <- pa_calibration_cr(p_cif, cr_time, cr_status,
                             t_star = t_star, event_type = 1)
 cal_cr$metrics
 ```
@@ -146,11 +146,11 @@ controlled by `bandwidth`. Both summarize errors with
 and E90. This competing-risks curve estimator differs from Fine-Gray spline
 calibration. Constant right-censored predictions use marginal Kaplan--Meier
 risk; small or few-valued samples use simpler calibration as documented in
-`?tm_calibration`.
+`?pa_calibration`.
 
 The matrix evaluators interpret supplied probability grids as right-continuous
 steps and use the last grid value at or before `t_star` for calibration.
-`tm_calibration()` and `tm_calibration_cr()` accept probabilities already
+`pa_calibration()` and `pa_calibration_cr()` accept probabilities already
 evaluated exactly at the requested time. Exact 0/1 probabilities are retained;
 the right-censored backend moves them slightly inward for fitting only and
 warns. A failed curve fit warns and produces missing calibration values in the
@@ -165,11 +165,11 @@ For a right-censored case-cohort or NCC validation sample, provide the positive
 inverse-inclusion weights for the sampled subjects in prediction order:
 
 ```r
-cal_w <- tm_calibration(p, event_time, status, t_star,
+cal_w <- pa_calibration(p, event_time, status, t_star,
                         case_weights = sampling_weights)
 cal_w$metrics
 # Calibration-only evaluation needs no separate censoring fit or mean times.
-tm_sample_design(list(external = prediction), case_weights = sampling_weights,
+pa_sample_design(list(external = prediction), case_weights = sampling_weights,
                  metrics = "ici", t_star = t_star)
 ```
 
@@ -187,35 +187,38 @@ or design-based confidence intervals are implemented.
 
 ## Functions
 
+**Continuous outcomes:** `pa_nlm(y, y.predict)` returns numeric R-squared and
+L-squared. `pam.nlm()` is the sole supported historical function-name exception.
+
 **Evaluation** — take predictions, return a `Metric`/`Value` table:
 
 | Function | Setting |
 |---|---|
-| `tm_survival_eval()` | Right-censored |
-| `tm_survival_eval_cr()` | Competing risks |
-| `tm_evaluate_two_phase()` | Case-cohort and nested case-control |
-| `tm_fit_and_eval()` | Fits several models from raw data, then evaluates |
-| `tm_calibration()`, `tm_calibration_cr()` | Direct probability inputs; return calibration metrics and curve |
+| `pa_survival_eval()` | Right-censored |
+| `pa_survival_eval_cr()` | Competing risks |
+| `pa_evaluate_two_phase()` | Case-cohort and nested case-control |
+| `pa_fit_and_eval()` | Fits several models from raw data, then evaluates |
+| `pa_calibration()`, `pa_calibration_cr()` | Direct probability inputs; return calibration metrics and curve |
 
 **Prediction** — produce the input the evaluators expect:
 
 | Function | Model |
 |---|---|
-| `tm_predict_coxph()` | Cox proportional hazards |
-| `tm_predict_survreg()` | Parametric AFT |
-| `tm_predict_cif()` | Cumulative incidence for competing risks |
+| `pa_predict_coxph()` | Cox proportional hazards |
+| `pa_predict_survreg()` | Parametric AFT |
+| `pa_predict_cif()` | Cumulative incidence for competing risks |
 
 **Summaries and weights:**
 
 | Function | Purpose |
 |---|---|
-| `tm_summarize()`, `tm_summarize_cr()` | One column per model, rows as metrics |
-| `tm_sample_design()` | Summary for two-phase designs |
-| `tm_case_cohort_weights()` | Prentice-style case-cohort weights |
-| `tm_nested_case_control_weights()` | Nested case-control weights |
+| `pa_summarize()`, `pa_summarize_cr()` | One column per model, rows as metrics |
+| `pa_sample_design()` | Summary for two-phase designs |
+| `pa_case_cohort_weights()` | Prentice-style case-cohort weights |
+| `pa_nested_case_control_weights()` | Nested case-control weights |
 
-**Plotting and simulation:** `tm_plot_pred()`, `tm_plot_summary()`,
-`tm_sim_cox_weibull()`, `tm_simulate_fine_gray()`.
+**Plotting and simulation:** `pa_plot_pred()`, `pa_plot_summary()`,
+`pa_sim_cox_weibull()`, `pa_simulate_fine_gray()`.
 
 ## Two-phase designs
 
@@ -225,23 +228,23 @@ inverse of its sampling probability:
 ```r
 set.seed(2001)
 in_subcohort <- rbinom(nrow(d), 1, 0.4) == 1
-w <- tm_case_cohort_weights(d$time, d$status, subcohort = in_subcohort)
+w <- pa_case_cohort_weights(d$time, d$status, subcohort = in_subcohort)
 keep <- which(in_subcohort | d$status == 1)
 keep <- keep[order(d$time[keep])]
-cc_pred <- tm_predict_coxph(fit, covs = c("x1", "x2"), new_data = d[keep, ])
+cc_pred <- pa_predict_coxph(fit, covs = c("x1", "x2"), new_data = d[keep, ])
 km <- survival::survfit(survival::Surv(d$time, 1 - d$status) ~ 1)
-tm_evaluate_two_phase(pred_results = cc_pred, km_cens_fit = km,
+pa_evaluate_two_phase(pred_results = cc_pred, km_cens_fit = km,
                        case_weights = w[keep])
 ```
 
-`tm_nested_case_control_weights(time, status, m = 2)` computes inverse-selection
+`pa_nested_case_control_weights(time, status, m = 2)` computes inverse-selection
 weights for two controls per case. Supply matching strata via `strata` when
 needed, subset to the subjects actually sampled, and align weights with the
 prediction order.
 
 ## Optional backends
 
-`tm_predict_cif()` accepts alternative model types through suggested packages:
+`pa_predict_cif()` accepts alternative model types through suggested packages:
 
 * `cmprsk` for a Fine-Gray fit, via the `fg_model` argument
 * `randomForestSRC` for a survival forest, via the `cr_model` argument
@@ -249,12 +252,14 @@ prediction order.
 Both are optional; the function reports which package to install if one is
 needed and absent.
 
-## Renamed functions
+## Function naming
 
-The primary interfaces retain the `tm_` prefix used by the TimeMetric `paper`
-branch. Its earlier script aliases remain available with deprecation warnings;
-see `?"PAmeasures-deprecated"` for the mapping. These aliases do not provide
-compatibility with the original CRAN PAmeasures 0.1.0 API.
+All 20 primary functions use `pa_`. The former 19 `tm_` entry points map
+directly to the corresponding `pa_` names, with the same arguments and survival
+calculations. For example, use `pa_survival_eval()` and `pa_predict_coxph()`.
+The earlier 15 TimeMetric script aliases have been removed. `pam.nlm()` is
+retained as the sole historical public alias, with its four-decimal character
+format. See the [API transition guide](docs/pa-api-transition.md).
 
 ## Paper analyses and figures
 

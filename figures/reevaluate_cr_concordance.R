@@ -68,7 +68,7 @@ for (file in files) {
   original <- readRDS(file)
   result <- original
   tau <- result$settings$tau
-  updated <- tm_summarize_cr(result$predictions, metrics = "c_index",
+  updated <- pa_summarize_cr(result$predictions, metrics = "c_index",
     event_type = 1, tau = tau, t_star = tau, digits = 4)
   row <- match("c_index", result$metrics$Metric)
   stopifnot(!is.na(row))

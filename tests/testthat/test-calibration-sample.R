@@ -10,8 +10,8 @@ weighted_calibration_data <- function() {
 
 test_that("unit weights reproduce ordinary right-censored calibration", {
   d <- weighted_calibration_data()
-  ordinary <- tm_calibration(d$p, d$time, d$status, 3)
-  weighted <- tm_calibration(d$p, d$time, d$status, 3,
+  ordinary <- pa_calibration(d$p, d$time, d$status, 3)
+  weighted <- pa_calibration(d$p, d$time, d$status, 3,
                               case_weights = rep(1, length(d$p)))
   expect_equal(weighted$curve, ordinary$curve, tolerance = 1e-9)
   expect_equal(weighted$metrics, ordinary$metrics, tolerance = 1e-9)
@@ -21,8 +21,8 @@ test_that("unit weights reproduce ordinary right-censored calibration", {
 
 test_that("sampling weights affect both curve fitting and error summaries", {
   d <- weighted_calibration_data()
-  ordinary <- tm_calibration(d$p, d$time, d$status, 3)
-  result <- tm_calibration(d$p, d$time, d$status, 3, case_weights = d$weight)
+  ordinary <- pa_calibration(d$p, d$time, d$status, 3)
+  result <- pa_calibration(d$p, d$time, d$status, 3, case_weights = d$weight)
   error <- abs(d$p - result$curve$calibrated)
   expect_equal(unname(result$metrics['ici']), sum(d$weight*error)/sum(d$weight))
   expect_equal(unname(result$metrics[c('e50','e90')]),
@@ -32,11 +32,11 @@ test_that("sampling weights affect both curve fitting and error summaries", {
   expect_gt(abs(unname(result$metrics['ici'])-posthoc), 1e-4)
   expect_identical(result$case_weights, d$weight)
 
-  scaled <- tm_calibration(d$p, d$time, d$status, 3, case_weights = 17*d$weight)
+  scaled <- pa_calibration(d$p, d$time, d$status, 3, case_weights = 17*d$weight)
   expect_equal(scaled$metrics, result$metrics, tolerance = 1e-10)
   expect_equal(scaled$curve, result$curve, tolerance = 1e-10)
   o <- rev(seq_along(d$p))
-  permuted <- tm_calibration(d$p[o], d$time[o], d$status[o], 3,
+  permuted <- pa_calibration(d$p[o], d$time[o], d$status[o], 3,
                               case_weights = d$weight[o])
   expect_equal(permuted$metrics, result$metrics, tolerance = 1e-9)
   expect_equal(permuted$curve$calibrated, rev(result$curve$calibrated),
@@ -49,7 +49,7 @@ test_that("weighted constant-risk calibration agrees with hand KM risk sets", {
   w <- c(1, 2, 4, 1, 3, 2)
   # At 4: the weighted KM survival is (1-1/13)*(1-4/10).
   risk <- 1-(1-1/13)*(1-4/10)
-  result <- tm_calibration(rep(.2, 6), time, status, 4, case_weights = w)
+  result <- pa_calibration(rep(.2, 6), time, status, 4, case_weights = w)
   expect_equal(result$curve$calibrated, rep(risk, 6))
   expect_equal(unname(result$metrics), rep(risk-.2, 3))
   expect_identical(result$method, "weighted_kaplan_meier_constant")
@@ -77,7 +77,7 @@ test_that("weighted Cox risk matches independently solved score and baseline", {
   }, numeric(1)))
   expected <- -expm1(-h0*exp(beta*group))
   p <- ifelse(group == 0, .2, .6)
-  result <- tm_calibration(p, time, status, 7.5, case_weights = w)
+  result <- pa_calibration(p, time, status, 7.5, case_weights = w)
   expect_equal(result$curve$calibrated, expected, tolerance = 1e-8)
   expect_equal(unname(result$metrics['ici']), sum(w*abs(p-expected))/sum(w),
                 tolerance = 1e-8)
@@ -91,14 +91,14 @@ test_that("two-phase calibration uses aligned weights and the past grid value", 
   surv <- outer(rate, grid, function(a,t) exp(-a*t))
   t <- stats::median(grid)
   p <- 1-surv[, findInterval(t, grid)]
-  reference <- tm_calibration(p, d$time, d$status, t,
+  reference <- pa_calibration(p, d$time, d$status, t,
                               nk = 3, case_weights = d$weight)$metrics
   # No model, mean time prediction or separate censoring fit is needed.
   pred <- list(times = d$time, status = d$status, surv_prob = surv)
-  result <- tm_evaluate_two_phase(pred, case_weights = d$weight,
+  result <- pa_evaluate_two_phase(pred, case_weights = d$weight,
     metrics = c('ici','e50','e90'), t_star = t, calibration_args = list(nk = 3))
   expect_equal(setNames(result$Value, result$Metric), round(reference, 4))
-  summary <- tm_sample_design(list(external = pred), case_weights = d$weight,
+  summary <- pa_sample_design(list(external = pred), case_weights = d$weight,
     metrics = c('ici','e50','e90'), t_star = t, calibration_args = list(nk = 3),
     digits = 4)
   expect_equal(summary$external, unname(round(reference, 4)))
@@ -106,7 +106,7 @@ test_that("two-phase calibration uses aligned weights and the past grid value", 
   o <- rev(seq_along(d$time))
   other <- list(times = d$time[o], status = d$status[o],
                 surv_prob = surv[o, , drop = FALSE])
-  permuted <- tm_evaluate_two_phase(other, case_weights = d$weight[o],
+  permuted <- pa_evaluate_two_phase(other, case_weights = d$weight[o],
     metrics = c('ici','e50','e90'), t_star = t, calibration_args = list(nk = 3))
   expect_equal(permuted, result)
 })
@@ -116,11 +116,11 @@ test_that("sampling calibration validates weights and preserves boundary risks",
   for (w in list(d$weight[-1], replace(d$weight, 1, NA_real_),
                  replace(d$weight, 1, Inf), replace(d$weight, 1, 0),
                  replace(d$weight, 1, -1), matrix(d$weight, ncol = 1))) {
-    expect_error(tm_calibration(d$p, d$time, d$status, 3, case_weights = w),
+    expect_error(pa_calibration(d$p, d$time, d$status, 3, case_weights = w),
                    'positive finite sampling-weight vector')
   }
   p <- d$p; p[1:2] <- c(0, 1)
-  expect_warning(result <- tm_calibration(p, d$time, d$status, 3,
+  expect_warning(result <- pa_calibration(p, d$time, d$status, 3,
                                           case_weights = d$weight),
                    'Boundary probabilities')
   expect_identical(result$curve$predicted, p)
@@ -128,10 +128,10 @@ test_that("sampling calibration validates weights and preserves boundary risks",
     sum(d$weight*abs(p-result$curve$calibrated))/sum(d$weight))
   pred <- list(times = d$time, status = d$status,
                 surv_prob = outer(d$p, sort(d$time), function(p,t) (1-p)^(t/3)))
-  expect_error(tm_evaluate_two_phase(pred, case_weights = d$weight,
+  expect_error(pa_evaluate_two_phase(pred, case_weights = d$weight,
     metrics = 'ici', calibration_args = list(case_weights = d$weight)),
     "supply sampling weights")
-  expect_warning(unavailable <- tm_evaluate_two_phase(pred,
+  expect_warning(unavailable <- pa_evaluate_two_phase(pred,
     case_weights = d$weight, metrics = 'ici', calibration_args = list(nk = 2)),
     'Calibration unavailable')
   expect_true(is.na(unavailable$Value))
@@ -140,11 +140,11 @@ test_that("sampling calibration validates weights and preserves boundary risks",
 test_that("ordinary evaluation cannot silently misalign sampling weights", {
   d <- weighted_calibration_data()
   pred <- outer(d$p, sort(d$time), function(p,t) (1-p)^(t/3))
-  expect_error(tm_survival_eval(event_time = d$time, status = d$status,
+  expect_error(pa_survival_eval(event_time = d$time, status = d$status,
     predicted_probability = pred, metrics = 'ici',
     calibration_args = list(case_weights = d$weight)),
-    'For sampling-adjusted calibration use tm_sample_design')
-  expect_error(tm_fit_and_eval(fx_surv(), fx_covs(), metrics = 'ici',
+    'For sampling-adjusted calibration use pa_sample_design')
+  expect_error(pa_fit_and_eval(fx_surv(), fx_covs(), metrics = 'ici',
     calibration_args = list(case_weights = rep(1, nrow(fx_surv())))),
-    'For sampling-adjusted calibration use tm_sample_design')
+    'For sampling-adjusted calibration use pa_sample_design')
 })

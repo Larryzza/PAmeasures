@@ -1,0 +1,26 @@
+Warning message:
+package ‘testthat’ was built under R version 4.5.2
+                                                            check       actual
+             Cox predictions invariant to validation event labels 0.000000e+00
+    Cox probabilities agree with fitted-model survfit predictions 2.220446e-16
+              weibull restricted means equal integral of survival 1.583811e-11
+             weibull prediction preserves evaluation event labels 0.000000e+00
+            lognormal restricted means equal integral of survival 1.405165e-09
+           lognormal prediction preserves evaluation event labels 0.000000e+00
+     NCC one control per case: control inverse probability weight 2.000000e+00
+               NCC sampling all eligible controls: control weight 1.000000e+00
+    Explained variation is invariant to joint subject permutation 2.794000e-01
+  Point pseudo R-squared agrees with event-probability regression 5.862000e-01
+ Reversed held-out AUC agrees with empirical case/control ranking 6.000000e-02
+ expected pass
+   0.0000 TRUE
+   0.0000 TRUE
+   0.0000 TRUE
+   0.0000 TRUE
+   0.0000 TRUE
+   0.0000 TRUE
+   2.0000 TRUE
+   1.0000 TRUE
+   0.2794 TRUE
+   0.5862 TRUE
+   0.0600 TRUE

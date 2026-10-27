@@ -10,8 +10,8 @@ tie_surv_data <- function(n = 150) {
 }
 
 tie_surv_eval <- function(fit, d, metrics) {
-  p <- tm_predict_coxph(fit, c("x1", "x2"), new_data = d)
-  r <- tm_survival_eval(model = fit, event_time = p$times,
+  p <- pa_predict_coxph(fit, c("x1", "x2"), new_data = d)
+  r <- pa_survival_eval(model = fit, event_time = p$times,
     predicted_probability = p$surv_prob, status = p$status,
     covariates = c("x1", "x2"), new_data = d, tau = 10e10, metrics = metrics)
   stats::setNames(r$Value, r$Metric)
@@ -22,7 +22,7 @@ test_that("censoring left limit is shared within tied times", {
   status <- c(1, 0, 0, 1, 0, 1, 1)
   fit <- survival::survfit(survival::Surv(time, 1 - status) ~ 1)
   # Censoring KM: 6/7 after t = 1, then 6/7 * 4/6 after t = 2 (2 of 6 at risk).
-  expect_equal(PAmeasures:::tm_censoring_left_limit(fit, time),
+  expect_equal(PAmeasures:::pa_censoring_left_limit(fit, time),
     c(4 / 7, 1, 6 / 7, 6 / 7, 6 / 7, 4 / 7, 6 / 7))
 })
 
@@ -48,7 +48,7 @@ test_that("point R2 matches the KM reference when censored at t*", {
   d$status[order(d$time)[51]] <- 0
   fit <- survival::coxph(survival::Surv(time, status) ~ x1 + x2, data = d,
     x = TRUE, y = TRUE)
-  p <- tm_predict_coxph(fit, c("x1", "x2"), new_data = d)
+  p <- pa_predict_coxph(fit, c("x1", "x2"), new_data = d)
   t_star <- stats::median(p$times)
   expect_true(any(p$times == t_star & p$status == 0))
 
@@ -60,7 +60,7 @@ test_that("point R2 matches the KM reference when censored at t*", {
     1 - sum(time == t & observed == 0) / sum(time >= t), numeric(1))
   G <- vapply(time, function(t) prod(factors[censor_times < t]), numeric(1))
   w <- (observed / G) / sum(observed / G)
-  k <- PAmeasures:::tm_nearest_time_index(p$times, t_star)
+  k <- PAmeasures:::pa_nearest_time_index(p$times, t_star)
   prediction <- 1 - p$surv_prob[, k]
   y <- as.numeric(p$times <= t_star & p$status == 1)
   ybar <- sum(w * y); pbar <- sum(w * prediction)
@@ -71,7 +71,7 @@ test_that("point R2 matches the KM reference when censored at t*", {
     r2_point = round(cv^2 / (sum(w * (y - ybar)^2) * vp), 4),
     l2_point = round(sum(w * (y - corrected)^2) / sum(w * (y - prediction)^2), 4))
 
-  r <- tm_survival_eval(model = fit, event_time = p$times,
+  r <- pa_survival_eval(model = fit, event_time = p$times,
     predicted_probability = p$surv_prob, status = p$status,
     covariates = c("x1", "x2"), new_data = d, tau = 10e10,
     metrics = c("r2_point", "l2_point"))
@@ -85,7 +85,7 @@ test_that("null Cox censoring equals exp(-Nelson-Aalen) with tied censoring", {
   jumps <- vapply(ct, function(t) sum(time == t & status == 0) / sum(time >= t),
     numeric(1))
   G <- vapply(time, function(t) exp(-sum(jumps[ct < t])), numeric(1))
-  out <- PAmeasures:::tm_cr_event_ipcw(time, status, censoring = "cox")
+  out <- PAmeasures:::pa_cr_event_ipcw(time, status, censoring = "cox")
   expect_equal(out$probability, G)
 })
 
@@ -99,7 +99,7 @@ test_that("competing-risk metrics do not depend on the order of tied rows", {
   grid <- sort(unique(time))
   cif <- outer(grid, x, function(t, xi) .6 * (1 - exp(-.3 * t * exp(.4 * xi))))
   ev <- function(o, censoring) {
-    r <- tm_survival_eval_cr(pred_cif = cif[, o], event_time = time[o],
+    r <- pa_survival_eval_cr(pred_cif = cif[, o], event_time = time[o],
       time.cif = grid, status = status[o], event_type = 1,
       censoring = censoring, metrics = "all")
     stats::setNames(r$Value, r$Metric)
@@ -121,16 +121,16 @@ test_that("Cox prediction supports strata-by-covariate interactions", {
   fit <- survival::coxph(survival::Surv(time, status) ~ x1 * strata(g),
     data = d, x = TRUE, y = TRUE)
   nd <- d[1:8, ]
-  p <- expect_no_warning(tm_predict_coxph(fit, c("x1", "g"), new_data = nd))
+  p <- expect_no_warning(pa_predict_coxph(fit, c("x1", "g"), new_data = nd))
   for (i in seq_len(nrow(nd))) {
     j <- which(p$times == nd$time[i] & p$status == nd$status[i])[1]
     sf <- survival::survfit(fit, newdata = nd[i, ])
     expected <- summary(sf, times = p$times, extend = TRUE)$surv
     expect_equal(p$surv_prob[j, ], expected)
   }
-  expect_error(tm_predict_coxph(fit, c("x1", "g")), "pass the evaluation data")
+  expect_error(pa_predict_coxph(fit, c("x1", "g")), "pass the evaluation data")
 
   fit_int <- survival::coxph(survival::Surv(time, status) ~ x1 * g, data = d,
     x = TRUE, y = TRUE)
-  expect_no_warning(tm_predict_coxph(fit_int, c("x1", "g"), new_data = nd))
+  expect_no_warning(pa_predict_coxph(fit_int, c("x1", "g"), new_data = nd))
 })

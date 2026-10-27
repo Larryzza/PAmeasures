@@ -52,16 +52,16 @@
 #'   theme_classic xlab ylab ggtitle theme element_text
 #' @export
 #' @examples
-#' d <- tm_sim_cox_weibull(n = 150, pi_c = 0.3, v = 2,
+#' d <- pa_sim_cox_weibull(n = 150, pi_c = 0.3, v = 2,
 #'                         beta = c(0.5, -0.5), seed = 2025)
 #' d <- d[, c("time", "status", "x1", "x2")]
 #' fit <- survival::coxph(survival::Surv(time, status) ~ x1 + x2,
 #'                        data = d, x = TRUE, y = TRUE)
-#' pred <- tm_predict_coxph(model = fit, covs = c("x1", "x2"), new_data = d)
+#' pred <- pa_predict_coxph(model = fit, covs = c("x1", "x2"), new_data = d)
 #'
 #' # observed time against predicted risk score, shaped by event status
-#' tm_plot_pred(pred, title = "Cox model")
-tm_plot_pred <- function(data,
+#' pa_plot_pred(pred, title = "Cox model")
+pa_plot_pred <- function(data,
                       title = NULL,
                       xlab = "Risk Score",
                       ylab = "Days",
@@ -125,7 +125,7 @@ tm_plot_pred <- function(data,
 #' Arrange multiple prediction plots with letter tags
 #'
 #' @description
-#' Builds one panel per data frame using \code{plot_fun} (default: \code{tm_plot_pred})
+#' Builds one panel per data frame using \code{plot_fun} (default: \code{pa_plot_pred})
 #' and arranges them with letter tags. The function collects a single shared legend
 #' and applies global styling (titles, axis labels, legend options) across panels.
 #'
@@ -133,7 +133,7 @@ tm_plot_pred <- function(data,
 #'   \code{linear.pred}, \code{pred}, \code{times}, and \code{status}.
 #' @param titles Optional character vector, same length as \code{data_list};
 #'   if \code{NULL}, defaults to "Panel 1", "Panel 2", etc.
-#' @param plot_fun Function that creates a single panel (default = \code{tm_plot_pred}).
+#' @param plot_fun Function that creates a single panel (default = \code{pa_plot_pred}).
 #' @param ncol Number of columns in the panel layout (default = 2).
 #' @param tag_levels Letter style for tags: \code{"a"}, \code{"A"}, \code{"1"}, \code{"i"}, or \code{"I"}.
 #'
@@ -161,25 +161,25 @@ tm_plot_pred <- function(data,
 #' @examples
 #' # One panel per model. The previous example referenced undefined objects and
 #' # so could not be executed; this one runs.
-#' d <- tm_sim_cox_weibull(n = 150, pi_c = 0.3, v = 2,
+#' d <- pa_sim_cox_weibull(n = 150, pi_c = 0.3, v = 2,
 #'                         beta = c(0.5, -0.5), seed = 2025)
 #' d <- d[, c("time", "status", "x1", "x2")]
 #' cox <- survival::coxph(survival::Surv(time, status) ~ x1 + x2,
 #'                        data = d, x = TRUE, y = TRUE)
 #' wei <- survival::survreg(survival::Surv(time, status) ~ x1 + x2,
 #'                          data = d, dist = "weibull", x = TRUE, y = TRUE)
-#' p_cox <- tm_predict_coxph(model = cox, covs = c("x1", "x2"), new_data = d)
-#' p_wei <- tm_predict_survreg(model = wei, covs = c("x1", "x2"), new_data = d)
+#' p_cox <- pa_predict_coxph(model = cox, covs = c("x1", "x2"), new_data = d)
+#' p_wei <- pa_predict_survreg(model = wei, covs = c("x1", "x2"), new_data = d)
 #'
-#' tm_plot_summary(
+#' pa_plot_summary(
 #'   list(p_cox, p_wei),
 #'   titles = c("Cox PH", "Weibull AFT"),
 #'   ncol = 2,
 #'   legend_name = "Status"
 #' )
-tm_plot_summary <- function(data_list,
+pa_plot_summary <- function(data_list,
                               titles = NULL,
-                              plot_fun = tm_plot_pred,
+                              plot_fun = pa_plot_pred,
                               ncol = 2,
                               tag_levels = "a",
                               invert_linear = TRUE,

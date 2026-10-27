@@ -38,7 +38,7 @@ pam.r2_metrics <- function(predicted_data, survival_time, status,
   
   # Calculate inverse probability of censoring weights (IPCW)
   fit.km.censoring <- survfit(Surv(y, 1 - delta) ~ 1)
-  km.censoring.minus <- tm_censoring_left_limit(fit.km.censoring, y)
+  km.censoring.minus <- pa_censoring_left_limit(fit.km.censoring, y)
   ratio.km <- delta / km.censoring.minus
   
   # Handle NaN and Inf values

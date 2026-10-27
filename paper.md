@@ -184,7 +184,8 @@ evaluation of survival prediction models.
 
 Draft disclosure, to be finalized by the authors before submission:
 generative AI assistance was used for the PAmeasures repository migration,
-including package and namespace renaming, development documentation, and
+including package and namespace renaming, restoration of continuous-outcome
+assessment, API standardization, development documentation, and
 validation orchestration. The authors must verify the complete historical
 scope of AI assistance, record the tools and versions used, and review and
 validate all assisted outputs before making a final disclosure.

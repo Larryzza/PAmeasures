@@ -51,7 +51,7 @@ for (name in names(result$predictions)) {
             identical(as.numeric(p$status), as.numeric(result$cc_test$status)))
   k <- findInterval(t, sort(p$times))
   risk <- 1-p$surv_prob[, k]
-  cal <- tm_calibration(risk, p$times, p$status, t, case_weights = result$weights)
+  cal <- pa_calibration(risk, p$times, p$status, t, case_weights = result$weights)
   error <- abs(risk-cal$curve$calibrated)
   hand_ici <- sum(expected_weights*error)/sum(expected_weights)
   stopifnot(nrow(cal$curve) == nrow(result$cc_test),
@@ -76,14 +76,14 @@ for (name in names(result$predictions)) {
   stopifnot(reference_error < 1e-7, abs(reference_ici-hand_ici) < 1e-8)
 
   # Check weight scaling, subject order and reduction to the ordinary method.
-  scaled <- tm_calibration(risk, p$times, p$status, t,
+  scaled <- pa_calibration(risk, p$times, p$status, t,
                              case_weights = 10*weights)
   o <- rev(seq_along(risk))
-  permuted <- tm_calibration(risk[o], p$times[o], p$status[o], t,
+  permuted <- pa_calibration(risk[o], p$times[o], p$status[o], t,
                                case_weights = weights[o])
-  unit <- tm_calibration(risk, p$times, p$status, t,
+  unit <- pa_calibration(risk, p$times, p$status, t,
                            case_weights = rep(1, length(weights)))
-  ordinary <- tm_calibration(risk, p$times, p$status, t)
+  ordinary <- pa_calibration(risk, p$times, p$status, t)
   scale_error <- max(abs(scaled$metrics-cal$metrics))
   order_error <- max(abs(permuted$curve$calibrated-rev(cal$curve$calibrated)))
   unit_error <- max(abs(unit$curve$calibrated-ordinary$curve$calibrated))
@@ -103,14 +103,14 @@ for (name in names(result$predictions)) {
     Predicted_risk = risk, Calibrated_risk = cal$curve$calibrated,
     Absolute_error = error, ICI_contribution = weights*error/sum(weights))
   for (nk in 3:5) {
-    alternative <- tm_calibration(risk, p$times, p$status, t,
+    alternative <- pa_calibration(risk, p$times, p$status, t,
                                    nk = nk, case_weights = weights)
     sensitivity[[length(sensitivity)+1L]] <- data.frame(Model = name,
       Requested_knots = nk, Actual_knots = length(alternative$knots),
       ICI = unname(alternative$metrics['ici']))
   }
 }
-ici <- tm_sample_design(result$predictions, case_weights = result$weights,
+ici <- pa_sample_design(result$predictions, case_weights = result$weights,
                          metrics = 'ici', t_star = t, digits = 4)
 previous <- original$metrics[original$metrics$Metric != 'ici', , drop = FALSE]
 table <- rbind(previous, ici[, names(previous), drop = FALSE])

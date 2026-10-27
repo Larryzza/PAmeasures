@@ -151,9 +151,9 @@ test_that("Gt() is NA beyond the last observed time, as pec::ipcw is", {
   expect_true(is.na(PAmeasures:::Gt(sv, beyond)))
 })
 
-test_that("tm_fit_and_eval gives the corrected Brier score on the exposed fixture", {
+test_that("pa_fit_and_eval gives the corrected Brier score on the exposed fixture", {
   d <- tie_fixture()
-  res <- suppressMessages(tm_fit_and_eval(
+  res <- suppressMessages(pa_fit_and_eval(
     train_data = d, covariates = c("x1", "x2"),
     models = "coxph", metrics = "brier_score", t_star = 5.5
   ))

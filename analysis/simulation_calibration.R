@@ -6,7 +6,7 @@ paper_simulation_risk_at <- function(model, new_data, t_star) {
   if (inherits(model, "coxph")) {
     lp <- as.numeric(stats::predict(model, newdata = new_data,
       type = "lp", reference = "sample"))
-    survival_at <- getFromNamespace("tm_cox_survival", "PAmeasures")
+    survival_at <- getFromNamespace("pa_cox_survival", "PAmeasures")
     survival_probability <- survival_at(model, new_data, lp, t_star)
   } else if (inherits(model, "survreg")) {
     survival_at <- getFromNamespace("predictSurvProb2survreg", "PAmeasures")
@@ -37,7 +37,7 @@ paper_simulation_calibration <- function(pred, t_star, calibration_args,
     p <- paper_simulation_risk_at(model, new_data, t_star)
     # Retain the existing diagnostic column name, now always equal to t_star.
     grid_time <- t_star
-    cal <- do.call(tm_calibration, c(list(p = p, event_time = pred$times,
+    cal <- do.call(pa_calibration, c(list(p = p, event_time = pred$times,
       status = pred$status, t_star = t_star), calibration_args))
     method <- cal$method
     unname(cal$metrics[["ici"]])

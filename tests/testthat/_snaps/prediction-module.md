@@ -1,4 +1,4 @@
-# tm_predict_coxph returns pred, times, status, surv_prob
+# pa_predict_coxph returns pred, times, status, surv_prob
 
     WAoAAAACAAQFAwACAwAAAAAQAAAACAAEAAkAAAAEY292cwAEAAkAAAALbGluZWFyLnByZWQA
     BAAJAAAABW1vZGVsAAQACQAAAAhuZXdfZGF0YQAEAAkAAAAEcHJlZAAEAAkAAAAGc3RhdHVz
@@ -16,7 +16,7 @@
     AAkAAAAFbmFtZXMAAAAQAAAABQAEAAkAAAADZGltAAQACQAAAANtaW4ABAAJAAAAA21heAAE
     AAkAAAAEbWVhbgAEAAkAAAAEbl9uYQAAAP4=
 
-# tm_predict_survreg returns the same component structure
+# pa_predict_survreg returns the same component structure
 
     WAoAAAACAAQFAwACAwAAAAAQAAAACAAEAAkAAAAEY292cwAEAAkAAAALbGluZWFyLnByZWQA
     BAAJAAAABW1vZGVsAAQACQAAAAhuZXdfZGF0YQAEAAkAAAAEcHJlZAAEAAkAAAAGc3RhdHVz
@@ -34,7 +34,7 @@
     AAkAAAAFbmFtZXMAAAAQAAAABQAEAAkAAAADZGltAAQACQAAAANtaW4ABAAJAAAAA21heAAE
     AAkAAAAEbWVhbgAEAAkAAAAEbl9uYQAAAP4=
 
-# tm_predict_cif dispatches on a pair of cause-specific coxph fits
+# pa_predict_cif dispatches on a pair of cause-specific coxph fits
 
     WAoAAAACAAQFAwACAwAAAAAOAAAACj/2ouf29L6DP/ZJiAlOXVs/6zru6VdHDz/cQYk3S8ao
     P+y/k/8l5W0/4qsZHd43WD/uslsxfv4NP/SQQ+UyHmA/6NEAo5PuXz/prHU+cH4X
@@ -46,7 +46,7 @@
     AAkAAAAFbmFtZXMAAAAQAAAABQAEAAkAAAADZGltAAQACQAAAANtaW4ABAAJAAAAA21heAAE
     AAkAAAAEbWVhbgAEAAkAAAAEbl9uYQAAAP4=
 
-# tm_predict_cif dispatches on a survreg model1
+# pa_predict_cif dispatches on a survreg model1
 
     WAoAAAACAAQFAwACAwAAAAAOAAAACj/2kihWYF7lP/YDjin5zo4/6pJiAlOXVz/cGDtgKF7E
     P+wzzErGza8/4kfNiYsunT/uHk92X9iuP/Q/bCaZx70/6CUHIIWxhT/pB8YyfthN

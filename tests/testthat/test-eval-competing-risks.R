@@ -1,5 +1,5 @@
-# Competing-risks inputs. tm_predict_cif's return value is exactly the shape
-# tm_summarize_cr requires (cif_pred, times, status), so the two are used as the
+# Competing-risks inputs. pa_predict_cif's return value is exactly the shape
+# pa_summarize_cr requires (cif_pred, times, status), so the two are used as the
 # designed pair rather than with synthetic CIF matrices.
 cr_data <- function() {
   d <- fx_cr()
@@ -14,7 +14,7 @@ cr_pred <- function() {
                         data = dd, x = TRUE, y = TRUE)
   m2 <- survival::coxph(survival::Surv(time, status == 2) ~ X1 + X2,
                         data = dd, x = TRUE, y = TRUE)
-  tm_predict_cif(model1 = m1, model2 = m2, newdata = dd,
+  pa_predict_cif(model1 = m1, model2 = m2, newdata = dd,
                  covs = c("X1", "X2"), event.type = 1, tau = max(dd$time))
 }
 
@@ -41,10 +41,10 @@ test_that("m_cif is monotone in the CIF magnitude", {
   expect_snapshot_value(snap_num(c(low, high)), style = "serialize")
 })
 
-test_that("tm_survival_eval_cr returns a Metric/Value table", {
+test_that("pa_survival_eval_cr returns a Metric/Value table", {
   p <- cr_pred()
 
-  res <- tm_survival_eval_cr(
+  res <- pa_survival_eval_cr(
     pred_cif   = p$cif_pred[, -1],
     event_time = p$times,
     time.cif   = p$cif_pred[, 1],
@@ -69,14 +69,14 @@ test_that("both evaluation entry points return Value as double (FINDING 14 fixed
   # The two entry points previously disagreed on the type of the Value column,
   # so is.finite() was silently FALSE for every competing-risks metric.
   p <- cr_pred()
-  cr <- tm_survival_eval_cr(
+  cr <- pa_survival_eval_cr(
     pred_cif = p$cif_pred[, -1], event_time = p$times,
     time.cif = p$cif_pred[, 1], status = p$status, event_type = 1
   )
 
-  pred <- tm_predict_coxph(model = fx_cox(), covs = fx_covs(),
+  pred <- pa_predict_coxph(model = fx_cox(), covs = fx_covs(),
                                new_data = fx_surv(), tau = 10e10)
-  rc <- tm_survival_eval(
+  rc <- pa_survival_eval(
     model = fx_cox(), event_time = pred$times,
     predicted_probability = pred$surv_prob, status = pred$status,
     covariates = fx_covs(), new_data = fx_surv(), tau = 10e10
@@ -89,7 +89,7 @@ test_that("both evaluation entry points return Value as double (FINDING 14 fixed
 })
 
 test_that("pred_cif is times-by-subjects with time.cif supplied separately", {
-  # tm_summarize_cr splits tm_predict_cif's cif_pred as cif_pred[, 1] -> time.cif
+  # pa_summarize_cr splits pa_predict_cif's cif_pred as cif_pred[, 1] -> time.cif
   # and cif_pred[, -1] -> pred_cif, so pred_cif rows are times and columns are
   # subjects. Documented here because no roxygen states it.
   p <- cr_pred()
@@ -107,7 +107,7 @@ test_that("competing-risks default metrics use C_index, not Harrell/Uno", {
   # This differs from the right-censored set and must survive standardization.
   p <- cr_pred()
 
-  res <- tm_survival_eval_cr(
+  res <- pa_survival_eval_cr(
     pred_cif = p$cif_pred[, -1], event_time = p$times,
     time.cif = p$cif_pred[, 1], status = p$status, event_type = 1
   )
@@ -119,11 +119,11 @@ test_that("competing-risks default metrics use C_index, not Harrell/Uno", {
   expect_false("harrell_c" %in% res$Metric)
 })
 
-test_that("tm_survival_eval_cr rejects a withdrawn metric name", {
+test_that("pa_survival_eval_cr rejects a withdrawn metric name", {
   p <- cr_pred()
 
   expect_error(
-    tm_survival_eval_cr(
+    pa_survival_eval_cr(
       pred_cif = p$cif_pred[, -1], event_time = p$times,
       time.cif = p$cif_pred[, 1], status = p$status, event_type = 1,
       metrics = "r_sh"
@@ -132,11 +132,11 @@ test_that("tm_survival_eval_cr rejects a withdrawn metric name", {
   )
 })
 
-test_that("tm_survival_eval_cr rejects an unknown metric name", {
+test_that("pa_survival_eval_cr rejects an unknown metric name", {
   p <- cr_pred()
 
   expect_error(
-    tm_survival_eval_cr(
+    pa_survival_eval_cr(
       pred_cif = p$cif_pred[, -1], event_time = p$times,
       time.cif = p$cif_pred[, 1], status = p$status, event_type = 1,
       metrics = "not_a_metric"
@@ -145,8 +145,8 @@ test_that("tm_survival_eval_cr rejects an unknown metric name", {
   )
 })
 
-test_that("tm_summarize_cr consumes tm_predict_cif output directly", {
-  res <- tm_summarize_cr(list(csh = cr_pred()), event_type = 1)
+test_that("pa_summarize_cr consumes pa_predict_cif output directly", {
+  res <- pa_summarize_cr(list(csh = cr_pred()), event_type = 1)
 
   expect_metric_table(res)
   expect_identical(names(res), c("Metric", "csh"))
@@ -157,22 +157,22 @@ test_that("tm_summarize_cr consumes tm_predict_cif output directly", {
   expect_snapshot_value(snap_num(res$csh), style = "serialize")
 })
 
-test_that("tm_summarize_cr names each model entry's required components", {
+test_that("pa_summarize_cr names each model entry's required components", {
   # required <- c("cif_pred", "times", "status")
   p <- cr_pred()
 
   expect_error(
-    tm_summarize_cr(list(bad = p[c("times", "status")]), event_type = 1),
+    pa_summarize_cr(list(bad = p[c("times", "status")]), event_type = 1),
     "must contain: cif_pred, times, status"
   )
-  expect_error(tm_summarize_cr(list()), "must be a non-empty named list")
-  expect_error(tm_summarize_cr("not a list"), "must be a non-empty named list")
+  expect_error(pa_summarize_cr(list()), "must be a non-empty named list")
+  expect_error(pa_summarize_cr("not a list"), "must be a non-empty named list")
 })
 
-test_that("tm_summarize_cr puts one column per model", {
+test_that("pa_summarize_cr puts one column per model", {
   p <- cr_pred()
 
-  res <- tm_summarize_cr(list(a = p, b = p), event_type = 1)
+  res <- pa_summarize_cr(list(a = p, b = p), event_type = 1)
 
   expect_identical(names(res), c("Metric", "a", "b"))
   # identical inputs must give identical columns

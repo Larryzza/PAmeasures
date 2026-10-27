@@ -1,0 +1,4 @@
+23 survival computational R files identical after identifier and trailing-whitespace normalization.
+Existing data, numerical fixtures and serialized snapshot values unchanged.
+All non-transformed files in the validated tarball match the source.
+Tarball SHA256: c889b7bacd4c5a5a5886371407b032407b2ae7867f6c86cd502b441c121a64fd

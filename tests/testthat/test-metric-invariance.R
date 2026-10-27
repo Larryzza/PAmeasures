@@ -11,18 +11,18 @@
 # removal must keep its exact value on every public evaluator path.
 #
 # Nine scenarios cover all four public entry points that resolve metric names
-# through tm_normalize_metrics(), because the tombstone added by the removal is
+# through pa_normalize_metrics(), because the tombstone added by the removal is
 # shared by all of them:
 #
-#   eval_default      tm_survival_eval()      metrics = NULL
-#   eval_all          tm_survival_eval()      metrics = "all"
-#   fit_and_eval_all  tm_fit_and_eval()       metrics = "all"
-#   cr_default        tm_survival_eval_cr()   metrics = NULL
-#   cr_all            tm_survival_eval_cr()   metrics = "all"
-#   two_phase_cc      tm_evaluate_two_phase() case-cohort weights
-#   two_phase_ncc     tm_evaluate_two_phase() nested case-control weights
-#   two_phase_unit    tm_evaluate_two_phase() unit weights (reference path)
-#   sample_design_cc  tm_sample_design()      case-cohort
+#   eval_default      pa_survival_eval()      metrics = NULL
+#   eval_all          pa_survival_eval()      metrics = "all"
+#   fit_and_eval_all  pa_fit_and_eval()       metrics = "all"
+#   cr_default        pa_survival_eval_cr()   metrics = NULL
+#   cr_all            pa_survival_eval_cr()   metrics = "all"
+#   two_phase_cc      pa_evaluate_two_phase() case-cohort weights
+#   two_phase_ncc     pa_evaluate_two_phase() nested case-control weights
+#   two_phase_unit    pa_evaluate_two_phase() unit weights (reference path)
+#   sample_design_cc  pa_sample_design()      case-cohort
 #
 # Between them the scenarios pin all 11 canonical post-removal metric names.
 # The three two-phase weightings are pinned separately because they genuinely
@@ -56,13 +56,13 @@ inv_named <- function(metric, value) {
 }
 
 inv_surv_pred <- function() {
-  tm_predict_coxph(model = fx_cox(), covs = fx_covs(),
+  pa_predict_coxph(model = fx_cox(), covs = fx_covs(),
                    new_data = fx_surv(), tau = 10e10)
 }
 
 inv_eval <- function(metrics) {
   pred <- inv_surv_pred()
-  res <- tm_survival_eval(
+  res <- pa_survival_eval(
     model = fx_cox(), event_time = pred$times,
     predicted_probability = pred$surv_prob, status = pred$status,
     covariates = fx_covs(), new_data = fx_surv(), tau = 10e10,
@@ -83,7 +83,7 @@ inv_survival_point_reference <- function(p = inv_surv_pred()) {
   G <- vapply(time, function(t) prod(factors[censor_times < t]), numeric(1))
   q <- observed / G
   w <- q / sum(q)
-  k <- PAmeasures:::tm_nearest_time_index(p$times, t_star)
+  k <- PAmeasures:::pa_nearest_time_index(p$times, t_star)
   prediction <- 1 - p$surv_prob[, k]
   y <- as.numeric(p$times <= t_star & p$status == 1)
   ybar <- sum(w * y)
@@ -105,13 +105,13 @@ inv_cr_pred <- function() {
                         data = dd, x = TRUE, y = TRUE)
   m2 <- survival::coxph(survival::Surv(time, status == 2) ~ X1 + X2,
                         data = dd, x = TRUE, y = TRUE)
-  tm_predict_cif(model1 = m1, model2 = m2, newdata = dd,
+  pa_predict_cif(model1 = m1, model2 = m2, newdata = dd,
                  covs = c("X1", "X2"), event.type = 1, tau = max(dd$time))
 }
 
 inv_eval_cr <- function(metrics) {
   p <- inv_cr_pred()
-  res <- tm_survival_eval_cr(
+  res <- pa_survival_eval_cr(
     pred_cif = p$cif_pred[, -1], event_time = p$times,
     time.cif = p$cif_pred[, 1], status = p$status, event_type = 1,
     metrics = metrics
@@ -174,14 +174,14 @@ inv_cr_event_reference <- function() {
 # weight constructors sample, so the weights are only reproducible under it.
 inv_tp_inputs <- function(design) {
   d <- fx_surv()
-  pr <- tm_predict_coxph(model = fx_cox(), covs = fx_covs(),
+  pr <- pa_predict_coxph(model = fx_cox(), covs = fx_covs(),
                          new_data = d, tau = 10e10)
   set.seed(2001)
   w <- switch(
     design,
-    cc   = tm_case_cohort_weights(time = d$time, status = d$status,
+    cc   = pa_case_cohort_weights(time = d$time, status = d$status,
                                   subcohort = stats::rbinom(nrow(d), 1, 0.4)),
-    ncc  = tm_nested_case_control_weights(time = d$time, status = d$status, m = 2),
+    ncc  = pa_nested_case_control_weights(time = d$time, status = d$status, m = 2),
     unit = rep(1, nrow(d))
   )
   list(pred = pr, weights = w,
@@ -190,7 +190,7 @@ inv_tp_inputs <- function(design) {
 
 inv_two_phase <- function(design) {
   inp <- inv_tp_inputs(design)
-  res <- tm_evaluate_two_phase(pred_results = inp$pred,
+  res <- pa_evaluate_two_phase(pred_results = inp$pred,
                                km_cens_fit = inp$km_cens,
                                case_weights = inp$weights)
   inv_named(res$Metric, res$Value)
@@ -198,7 +198,7 @@ inv_two_phase <- function(design) {
 
 inv_sample_design <- function() {
   inp <- inv_tp_inputs("cc")
-  res <- tm_sample_design(models = list(cc = inp$pred),
+  res <- pa_sample_design(models = list(cc = inp$pred),
                           case_weights = inp$weights, km_cens = inp$km_cens)
   inv_named(res$Metric, res[["cc"]])
 }
@@ -207,7 +207,7 @@ inv_builders <- list(
   eval_default     = function() inv_eval(NULL),
   eval_all         = function() inv_eval("all"),
   fit_and_eval_all = function() {
-    res <- tm_fit_and_eval(train_data = fx_surv(), covariates = fx_covs(),
+    res <- pa_fit_and_eval(train_data = fx_surv(), covariates = fx_covs(),
                            models = "coxph", metrics = "all")
     num <- vapply(res, is.numeric, logical(1))
     inv_named(names(res)[num], unlist(res[num]))

@@ -64,11 +64,11 @@ test_that("public CR evaluation and summary use the corrected concordance", {
   right <- c(1, rep(6/7, 3), rep(9/14, 3), 0)
   expected <- round(cr_concordance_reference(time, status, prediction, 6,
                                              left, right), 4)
-  actual <- tm_survival_eval_cr(cif, time, grid, status,
+  actual <- pa_survival_eval_cr(cif, time, grid, status,
     metrics = "c_index", tau = 6, t_star = 6)
   expect_equal(actual$Value, expected)
   model <- list(cif_pred = cbind(grid, cif), times = time, status = status)
-  summary <- tm_summarize_cr(list(model = model), metrics = "c_index",
+  summary <- pa_summarize_cr(list(model = model), metrics = "c_index",
     tau = 6, t_star = 6, digits = 4)
   expect_equal(summary$model, expected)
 })

@@ -15,7 +15,7 @@ Open an issue at
 A report is most useful when it includes:
 
 * a minimal reproducible example — the smallest code that shows the problem,
-  using simulated data (`tm_sim_cox_weibull()` or `tm_simulate_fine_gray()`) or a
+  using simulated data (`pa_sim_cox_weibull()` or `pa_simulate_fine_gray()`) or a
   public dataset such as `survival::pbc`, so no private data is needed;
 * what you expected and what happened instead, with the exact error or the
   metric values you obtained;

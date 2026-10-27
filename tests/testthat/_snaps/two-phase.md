@@ -1,4 +1,4 @@
-# tm_case_cohort_weights returns one finite weight per subject
+# pa_case_cohort_weights returns one finite weight per subject
 
     WAoAAAACAAQFAwACAwAAAAAOAAAACj/wAAAAAAAAP/AAAAAAAAA/8AAAAAAAAEAHHHHWBjFy
     P/AAAAAAAAA/8AAAAAAAAD/wAAAAAAAAQAcccdYGMXJABxxx1gYxckAHHHHWBjFy
@@ -7,7 +7,7 @@
 
     WAoAAAACAAQFAwACAwAAAAAOAAAAAUByo444p+c6
 
-# tm_nested_case_control_weights requires m and returns one weight per subject
+# pa_nested_case_control_weights requires m and returns one weight per subject
 
     WAoAAAACAAQFAwACAwAAAAAOAAAACj/wAAAAAAAAP/AAAAAAAAA/8AAAAAAAAEARgwPAfuCx
     P/AAAAAAAAA/8AAAAAAAAD/wAAAAAAAAP/CcNYr8R+VAE+HI6r/820AFtP557gKn
@@ -36,7 +36,7 @@
     WAoAAAACAAQFAwACAwAAAAAOAAAABT/Qo9cKPXCkP+RR64UeuFI/5IcrAgxJuj/IPkJa7mMg
     P+gdfb9If8w=
 
-# tm_sample_design summarises a two-phase design
+# pa_sample_design summarises a two-phase design
 
     WAoAAAACAAQFAwACAwAAAAAQAAAABQAEAAkAAAAJcHNldWRvX3IyAAQACQAAAAloYXJyZWxs
     X2MABAAJAAAABXVub19jAAQACQAAAAticmllcl9zY29yZQAEAAkAAAAGdGRfYXVj

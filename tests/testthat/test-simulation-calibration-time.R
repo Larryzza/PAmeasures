@@ -11,7 +11,7 @@ test_that("simulation Cox calibration uses the exact horizon in subject order", 
   e <- simulation_calibration_helpers()
   fit <- fx_cox()
   d <- fx_surv_uncensored()[seq(1, 200, by = 5), ]
-  pred <- tm_predict_coxph(fit, fx_covs(), new_data = d)
+  pred <- pa_predict_coxph(fit, fx_covs(), new_data = d)
   # Choose an actual training jump strictly between validation grid points.
   baseline <- survival::basehaz(fit)
   candidates <- baseline$time[baseline$hazard > c(0, head(baseline$hazard, -1))]
@@ -25,7 +25,7 @@ test_that("simulation Cox calibration uses the exact horizon in subject order", 
   old <- 1 - pred$surv_prob[, findInterval(tau, pred$times)]
   expect_gt(max(abs(actual - old)), 1e-6)
   cal <- e$paper_simulation_calibration(pred, tau, list(nk = 5), fit, d)
-  reference <- tm_calibration(expected, pred$times, pred$status, tau)
+  reference <- pa_calibration(expected, pred$times, pred$status, tau)
   expect_equal(cal$ici, unname(reference$metrics[["ici"]]), tolerance = 1e-12)
   expect_equal(cal$diagnostics$prediction_grid_time, tau)
   expect_identical(cal$diagnostics$error, "")
@@ -41,7 +41,7 @@ test_that("simulation AFT calibration requests the exact distribution probabilit
   fit <- survival::survreg(survival::Surv(time, status) ~ x1 + x2,
     data = fx_surv(), dist = "lognormal", x = TRUE, y = TRUE)
   d <- fx_surv_uncensored()[seq(1, 200, by = 5), ]
-  pred <- tm_predict_survreg(fit, fx_covs(), new_data = d)
+  pred <- pa_predict_survreg(fit, fx_covs(), new_data = d)
   ordered <- d[order(d$time), ]
   tau <- median(d$time)
   expected <- stats::pnorm((log(tau) - predict(fit, newdata = ordered,
@@ -49,7 +49,7 @@ test_that("simulation AFT calibration requests the exact distribution probabilit
   expect_equal(e$paper_simulation_risk_at(fit, ordered, tau),
                as.numeric(expected), tolerance = 1e-12)
   cal <- e$paper_simulation_calibration(pred, tau, list(nk = 5), fit, d)
-  expect_equal(cal$ici, unname(tm_calibration(as.numeric(expected),
+  expect_equal(cal$ici, unname(pa_calibration(as.numeric(expected),
     pred$times, pred$status, tau)$metrics[["ici"]]), tolerance = 1e-12)
   expect_equal(cal$diagnostics$prediction_grid_time, tau)
 })
@@ -58,7 +58,7 @@ test_that("simulation calibration rejects misaligned outcomes and retains suppor
   e <- simulation_calibration_helpers()
   d <- fx_surv_uncensored()[seq(1, 200, by = 5), ]
   fit <- fx_cox()
-  pred <- tm_predict_coxph(fit, fx_covs(), new_data = d)
+  pred <- pa_predict_coxph(fit, fx_covs(), new_data = d)
   bad <- pred; bad$times <- rev(bad$times)
   expect_warning(result <- e$paper_simulation_calibration(
     bad, median(d$time), list(nk = 5), fit, d), "not aligned")

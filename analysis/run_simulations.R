@@ -86,7 +86,7 @@ utils::write.csv(jobs, file.path(out, "full_job_plan.csv"), row.names = FALSE)
 # The old design fits once and regenerates test data. Keep exactly that structure.
 clean_data <- function(d) d[, c("time", "status", "x1", "x2")]
 simulate <- function(n, censor, v, beta, seed, nonlinear = FALSE) {
-  clean_data(tm_sim_cox_weibull(n = n, pi_c = censor, v = v,
+  clean_data(pa_sim_cox_weibull(n = n, pi_c = censor, v = v,
                                 beta = beta, seed = seed, nonlinear = nonlinear))
 }
 compact_model <- function(fit) {
@@ -170,9 +170,9 @@ evaluate_job <- function(job) {
       fit <- models[[m]]
       covs <- if (m == "Cox.reduce") "x2" else c("x1", "x2")
       if (inherits(fit, "coxph")) {
-        pred <- tm_predict_coxph(fit, covs, tau = tau, new_data = test)
+        pred <- pa_predict_coxph(fit, covs, tau = tau, new_data = test)
       } else if (inherits(fit, "survreg")) {
-        pred <- tm_predict_survreg(fit, covs, tau = tau, new_data = test)
+        pred <- pa_predict_survreg(fit, covs, tau = tau, new_data = test)
       } else {
         grid <- sort(test$time)
         sp <- pec::predictSurvProb(fit, newdata = test, times = grid)
@@ -180,7 +180,7 @@ evaluate_job <- function(job) {
                      surv_prob = sp, pred = NULL, new_data = test, covs = covs)
       }
       # Preserve the existing metrics and their historical rounding.
-      table <- tm_summarize(setNames(list(pred), m), metrics = setdiff(settings$metrics, "ici"),
+      table <- pa_summarize(setNames(list(pred), m), metrics = setdiff(settings$metrics, "ici"),
                             tau = tau, t_star = t_star, digits = 4)
       cal <- paper_simulation_calibration(pred, t_star, settings$calibration_args,
                                            model = fit, new_data = test)

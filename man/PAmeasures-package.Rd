@@ -4,16 +4,21 @@
 \name{PAmeasures-package}
 \alias{PAmeasures-package}
 \alias{PAmeasures}
-\title{PAmeasures: Predictive Performance Metrics for Survival Models}
+\title{PAmeasures: Prediction Accuracy for Continuous and Survival Outcomes}
 \description{
-Unified performance metrics for survival models with right-censoring,
+Prediction accuracy for continuous outcomes and performance metrics for
+survival models with right-censoring,
 competing risks, and two-phase designs such as nested case-control and
 case-cohort studies.
+}
+\details{
+All primary interfaces use the `pa_` prefix. [pa_nlm()] assesses continuous
+outcomes; [pam.nlm()] retains the historical four-decimal character format.
 }
 \section{Optional backends}{
 
 Two prediction backends are optional and declared in `Suggests` rather than
-`Imports`, because each serves a single branch of [tm_predict_cif()]:
+`Imports`, because each serves a single branch of [pa_predict_cif()]:
 
 * `randomForestSRC` supplies the `cr_model` argument (an `rfsrc` fit).
 * `cmprsk` supplies the `fg_model` argument (a Fine-Gray `crr` fit).

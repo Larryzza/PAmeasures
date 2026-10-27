@@ -12,7 +12,7 @@ required <- setdiff(required, "R")
 missing <- setdiff(required, db[, "Package"])
 if (length(missing)) stop("Missing runtime dependencies: ", paste(missing, collapse = ", "))
 stopifnot(all(c("tidyr", "Hmisc", "pmcalibration", "prodlim") %in% required))
-lib <- tempfile("timemetric-hard-deps-")
+lib <- tempfile("pameasures-hard-deps-")
 dir.create(lib)
 check <- function() {
   on.exit(unlink(lib, recursive = TRUE), add = TRUE)
@@ -21,13 +21,17 @@ check <- function() {
   stopifnot(all(file.symlink(paths, file.path(lib, required))))
   .libPaths(c(lib, .Library), include.site = FALSE)
   library(PAmeasures)
-  d <- tm_sim_cox_weibull(120, pi_c = .3, v = 2,
+  stopifnot(isTRUE(all.equal(unlist(pa_nlm(c(1, 2, 4, 5), 1:4)),
+                            c(R.squared = .98, L.squared = .1))),
+            identical(pam.nlm(c(1, 2, 4, 5), 1:4),
+                      list(R.squared = "0.9800", L.squared = "0.1000")))
+  d <- pa_sim_cox_weibull(120, pi_c = .3, v = 2,
                           beta = c(.5, -.5), seed = 1051)
   fit <- survival::coxph(survival::Surv(time, status) ~ x1 + x2,
                          d, x = TRUE, y = TRUE)
-  pred <- tm_predict_coxph(fit, c("x1", "x2"), new_data = d)
+  pred <- pa_predict_coxph(fit, c("x1", "x2"), new_data = d)
   km <- survival::survfit(survival::Surv(time, 1 - status) ~ 1, d)
-  result <- tm_evaluate_two_phase(pred, km_cens_fit = km,
+  result <- pa_evaluate_two_phase(pred, km_cens_fit = km,
                                   case_weights = rep(1, nrow(d)))
   expected <- c("pseudo_r2", "harrell_c", "uno_c", "brier_score", "td_auc", "ici")
   stopifnot(nrow(result) == length(expected),

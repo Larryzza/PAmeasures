@@ -1,16 +1,16 @@
-# Two-phase inputs. tm_case_cohort_weights and tm_nested_case_control_weights both return a bare numeric
+# Two-phase inputs. pa_case_cohort_weights and pa_nested_case_control_weights both return a bare numeric
 # vector, one weight per subject -- no list wrapping.
 tp_inputs <- function(design = c("cc", "ncc")) {
   design <- match.arg(design)
   d <- fx_surv()
-  pred <- tm_predict_coxph(model = fx_cox(), covs = fx_covs(),
+  pred <- pa_predict_coxph(model = fx_cox(), covs = fx_covs(),
                                new_data = d, tau = 10e10)
   set.seed(2001)
   w <- if (design == "cc") {
-    tm_case_cohort_weights(time = d$time, status = d$status,
+    pa_case_cohort_weights(time = d$time, status = d$status,
                subcohort = stats::rbinom(nrow(d), 1, 0.4))
   } else {
-    tm_nested_case_control_weights(time = d$time, status = d$status, m = 2)
+    pa_nested_case_control_weights(time = d$time, status = d$status, m = 2)
   }
   list(
     d = d,
@@ -20,12 +20,12 @@ tp_inputs <- function(design = c("cc", "ncc")) {
   )
 }
 
-test_that("tm_case_cohort_weights returns one finite weight per subject", {
+test_that("pa_case_cohort_weights returns one finite weight per subject", {
   d <- fx_surv()
   set.seed(2001)
   subcohort <- stats::rbinom(nrow(d), 1, 0.4)
 
-  w <- tm_case_cohort_weights(time = d$time, status = d$status, subcohort = subcohort)
+  w <- pa_case_cohort_weights(time = d$time, status = d$status, subcohort = subcohort)
 
   expect_true(is.numeric(w))
   expect_false(is.list(w))
@@ -38,15 +38,15 @@ test_that("tm_case_cohort_weights returns one finite weight per subject", {
   expect_snapshot_value(snap_num(sum(w)), style = "serialize")
 })
 
-test_that("tm_nested_case_control_weights requires m and returns one weight per subject", {
+test_that("pa_nested_case_control_weights requires m and returns one weight per subject", {
   d <- fx_surv()
 
   expect_error(
-    tm_nested_case_control_weights(time = d$time, status = d$status),
+    pa_nested_case_control_weights(time = d$time, status = d$status),
     "`m` must be provided for NCC weights"
   )
 
-  w <- tm_nested_case_control_weights(time = d$time, status = d$status, m = 2)
+  w <- pa_nested_case_control_weights(time = d$time, status = d$status, m = 2)
 
   expect_true(is.numeric(w))
   expect_identical(length(w), 200L)
@@ -59,9 +59,9 @@ test_that("tm_nested_case_control_weights requires m and returns one weight per 
 test_that("case-cohort and NCC weighting schemes differ", {
   d <- fx_surv()
   set.seed(2001)
-  cc <- tm_case_cohort_weights(time = d$time, status = d$status,
+  cc <- pa_case_cohort_weights(time = d$time, status = d$status,
                    subcohort = stats::rbinom(nrow(d), 1, 0.4))
-  ncc <- tm_nested_case_control_weights(time = d$time, status = d$status, m = 2)
+  ncc <- pa_nested_case_control_weights(time = d$time, status = d$status, m = 2)
 
   expect_false(isTRUE(all.equal(cc, ncc, tolerance = 1e-6)))
 })
@@ -69,7 +69,7 @@ test_that("case-cohort and NCC weighting schemes differ", {
 test_that("two-phase evaluation works for a case-cohort design", {
   inp <- tp_inputs("cc")
 
-  res <- tm_evaluate_two_phase(
+  res <- pa_evaluate_two_phase(
     pred_results = inp$pred,
     km_cens_fit = inp$km_cens,
     case_weights = inp$weights
@@ -90,7 +90,7 @@ test_that("two-phase evaluation works for a case-cohort design", {
 test_that("two-phase evaluation works for a nested case-control design", {
   inp <- tp_inputs("ncc")
 
-  res <- tm_evaluate_two_phase(
+  res <- pa_evaluate_two_phase(
     pred_results = inp$pred,
     km_cens_fit = inp$km_cens,
     case_weights = inp$weights
@@ -112,11 +112,11 @@ test_that("case-cohort and NCC weighting give different metric values", {
   cc_in <- tp_inputs("cc")
   ncc_in <- tp_inputs("ncc")
 
-  cc <- tm_evaluate_two_phase(
+  cc <- pa_evaluate_two_phase(
     pred_results = cc_in$pred, km_cens_fit = cc_in$km_cens,
     case_weights = cc_in$weights
   )
-  ncc <- tm_evaluate_two_phase(
+  ncc <- pa_evaluate_two_phase(
     pred_results = ncc_in$pred, km_cens_fit = ncc_in$km_cens,
     case_weights = ncc_in$weights
   )
@@ -125,16 +125,16 @@ test_that("case-cohort and NCC weighting give different metric values", {
   expect_false(isTRUE(all.equal(cc$Value, ncc$Value, tolerance = 1e-6)))
 })
 
-test_that("two-phase output labels AUC differently from tm_sample_design", {
+test_that("two-phase output labels AUC differently from pa_sample_design", {
   # FINDING 15: the evaluator emits "td_auc" while its own summary
   # wrapper emits "td_auc" for the same quantity.
   inp <- tp_inputs("cc")
 
-  direct <- tm_evaluate_two_phase(
+  direct <- pa_evaluate_two_phase(
     pred_results = inp$pred, km_cens_fit = inp$km_cens,
     case_weights = inp$weights
   )
-  summarised <- tm_sample_design(
+  summarised <- pa_sample_design(
     models = list(cc = inp$pred), case_weights = inp$weights,
     km_cens = inp$km_cens
   )
@@ -145,20 +145,20 @@ test_that("two-phase output labels AUC differently from tm_sample_design", {
   expect_setequal(direct$Metric, summarised$Metric)
 })
 
-test_that("tm_sample_design validates its models argument", {
+test_that("pa_sample_design validates its models argument", {
   inp <- tp_inputs("cc")
 
   expect_error(
-    tm_sample_design(models = list(), case_weights = inp$weights,
+    pa_sample_design(models = list(), case_weights = inp$weights,
                       km_cens = inp$km_cens),
     "must be a non-empty named list"
   )
 })
 
-test_that("tm_sample_design summarises a two-phase design", {
+test_that("pa_sample_design summarises a two-phase design", {
   inp <- tp_inputs("cc")
 
-  res <- tm_sample_design(
+  res <- pa_sample_design(
     models = list(cc = inp$pred),
     case_weights = inp$weights,
     km_cens = inp$km_cens
@@ -177,14 +177,14 @@ test_that("two-phase default metric names are pinned with current spelling", {
   # c("pseudo_r2", "Harrell<u2019>s C", "Uno<u2019>s C", "brier_score",
   #   "td_auc") -- misspelling and curly apostrophes included.
   defaults <- eval(formals(
-    tm_evaluate_two_phase
+    pa_evaluate_two_phase
   )$metrics)
 
   expect_true("pseudo_r2" %in% defaults)
   expect_true("harrell_c" %in% defaults)
   expect_true("uno_c" %in% defaults)
   expect_false("Pesudo_R" %in% defaults)
-  expect_true(all(defaults %in% tm_metric_names()))
+  expect_true(all(defaults %in% pa_metric_names()))
   expect_true("ici" %in% defaults)
   expect_false(any(c("e50", "e90") %in% defaults))
   expect_snapshot_value(defaults[defaults != "ici"], style = "serialize")
@@ -195,7 +195,7 @@ test_that("two-phase uses Pesudo_R where the survival path uses Pseudo_R_square"
   # package. Recorded so spec step 6's standardization has a pinned starting set.
   inp <- tp_inputs("cc")
 
-  res <- tm_evaluate_two_phase(
+  res <- pa_evaluate_two_phase(
     pred_results = inp$pred, km_cens_fit = inp$km_cens,
     case_weights = inp$weights
   )

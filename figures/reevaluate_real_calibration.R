@@ -75,7 +75,7 @@ calibration <- list()
 for (version in c("before", "after")) {
   previous <- utils::read.csv(file.path(input, "pbc", paste0("metrics_", version, ".csv")),
                              check.names = FALSE)
-  ici <- tm_summarize(pbc[[version]], metrics = "ici", tau = 10e10, digits = 4)
+  ici <- pa_summarize(pbc[[version]], metrics = "ici", tau = 10e10, digits = 4)
   table <- replace_ici(previous, ici)
   write_metrics(table, file.path(output, "pbc", paste0("metrics_", version)))
   if (version == "after") {
@@ -84,7 +84,7 @@ for (version in c("before", "after")) {
       p <- pbc$after[[name]]
       t <- median(p$times)
       k <- findInterval(t, sort(p$times))
-      cal <- tm_calibration(1-p$surv_prob[, k], p$times, p$status, t)
+      cal <- pa_calibration(1-p$surv_prob[, k], p$times, p$status, t)
       stopifnot(table[[name]][table$Metric == "ici"] == round(cal$metrics["ici"], 4))
       calibration[[name]] <- cal
       record(cal, "PBC", name, sort(p$times)[k])
@@ -110,7 +110,7 @@ for (file in files) {
   original <- readRDS(file)
   result <- original
   tau <- result$settings$tau
-  ici <- tm_summarize_cr(result$predictions,
+  ici <- pa_summarize_cr(result$predictions,
     metrics = "ici", event_type = 1,
     tau = tau, t_star = tau, digits = 4, censoring = "cox")
   table <- replace_ici(original$metrics, ici)
@@ -118,7 +118,7 @@ for (file in files) {
   for (name in names(result$predictions)) {
     p <- result$predictions[[name]]
     k <- findInterval(tau, p$cif_pred[, 1])
-    cal <- tm_calibration_cr(as.numeric(p$cif_pred[k, -1]), p$times, p$status,
+    cal <- pa_calibration_cr(as.numeric(p$cif_pred[k, -1]), p$times, p$status,
                               t_star = tau, event_type = 1)
     stopifnot(table[[name]][table$Metric == "ici"] == round(cal$metrics["ici"], 4))
     calibration[[name]] <- cal

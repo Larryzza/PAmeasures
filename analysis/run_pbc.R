@@ -31,11 +31,11 @@ old <- paper_legacy_cox(root)
 make_predictions <- function(cox_fn) list(
   Cox = cox_fn(fits$Cox, covs, new_data = test),
   Cox.Reduce = cox_fn(fits$Cox.Reduce, c("age", "edema"), new_data = test),
-  Weibull.AFT = tm_predict_survreg(fits$Weibull.AFT, covs, new_data = test))
+  Weibull.AFT = pa_predict_survreg(fits$Weibull.AFT, covs, new_data = test))
 before <- make_predictions(old)
-after <- make_predictions(tm_predict_coxph)
+after <- make_predictions(pa_predict_coxph)
 tables <- lapply(list(before = before, after = after), function(p) {
-  tm_summarize(p, metrics = paper_cohort_metrics, tau = 10e10, digits = 4)
+  pa_summarize(p, metrics = paper_cohort_metrics, tau = 10e10, digits = 4)
 })
 for (name in names(tables)) {
   utils::write.csv(tables[[name]], file.path(out, paste0("metrics_", name, ".csv")), row.names = FALSE)
@@ -53,7 +53,7 @@ changed <- test
 changed$status[which(test$status == 1 & test$time <= median(test$time))[1]] <- 0
 checks <- do.call(rbind, lapply(c("Cox", "Cox.Reduce"), function(m) {
   cv <- if (m == "Cox") covs else c("age", "edema")
-  perturbed <- tm_predict_coxph(fits[[m]], cv, new_data = changed)
+  perturbed <- pa_predict_coxph(fits[[m]], cv, new_data = changed)
   ref <- survival::survfit(fits[[m]], newdata = test[order(test$time), ], se.fit = FALSE)
   expected <- t(summary(ref, times = sort(test$time), extend = TRUE)$surv)
   data.frame(Model = m, Probability_change_when_labels_changed = max(abs(after[[m]]$surv_prob - perturbed$surv_prob)),
@@ -69,7 +69,7 @@ saveRDS(list(train = train, test = test, models = fits, before = before, after =
          file.path(out, "pbc_comparison.rds"))
 settings <- paper_support(fits$Cox, test, 10e10)
 settings$probability_time_requested <- median(test$time)
-settings$probability_time_used <- sort(test$time)[PAmeasures:::tm_nearest_time_index(sort(test$time), median(test$time))]
+settings$probability_time_used <- sort(test$time)[PAmeasures:::pa_nearest_time_index(sort(test$time), median(test$time))]
 settings$calibration_time <- median(test$time)
 settings$calibration_prediction_time <- max(test$time[test$time <= settings$calibration_time])
 settings$calibration_method <- "pmcalibration restricted cubic spline; five knots"

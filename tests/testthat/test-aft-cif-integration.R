@@ -13,7 +13,7 @@ test_that("Weibull CIFs match the closed form, including scale five", {
       data = d, dist = "weibull", scale = sc)
     b <- survival::survreg(survival::Surv(time, status == 2) ~ 1,
       data = d, dist = "weibull", scale = sc)
-    p <- tm_predict_cif(model1 = a, model2 = b, newdata = nd,
+    p <- pa_predict_cif(model1 = a, model2 = b, newdata = nd,
                         covs = character(), tau = 4380)
     rate1 <- exp(-unname(stats::coef(a)) / sc)
     rate2 <- exp(-unname(stats::coef(b)) / sc)
@@ -33,8 +33,8 @@ test_that("AFT CIF values do not depend on intervening evaluation times", {
     data = d, dist = "weibull", scale = 0.7)
   coarse <- data.frame(time = c(100, 4380), status = 0L, x = c(-0.5, 0.5))
   fine <- rbind(coarse, data.frame(time = seq(1, 4300, length.out = 50), status = 0L, x = 0))
-  p <- tm_predict_cif(model1 = a, model2 = b, newdata = coarse, covs = "x")
-  q <- tm_predict_cif(model1 = a, model2 = b, newdata = fine, covs = "x")
+  p <- pa_predict_cif(model1 = a, model2 = b, newdata = coarse, covs = "x")
+  q <- pa_predict_cif(model1 = a, model2 = b, newdata = fine, covs = "x")
   expect_equal(p$cif_pred[, 2:3], q$cif_pred[match(p$cif_pred[, 1], q$cif_pred[, 1]), 2:3],
                tolerance = 1e-8)
 })
@@ -45,7 +45,7 @@ test_that("lognormal and loglogistic CIFs obey the equal-hazard identity", {
   for (dist in c("lognormal", "loglogistic")) {
     a <- survival::survreg(survival::Surv(time, status == 1) ~ x,
       data = d, dist = dist)
-    p <- tm_predict_cif(model1 = a, model2 = a, newdata = nd, covs = "x")
+    p <- pa_predict_cif(model1 = a, model2 = a, newdata = nd, covs = "x")
     lp <- stats::predict(a, newdata = nd, type = "lp")
     z <- outer(log(p$cif_pred[, 1]), lp, "-") / a$scale
     s <- if (dist == "lognormal") stats::pnorm(z, lower.tail = FALSE) else
@@ -61,7 +61,7 @@ test_that("unequal Weibull hazards agree with integration on the time scale", {
   b <- survival::survreg(survival::Surv(time, status == 2) ~ x,
     data = d, dist = "weibull", scale = 0.8)
   nd <- data.frame(time = c(100, 4380), status = 0L, x = c(-1, 1))
-  p <- tm_predict_cif(model1 = a, model2 = b, newdata = nd, covs = "x")
+  p <- pa_predict_cif(model1 = a, model2 = b, newdata = nd, covs = "x")
   sc1 <- exp(stats::predict(a, newdata = nd, type = "lp"))
   sc2 <- exp(stats::predict(b, newdata = nd, type = "lp"))
   expected <- sapply(seq_len(nrow(nd)), function(i) vapply(p$cif_pred[, 1], function(t) {

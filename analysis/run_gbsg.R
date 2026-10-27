@@ -29,12 +29,12 @@ km <- survival::survfit(survival::Surv(time, 1 - status) ~ 1, data = train)
 
 # Obtain inclusion weights on the complete phase-one data, before selecting rows.
 train$subco <- train$id %in% sub_train
-train$weight <- tm_case_cohort_weights(train$time, train$status, train$subco)
+train$weight <- pa_case_cohort_weights(train$time, train$status, train$subco)
 train$selected <- train$subco | train$status == 1
 cc_train <- train[train$selected, ]
 random_train <- train[train$id %in% sample(train$id, nrow(cc_train)), ]
 test$subco <- test$id %in% sub_test
-test$weight <- tm_case_cohort_weights(test$time, test$status, test$subco)
+test$weight <- pa_case_cohort_weights(test$time, test$status, test$subco)
 test$selected <- test$subco | test$status == 1
 cc_test <- test[test$selected, ]
 # Cox adapters sort subjects by time. Sort IDs, outcomes, covariates and weights
@@ -49,13 +49,13 @@ fit2 <- survival::coxph(survival::Surv(time, status) ~ .,
                         data = random_train[, model_cols], x = TRUE, y = TRUE)
 eval <- cc_test[, model_cols]
 models <- list(Cox.cc = fit1, Cox.random = fit2)
-predictions <- lapply(models, tm_predict_coxph, covs = covs, new_data = eval)
+predictions <- lapply(models, pa_predict_coxph, covs = covs, new_data = eval)
 for (p in predictions) {
   stopifnot(identical(p$times, eval$time), identical(as.numeric(p$status), as.numeric(eval$status)),
             all(is.finite(p$surv_prob)), all(is.finite(p$pred)))
 }
 stopifnot(all(is.finite(weights)), all(weights > 0))
-metrics <- tm_sample_design(predictions, case_weights = weights, km_cens = km,
+metrics <- pa_sample_design(predictions, case_weights = weights, km_cens = km,
                             metrics = paper_sample_metrics, tau = 10e10, digits = 4)
 stopifnot(all(is.finite(as.matrix(metrics[, -1]))))
 utils::write.csv(metrics, file.path(out, "metrics.csv"), row.names = FALSE)
@@ -67,7 +67,7 @@ utils::write.csv(cc_test[, c("id", "time", "status", "subco", "weight")],
 checks <- do.call(rbind, lapply(names(models), function(m) {
   changed <- eval; changed$status[1] <- 1 - changed$status[1]
   a <- predictions[[m]]
-  b <- tm_predict_coxph(models[[m]], covs, new_data = changed)
+  b <- pa_predict_coxph(models[[m]], covs, new_data = changed)
   data.frame(Model = m,
     Probability_change_when_labels_changed = max(abs(a$surv_prob - b$surv_prob)),
     Mean_change_when_labels_changed = max(abs(a$pred - b$pred)),

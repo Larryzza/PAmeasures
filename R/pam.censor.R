@@ -35,7 +35,7 @@ pam.censor<-function(y,y.predict,delta){
 
   #KM estimate for censoring distribution
   fit.km.censoring <- survfit(Surv(y.sorted, 1-delta.sorted) ~ 1  )
-  km.censoring.minus <- tm_censoring_left_limit(fit.km.censoring, y.sorted)
+  km.censoring.minus <- pa_censoring_left_limit(fit.km.censoring, y.sorted)
   ratio.km<- delta.sorted/km.censoring.minus
 
   ratio.km[is.nan(ratio.km)]<-0
@@ -71,7 +71,7 @@ pam.censor<-function(y,y.predict,delta){
 #' the order of tied rows.
 #' @keywords internal
 #' @noRd
-tm_censoring_left_limit <- function(fit, times) {
+pa_censoring_left_limit <- function(fit, times) {
   idx <- findInterval(times, fit$time, left.open = TRUE)
   c(1, fit$surv)[idx + 1L]
 }

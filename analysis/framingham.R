@@ -103,12 +103,12 @@ paper_run_framingham <- function(root, out = file.path(root, "results", "framing
     stop("A Fine-Gray model did not converge; do not use its metrics.")
   }
   predictions <- list(
-    FG = tm_predict_cif(fg_model = models$FG, newdata = test, covs = covs, tau = tau),
-    FG.Reduced = tm_predict_cif(fg_model = models$FG.Reduced, newdata = test,
+    FG = pa_predict_cif(fg_model = models$FG, newdata = test, covs = covs, tau = tau),
+    FG.Reduced = pa_predict_cif(fg_model = models$FG.Reduced, newdata = test,
                                covs = reduced_covs, tau = tau),
-    CSH.AFT = tm_predict_cif(model1 = models$AFT.Hypertension, model2 = models$AFT.Death,
+    CSH.AFT = pa_predict_cif(model1 = models$AFT.Hypertension, model2 = models$AFT.Death,
                             newdata = test, covs = covs, tau = tau),
-    CSH.AFT.FIX = tm_predict_cif(model1 = models$AFT.Fixed.Hypertension,
+    CSH.AFT.FIX = pa_predict_cif(model1 = models$AFT.Fixed.Hypertension,
                                 model2 = models$AFT.Fixed.Death,
                                 newdata = test, covs = covs, tau = tau))
   for (p in predictions) {
@@ -119,7 +119,7 @@ paper_run_framingham <- function(root, out = file.path(root, "results", "framing
               all(p$cif_pred[, -1] >= -1e-8 & p$cif_pred[, -1] <= 1 + 1e-8))
   }
   # Explicit metrics retain R/L components and omit the withdrawn R_SH/R_E.
-  metrics <- tm_summarize_cr(predictions, metrics = c("r_square", "l_square", "pseudo_r2",
+  metrics <- pa_summarize_cr(predictions, metrics = c("r_square", "l_square", "pseudo_r2",
                               "pseudo_r2_point", "c_index", "brier_score", "td_auc", "ici"),
                              event_type = 1, tau = tau, t_star = tau, digits = 4,
                              censoring = "cox")
@@ -142,7 +142,7 @@ paper_run_framingham <- function(root, out = file.path(root, "results", "framing
   utils::write.csv(support, file.path(out, "followup_support.csv"), row.names = FALSE)
   # Event-observation R2 weights can depend on censoring AFTER the horizon.
   # G(12y) alone is therefore not a diagnostic for this weighting strategy.
-  r2_ipcw <- getFromNamespace("tm_cr_event_ipcw", "PAmeasures")(
+  r2_ipcw <- getFromNamespace("pa_cr_event_ipcw", "PAmeasures")(
     test$time, test$status, censoring = "cox")
   r2_weights <- data.frame(RANDID = cohort$RANDID[-idx],
     original_time = test$time, original_status = test$status,

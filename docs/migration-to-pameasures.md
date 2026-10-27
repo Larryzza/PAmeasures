@@ -2,8 +2,14 @@
 
 Date: 2026-10-26 (America/Los_Angeles)
 Target: PAmeasures 2.0.0
-Development snapshot: 2.0.0.9000
+Initial snapshot: 2.0.0.9000
+Current development snapshot: 2.0.0.9002
 Repository: https://github.com/Larryzza/PAmeasures (initially private)
+
+The current public API uses `pa_`, with `pam.nlm()` retained for historical
+continuous-outcome calls. See [the API transition guide](pa-api-transition.md)
+for current names and compatibility rules. The initial migration validation
+report describes the earlier 2.0.0.9000 state.
 
 ## Baselines and provenance
 
@@ -23,7 +29,9 @@ Repository: https://github.com/Larryzza/PAmeasures (initially private)
 
 The package name, active namespace references, package-level help, citation,
 repository URLs, installation examples and test bootstrap now use PAmeasures.
-The current `tm_` functions, arguments and return structures remain in place.
+The original migration retained `tm_`; the subsequent API step renames those
+functions to `pa_` while retaining their arguments, computations and return
+structures. It also restores continuous-outcome assessment with `pa_nlm()`.
 No estimator, seed, test expectation or numerical fixture is intentionally
 changed. Historical TimeMetric NEWS and audit evidence retain their original
 names and versions.
@@ -41,13 +49,11 @@ Larryzza, and this does not assert that CRAN has approved a maintainer change.
 
 PAmeasures 0.1.0's public functions were `pam.nlm()`, `pam.censor()`,
 `pam.coxph()` and `pam.survreg()`, plus the `moore` dataset. The current package
-focuses on survival prediction evaluation; it retains `moore` and the
-survival-related implementations, but does not export those four historical
-interfaces. In particular, the nonlinear-regression `pam.nlm()` interface is
-not included. Full feature equivalence with 0.1.0 is not claimed.
-
-The deprecated aliases in `R/deprecated.R` preserve earlier TimeMetric script
-entry points. They are not a PAmeasures 0.1.0 compatibility layer.
+retains `moore`, restores `pam.nlm()` alongside numeric `pa_nlm()`, and exposes
+survival capabilities through the `pa_` interfaces. The other three historical
+function names are not exported. Full API compatibility with 0.1.0 is not
+claimed. Earlier TimeMetric script aliases have been removed; `pam.nlm()` is
+the sole supported historical public name.
 
 ## Manuscript and results
 
@@ -72,7 +78,7 @@ Validation results for this migration are recorded in
 * Confirm withdrawal/status of the separate TimeMetric CRAN submission.
 * Complete the PAmeasures maintainer handover and choose the monitored email;
   update Authors@R when that decision is made.
-* Finalize the intended feature scope and any future function-prefix changes.
+* Finalize the remaining feature scope; the primary `pa_` naming decision is implemented.
 * Review the inherited JOSS draft: update the metric-availability table,
   remove historical claims for retired metrics, and finalize AI usage
   disclosure and publication authorship with the human authors.

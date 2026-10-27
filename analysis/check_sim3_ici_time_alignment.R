@@ -33,7 +33,7 @@ dir.create(output, recursive = TRUE, showWarnings = FALSE)
 rows <- vector("list", nrow(old))
 for (i in seq_len(nrow(old))) {
   r <- old[i, ]
-  d <- tm_sim_cox_weibull(r$n, pi_c = 0, v = r$v,
+  d <- pa_sim_cox_weibull(r$n, pi_c = 0, v = r$v,
                          beta = r$beta*c(1, -1), seed = r$seed)
   d <- d[, c("time", "status", "x1", "x2")]
   ordered <- d[order(d$time), ]

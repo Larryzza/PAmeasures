@@ -94,12 +94,12 @@ paper_manifest(root, out, manifest_settings)
 utils::write.csv(support, file.path(out, "followup_support.csv"), row.names = FALSE)
 m <- old$models
 predictions <- list(
-  FG = tm_predict_cif(fg_model = m$FG, newdata = test, covs = covs, tau = tau),
-  FG.Reduced = tm_predict_cif(fg_model = m$FG.Reduced, newdata = test,
+  FG = pa_predict_cif(fg_model = m$FG, newdata = test, covs = covs, tau = tau),
+  FG.Reduced = pa_predict_cif(fg_model = m$FG.Reduced, newdata = test,
                              covs = reduced_covs, tau = tau),
-  CSH.AFT = tm_predict_cif(model1 = m$AFT.Hypertension, model2 = m$AFT.Death,
+  CSH.AFT = pa_predict_cif(model1 = m$AFT.Hypertension, model2 = m$AFT.Death,
                           newdata = test, covs = covs, tau = tau),
-  CSH.AFT.FIX = tm_predict_cif(model1 = m$AFT.Fixed.Hypertension,
+  CSH.AFT.FIX = pa_predict_cif(model1 = m$AFT.Fixed.Hypertension,
     model2 = m$AFT.Fixed.Death, newdata = test, covs = covs, tau = tau))
 checks <- do.call(rbind, lapply(names(predictions), function(n) {
   p <- predictions[[n]]
@@ -111,7 +111,7 @@ checks <- do.call(rbind, lapply(names(predictions), function(n) {
     tau_days = tau, CIF_knot_at_horizon = max(p$cif_pred[p$cif_pred[, 1] <= tau, 1]),
     Grid_maximum_days = max(p$cif_pred[, 1]))
 }))
-metrics <- tm_summarize_cr(predictions,
+metrics <- pa_summarize_cr(predictions,
   metrics = c("r_square", "l_square", "pseudo_r2", "pseudo_r2_point",
               "c_index", "brier_score", "td_auc", "ici"),
   event_type = 1, tau = tau, t_star = tau, digits = 4, censoring = "cox")
@@ -120,7 +120,7 @@ utils::write.csv(metrics, file.path(out, "metrics.csv"), row.names = FALSE)
 paper_write_md(metrics, file.path(out, "metrics.md"))
 utils::write.csv(checks, file.path(out, "prediction_checks.csv"), row.names = FALSE)
 utils::write.csv(cohort, file.path(out, "cohort_and_split.csv"), row.names = FALSE)
-ipcw <- getFromNamespace("tm_cr_event_ipcw", "PAmeasures")(
+ipcw <- getFromNamespace("pa_cr_event_ipcw", "PAmeasures")(
   test$time, test$status, censoring = "cox")
 r2_weights <- data.frame(RANDID = cohort$RANDID[cohort$Split == "Test"],
   time = test$time, status = test$status,

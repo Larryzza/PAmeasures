@@ -1,4 +1,4 @@
-# tm_plot_pred builds exactly two layers
+# pa_plot_pred builds exactly two layers
 
     WAoAAAACAAQFAwACAwAAAAANAAAAAgAAAMgAAADI
 

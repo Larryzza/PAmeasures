@@ -1,18 +1,18 @@
-test_that("package exports the tm_ API", {
+test_that("package exports the pa_ API", {
   exports <- getNamespaceExports("PAmeasures")
 
   expect_true(all(c(
-    "tm_survival_eval", "tm_survival_eval_cr", "tm_evaluate_two_phase",
-    "tm_fit_and_eval", "tm_predict_coxph", "tm_predict_survreg",
-    "tm_predict_cif", "tm_summarize", "tm_summarize_cr", "tm_sample_design",
-    "tm_case_cohort_weights", "tm_nested_case_control_weights",
-    "tm_plot_pred", "tm_plot_summary", "tm_sim_cox_weibull",
-    "tm_simulate_fine_gray", "tm_calibration", "tm_calibration_cr"
+    "pa_survival_eval", "pa_survival_eval_cr", "pa_evaluate_two_phase",
+    "pa_fit_and_eval", "pa_predict_coxph", "pa_predict_survreg",
+    "pa_predict_cif", "pa_summarize", "pa_summarize_cr", "pa_sample_design",
+    "pa_case_cohort_weights", "pa_nested_case_control_weights",
+    "pa_plot_pred", "pa_plot_summary", "pa_sim_cox_weibull",
+    "pa_simulate_fine_gray", "pa_calibration", "pa_calibration_cr"
   ) %in% exports))
-  # every public function carries the prefix, apart from the deprecated aliases
-  new_api <- grep("^tm_", exports, value = TRUE)
-  expect_length(new_api, 19L)   # original API plus the two calibration functions
-  expect_true("tm_metric_names" %in% exports)
+  # Every primary function uses pa_; pam.nlm is the retained compatibility entry.
+  new_api <- grep("^pa_", exports, value = TRUE)
+  expect_length(new_api, 20L)   # nineteen survival interfaces plus pa_nlm
+  expect_true("pa_metric_names" %in% exports)
 })
 
 test_that("the deleted Cluster C duplicates are gone", {
@@ -31,7 +31,7 @@ test_that("functions this suite reaches with ::: are genuinely internal", {
   expect_false(any(c(
     "Gt", "pam.Brier", "m_cif"
   ) %in% exports))
-  # tm_evaluate_two_phase was promoted from internal to public, so the
+  # pa_evaluate_two_phase was promoted from internal to public, so the
   # case-cohort and NCC functionality the paper advertises is now reachable
-  expect_true("tm_evaluate_two_phase" %in% exports)
+  expect_true("pa_evaluate_two_phase" %in% exports)
 })
