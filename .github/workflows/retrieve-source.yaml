@@ -1,0 +1,42 @@
+name: Retrieve the audited R-release source archive
+'on':
+  push:
+    branches:
+    - cran-check-2.0.0-*
+    paths:
+    - .github/workflows/retrieve-source.yaml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  retrieve:
+    name: Retrieve the exact approved R-release archive
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v5
+    - uses: actions/download-artifact@v8
+      with:
+        name: PAmeasures-2.0.0-current-release-source
+        path: submission
+        run-id: 40614035318
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Verify the exact release-build digest
+      run: |
+        python3 - <<'PYTHON'
+        from pathlib import Path
+        import hashlib
+        expected="ffa9bad393ff348b610299c2a63f7696efbe72491908f83da5a793e8d6b1f991"
+        assert hashlib.sha256(Path("submission/PAmeasures_2.0.0.tar.gz").read_bytes()).hexdigest()==expected
+        print("Source SHA256 verified")
+        PYTHON
+    - name: Retrieve verified archive segment 1/5
+      run: python3 emit-rebuilt-archive.py 0
+    - name: Retrieve verified archive segment 2/5
+      run: python3 emit-rebuilt-archive.py 1
+    - name: Retrieve verified archive segment 3/5
+      run: python3 emit-rebuilt-archive.py 2
+    - name: Retrieve verified archive segment 4/5
+      run: python3 emit-rebuilt-archive.py 3
+    - name: Retrieve verified archive segment 5/5
+      run: python3 emit-rebuilt-archive.py 4

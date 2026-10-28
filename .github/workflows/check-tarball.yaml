@@ -25,13 +25,22 @@ jobs:
     - name: Audit rebuilt contents and export final digest
       id: audit
       run: python3 audit-rebuilt-source.py
-    - name: Provide the exact audited source for credential-free retrieval
-      run: python3 emit-rebuilt-archive.py
+    - name: Provide audited source archive segment 1/5
+      run: python3 emit-rebuilt-archive.py 0
+    - name: Provide audited source archive segment 2/5
+      run: python3 emit-rebuilt-archive.py 1
+    - name: Provide audited source archive segment 3/5
+      run: python3 emit-rebuilt-archive.py 2
+    - name: Provide audited source archive segment 4/5
+      run: python3 emit-rebuilt-archive.py 3
+    - name: Provide audited source archive segment 5/5
+      run: python3 emit-rebuilt-archive.py 4
     - uses: actions/upload-artifact@v7
       with:
         name: PAmeasures-2.0.0-current-release-source
         path: submission/*
         retention-days: 30
+    if: '!contains(github.event.head_commit.message, ''[retrieve-source]'')'
   check:
     name: ${{ matrix.os }} (R ${{ matrix.r }})
     runs-on: ${{ matrix.os }}
