@@ -16,13 +16,9 @@ accuracy is available through `pa_nlm()` and the supported historical
 `pam.nlm()` entry point. All twenty primary interfaces use the `pa_` prefix.
 The historical `pam.censor()`, `pam.coxph()` and `pam.survreg()` interfaces are
 not exported; use the corresponding survival capabilities through the `pa_`
-interfaces. See the [API transition guide](docs/pa-api-transition.md) for
-compatibility details and the [migration record](docs/migration-to-pameasures.md)
+interfaces. See the [API transition guide](https://github.com/Larryzza/PAmeasures/blob/main/docs/pa-api-transition.md) for
+compatibility details and the [migration record](https://github.com/Larryzza/PAmeasures/blob/main/docs/migration-to-pameasures.md)
 for source provenance and historical validation.
-
-Historical R workspace snapshots were removed before public release. Existing
-clones made before this cleanup must be replaced with a fresh clone; do not
-merge their old history. See [the cleanup record](docs/workspace-history-cleanup.md).
 
 It separates **prediction** from **evaluation**: the evaluation functions take
 predicted survival probabilities or cumulative incidence functions from any
@@ -265,7 +261,7 @@ directly to the corresponding `pa_` names, with the same arguments and survival
 calculations. For example, use `pa_survival_eval()` and `pa_predict_coxph()`.
 The earlier 15 TimeMetric script aliases have been removed. `pam.nlm()` is
 retained as the sole historical public alias, with its four-decimal character
-format. See the [API transition guide](docs/pa-api-transition.md).
+format. See the [API transition guide](https://github.com/Larryzza/PAmeasures/blob/main/docs/pa-api-transition.md).
 
 ## Paper analyses and figures
 
@@ -291,7 +287,7 @@ package versions change. Reusing an unchanged run resumes simulation
 checkpoints; the real-data analyses are refitted each time. Simulation 3 can
 return a nonzero status for unestimable ICI repetitions even when Figure 6
 is produced; inspect its diagnostics and finite-count file as described in
-[the simulation notes](docs/simulation-ici.md).
+[the simulation notes](https://github.com/Larryzza/PAmeasures/blob/main/docs/simulation-ici.md).
 
 In RStudio, from this checkout:
 
@@ -345,15 +341,12 @@ rmarkdown::render("paper.code.Rmd", output_dir = "results/report")
 ```
 
 Rendering requires all four full simulation parts and all three real-data
-exports; smoke or incomplete results are rejected. See
-[the historical development record](docs/development-2026-10-18.md) for method
-changes and validation. Earlier development/audit records are preserved under
-`docs/superpowers/`.
+exports; smoke or incomplete results are rejected.
 
 The migrated manuscript figure-refresh driver is
-[`manuscript/update_all_figures.R`](manuscript/update_all_figures.R). It accepts
+[`manuscript/update_all_figures.R`](https://github.com/Larryzza/PAmeasures/blob/main/manuscript/update_all_figures.R). It accepts
 an explicit manuscript directory and saved-result paths; see
-[`manuscript/README.md`](manuscript/README.md). Historical results and clinical
+[`manuscript/README.md`](https://github.com/Larryzza/PAmeasures/blob/main/manuscript/README.md). Historical results and clinical
 inputs are not distributed in this repository. Existing TimeMetric checkpoint
 signatures differ after migration, so use a new output directory for new runs.
 `paper.md` contains the software-paper draft.
@@ -400,7 +393,7 @@ To select a part or a repetition range, append
 `--part=sim2_linear,sim2_nonlinear` or `--repeats=1:10` to the full-run command.
 Repeat the same command to resume an unchanged run. Before launching, ensure
 `pmcalibration`, `Hmisc` and the other package dependencies are available in
-the R library used by `Rscript`. See [simulation launch instructions](docs/simulation-ici.md)
+the R library used by `Rscript`. See [simulation launch instructions](https://github.com/Larryzza/PAmeasures/blob/main/docs/simulation-ici.md)
 for terminal and RStudio commands.
 
 To run package checks without creating paper results:
