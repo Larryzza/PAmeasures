@@ -298,6 +298,8 @@ Gang Li.
 
 The original PAmeasures 0.1.0 was authored by Xiaoyan Wang and Gang Li; their
 contributions are retained in the package authorship and provenance records.
+The survival prediction and evaluation framework was initially developed
+under the name TimeMetric and subsequently integrated into PAmeasures 2.0.0.
 
 ## License
 
