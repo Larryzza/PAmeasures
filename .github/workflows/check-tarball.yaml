@@ -76,7 +76,7 @@ jobs:
           library <- file.path(Sys.getenv("RUNNER_TEMP"), "Library")
           dir.create(library, recursive = TRUE, showWarnings = FALSE)
           cat("R_LIBS_USER=", library, "\n", file = Sys.getenv("GITHUB_ENV"), append = TRUE, sep = "")
-          config <- unlist(lapply(c("CC", "CFLAGS", "CPPFLAGS", "LDFLAGS", "CXX17", "FC", "FFLAGS", "FLIBS"), function(key) {
+          config <- unlist(lapply(c("CC", "CFLAGS", "CPPFLAGS", "LDFLAGS", "CXX17", "FC", "FFLAGS", "FCFLAGS", "FLIBS"), function(key) {
             c(key, system2(file.path(R.home("bin"), "R"), c("CMD", "config", key), stdout = TRUE))
           }))
           writeLines(config, "compiler-config.txt")
