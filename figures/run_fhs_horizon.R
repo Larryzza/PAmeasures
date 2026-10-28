@@ -16,8 +16,7 @@ for (a in commandArgs(trailingOnly = TRUE)) {
   if (startsWith(a, "--output=")) out <- sub("^--output=", "", a) else
     stop("Use --years=12, --input=/path/to/fit.rds, --output=/path.")
 }
-if (is.null(input)) input <- file.path(paper_current_real_run(root), "framingham",
-                                      "framingham_visit3_10y.rds")
+if (is.null(input)) input <- paper_framingham_fit(paper_current_real_run(root))
 stopifnot(length(years) == 1L, is.finite(years), years > 0, file.exists(input))
 tag <- paste0(format(years, trim = TRUE, scientific = FALSE), "y")
 explicit_output <- !is.null(out)

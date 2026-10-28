@@ -36,11 +36,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Tong Zhu \email{toz015@ucla.edu}
+\strong{Maintainer}: Zian Zhuang \email{zianzhuang@ucla.edu}
 
 Authors:
 \itemize{
-  \item Zian Zhuang
+  \item Tong Zhu
   \item Wen Su
   \item Xiaowu Dai
   \item Xiaoyan Wang

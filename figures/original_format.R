@@ -43,16 +43,27 @@ paper_original_real_plot <- function(dataset, predictions, tau = 3650) {
   stop("Unknown real-data figure: ", dataset)
 }
 
+paper_framingham_fit <- function(out) {
+  candidates <- file.path(out, "framingham",
+    c("framingham_visit3_12y.rds", "framingham_visit3_10y.rds"))
+  found <- candidates[file.exists(candidates)]
+  if (!length(found)) stop("Missing FHS training fit in ", file.path(out, "framingham"),
+                           ". Run figures/run_real_data.R first.")
+  found[1L]
+}
+
 paper_original_real <- function(root, out, datasets = c("pbc", "framingham", "gbsg")) {
   files <- c(pbc = "pbc/pbc_comparison.rds",
              framingham = "framingham/framingham_visit3_10y.rds", gbsg = "gbsg/gbsg2.rds")
+  if ("framingham" %in% datasets)
+    files[["framingham"]] <- normalizePath(paper_framingham_fit(out), mustWork = TRUE)
   stems <- c(pbc = "paper.fig1", framingham = "paper.fig2", gbsg = "paper.fig3")
   sizes <- list(pbc = c(9, 3.5), framingham = c(9, 7), gbsg = c(9, 4))
   aliases <- c(pbc = "pbc", framingham = "framingham_visit3_10y", gbsg = "gbsg2")
   active_file <- file.path(out, "framingham", "active_horizon.csv")
   if ("framingham" %in% datasets && file.exists(active_file)) {
     active <- utils::read.csv(active_file, stringsAsFactors = FALSE)
-    fit <- file.path(out, files[["framingham"]])
+    fit <- files[["framingham"]]
     if (nrow(active) != 1L || !file.exists(fit) ||
         !identical(active$Fit_source_md5, unname(tools::md5sum(fit)))) {
       stop("FHS fit changed: rerun figures/run_fhs_horizon.R --years=12 with this --input.")

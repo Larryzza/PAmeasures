@@ -1,11 +1,11 @@
 Package: PAmeasures
 Type: Package
 Title: Performance Assessment for Continuous and Survival Outcomes
-Version: 2.0.0.9002
-Date: 2026-10-26
+Version: 2.0.0
+Date: 2026-10-27
 Authors@R: c(
-    person("Tong", "Zhu", email = "toz015@ucla.edu", role = c("aut", "cre")),
-    person("Zian", "Zhuang", role = "aut"),
+    person("Tong", "Zhu", role = "aut"),
+    person("Zian", "Zhuang", email = "zianzhuang@ucla.edu", role = c("aut", "cre")),
     person("Wen", "Su", role = "aut"),
     person("Xiaowu", "Dai", role = "aut"),
     person("Xiaoyan", "Wang", role = "aut"),

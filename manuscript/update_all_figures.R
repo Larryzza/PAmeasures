@@ -33,7 +33,7 @@ update_all_figures <- function(manuscript_dir = NULL,
 
   # Read the same saved predictions used by the current manuscript figures.
   active <- utils::read.csv(file.path(real_output, "framingham", "active_horizon.csv"))
-  fit <- file.path(real_output, "framingham", "framingham_visit3_10y.rds")
+  fit <- helper$paper_framingham_fit(real_output)
   if (nrow(active) != 1L || active$Horizon_years != 12 ||
       !identical(active$Fit_source_md5, unname(tools::md5sum(fit))))
     stop("The saved FHS 12-year selection is missing or out of date.")

@@ -31,7 +31,7 @@ between them.
 or private data committed to a repository, and any defect that could expose data
 belonging to someone else.
 
-Email the maintainer directly at <toz015@ucla.edu> with "PAmeasures security" in
+Email the maintainer directly at <zianzhuang@ucla.edu> with "PAmeasures security" in
 the subject line, and include enough detail to reproduce the problem. Please
 allow time for the issue to be assessed before discussing it publicly.
 

@@ -133,10 +133,9 @@ specific metrics or data settings. The unique contribution of `PAmeasures`
 is to provide a comprehensive framework that brings together $R^2$-type
 measures, C-index, Brier score, and time-dependent AUC across right-censored
 data, competing risks data, case-cohort studies, and nested case-control
-studies. This development line revives the original PAmeasures package and integrates
-the TimeMetric implementation into its continued development. Its goal is a
-unified workflow for evaluating and comparing models across multiple
-performance measures and survival data structures.
+studies. PAmeasures 2.0.0 expands the original package with methods adapted
+from TimeMetric. It provides a unified workflow for evaluating and comparing
+models across multiple performance measures and survival data structures.
 
 # Software Design
 

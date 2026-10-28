@@ -38,7 +38,7 @@ if (is.null(out)) stop("The computation output directory was not selected.")
 if ("framingham" %in% selected) {
   status <- system2(file.path(R.home("bin"), "Rscript"),
     c("--vanilla", shQuote(file.path(root, "figures", "run_fhs_horizon.R")), "--years=12",
-      shQuote(paste0("--input=", file.path(out, "framingham", "framingham_visit3_10y.rds")))))
+      shQuote(paste0("--input=", paper_framingham_fit(out)))))
   if (status != 0) quit(save = "no", status = status)
 }
 print(paper_original_real(root,out,selected), row.names=FALSE)

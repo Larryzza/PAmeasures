@@ -1,15 +1,17 @@
 # PAmeasures development migration
 
 Date: 2026-10-26 (America/Los_Angeles)
-Target: PAmeasures 2.0.0
+Package version: PAmeasures 2.0.0
 Initial snapshot: 2.0.0.9000
-Current development snapshot: 2.0.0.9002
+Last development snapshot: 2.0.0.9002
 Repository: https://github.com/Larryzza/PAmeasures (initially private)
 
 The current public API uses `pa_`, with `pam.nlm()` retained for historical
 continuous-outcome calls. See [the API transition guide](pa-api-transition.md)
 for current names and compatibility rules. The initial migration validation
-report describes the earlier 2.0.0.9000 state.
+report describes the earlier 2.0.0.9000 state. Historical validation reports
+retain the versions they checked; they are not checks of the 2.0.0 release
+tarball.
 
 Historical commit IDs in older reports refer to the pre-cleanup history or
 the original TimeMetric repository. Local baseline tags have been rewritten

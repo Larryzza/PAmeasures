@@ -1,6 +1,6 @@
 # PAmeasures pa_ API transition
 
-Development version: 2.0.0.9002. Date: 2026-10-26 (America/Los_Angeles).
+Package version: 2.0.0. Updated: 2026-10-27.
 
 The primary API contains twenty `pa_` functions. `pam.nlm()` is the only
 supported historical public name. All original `tm_` exports and the fifteen
@@ -73,6 +73,7 @@ dataset remains available.
 
 The baseline before this step is tagged `before-pa-api-2026-10-26`, pointing to
 5a791aacef9d378e632bc49d256c0b0e8409c625. The prior migration report describes
-that earlier state; current validation is in
-`validation/pa-api-2026-10-26.md`. Historical audit reports and archived
-manuscript helpers keep their original names and results.
+that earlier state. The API validation in `validation/pa-api-2026-10-26.md`
+records development snapshot 2.0.0.9002, not a check of the 2.0.0 release
+tarball. Historical audit reports and archived manuscript helpers keep their
+original names and results.

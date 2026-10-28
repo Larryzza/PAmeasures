@@ -10,15 +10,15 @@
 predictive performance across right-censored survival data, competing risks,
 and two-phase sampling designs (case-cohort and nested case-control).
 
-This is the development repository for the planned **PAmeasures 2.0.0**
-revival, starting from the TimeMetric `paper` branch at
-`f9fd19f73d7abefc8cb1c54c415ce99c1fd96ba0`. The development version is
-`2.0.0.9002`; it is not a CRAN release. Continuous-outcome accuracy is available
-through `pa_nlm()` and the supported historical `pam.nlm()` entry point.
-The survival interfaces and statistical implementations are retained.
-Full compatibility with all PAmeasures 0.1.0 interfaces is not promised.
-See the [migration record](docs/migration-to-pameasures.md)
-for source provenance and validation.
+This repository contains **PAmeasures 2.0.0**, extending the original package
+with survival evaluation methods adapted from TimeMetric. Continuous-outcome
+accuracy is available through `pa_nlm()` and the supported historical
+`pam.nlm()` entry point. All twenty primary interfaces use the `pa_` prefix.
+The historical `pam.censor()`, `pam.coxph()` and `pam.survreg()` interfaces are
+not exported; use the corresponding survival capabilities through the `pa_`
+interfaces. See the [API transition guide](docs/pa-api-transition.md) for
+compatibility details and the [migration record](docs/migration-to-pameasures.md)
+for source provenance and historical validation.
 
 Historical R workspace snapshots were removed before public release. Existing
 clones made before this cleanup must be replaced with a fresh clone; do not
@@ -30,6 +30,8 @@ source, so a model fitted outside the package can be assessed with the same
 metrics as one fitted by it.
 
 ## Installation
+
+Install the version in this repository from GitHub:
 
 ```r
 # install.packages("remotes")
@@ -267,6 +269,42 @@ format. See the [API transition guide](docs/pa-api-transition.md).
 
 ## Paper analyses and figures
 
+To rerun every simulation and all three real-data analyses with one command,
+run from this checkout:
+
+```sh
+# Check dependencies and historical PBC source without fitting anything.
+Rscript --vanilla figures/run_all.R
+
+# Refit real-data models, then run all four full simulation parts (100 repeats).
+Rscript --vanilla figures/run_all.R --mode=full --output=results/reruns/pa_full
+```
+
+The unified runner loads this checkout's PAmeasures code. Outputs are grouped
+under the selected directory: `real_data/` for fits and diagnostics, `paper/`
+for real-data manuscript figures/tables, and `simulations/` for simulation
+checkpoints, metrics and figures. `run_all_status.csv` records both exit codes;
+a failed real-data step does not prevent the simulation step from running.
+Existing global manuscript exports and manuscript files are not replaced.
+Use a new output directory for a fresh run or after computation sources or
+package versions change. Reusing an unchanged run resumes simulation
+checkpoints; the real-data analyses are refitted each time. Simulation 3 can
+return a nonzero status for unestimable ICI repetitions even when Figure 6
+is produced; inspect its diagnostics and finite-count file as described in
+[the simulation notes](docs/simulation-ici.md).
+
+In RStudio, from this checkout:
+
+```r
+source("figures/run_all.R")
+run_all() # check only
+run_all(mode = "full", output = "results/reruns/pa_full")
+```
+
+The runner propagates `.libPaths()` to its child R sessions. For a dependency
+in a separate library, add that directory to `.libPaths()` in RStudio, or set
+`R_LIBS=/path/to/library` before `Rscript` in the terminal.
+
 Run these commands from this checkout. They load its local package code rather
 than an older installed PAmeasures version. The analyses also need `pkgload`,
 `cmprsk`, `randomForestSRC`, and `riskCommunicator` (the Framingham data source).
@@ -308,7 +346,7 @@ rmarkdown::render("paper.code.Rmd", output_dir = "results/report")
 
 Rendering requires all four full simulation parts and all three real-data
 exports; smoke or incomplete results are rejected. See
-[the current development record](docs/development-2026-10-18.md) for method
+[the historical development record](docs/development-2026-10-18.md) for method
 changes and validation. Earlier development/audit records are preserved under
 `docs/superpowers/`.
 

@@ -1,50 +1,50 @@
-# PAmeasures 2.0.0.9002 (development)
+# PAmeasures 2.0.0
 
-* Standardize all twenty primary exported interfaces on `pa_`. The nineteen
-  former `tm_` survival interfaces retain their arguments and computations
-  under the new prefix. Update internal helpers, tests, analysis and plotting
-  scripts, generated help and active usage documentation together.
-* Remove the fifteen earlier TimeMetric script aliases. No `tm_` entry is
-  exported. `pam.nlm()` is the sole supported historical name.
-* Keep original numerical fixture values and serialized snapshots; update
-  snapshot headings only to match renamed test descriptions. Historical
-  development reports and archived manuscript helpers retain their old names.
-* Adapt the isolated historical Cox comparison to the renamed internal helpers
-  while preserving its original git-object path. Use fresh output directories
-  when source fingerprints differ from old simulation checkpoints.
-* Make the executable scientific audit call this PAmeasures namespace
-  explicitly, rather than an unrelated installed TimeMetric version.
+## New features
 
-# PAmeasures 2.0.0.9001 (development)
+* Extend performance assessment to right-censored survival outcomes, competing
+  risks, case-cohort designs and nested case-control designs. Prediction and
+  evaluation are separate, allowing externally fitted predictions to be used.
+* Provide twenty primary `pa_` interfaces for prediction, evaluation,
+  calibration, model summaries, sampling weights, plotting and simulation.
+  Survival methods are adapted from TimeMetric; its historical release notes
+  are retained below.
+* Add `pa_nlm()` for continuous-outcome R-squared and L-squared, returning
+  unrounded numeric results. Retain `pam.nlm()` with its historical field
+  names and four-decimal character format, using the same calculation core.
+* Provide integrated and point-in-time R-squared measures, concordance,
+  Brier scores and time-dependent AUC for their supported outcome settings.
+* Provide ICI, E50 and E90 calibration assessment at a specified time for
+  right-censored and competing-risk cohorts, and sampling-weighted calibration
+  for right-censored two-phase designs. Evaluation defaults include ICI;
+  E50 and E90 can be requested explicitly.
 
-* Restore continuous-outcome R-squared and L-squared assessment with
-  `pa_nlm()`, returning unrounded numeric results. The supported `pam.nlm()`
-  entry retains the historical field names and four-decimal character format,
-  using the same calculation core. The archived 0.1.0 implementation is kept
-  as a test reference, including its original Moore's Law example.
-* Validate paired finite vectors explicitly. Constant predictions use an
-  intercept-only correction; undefined denominators return NA with a warning
-  while retaining any other defined measure. Overflow and underflow in
-  squared deviations require rescaling. These explicit edge rules replace
-  historical incidental NaN/Inf or missing-value behavior.
-* Broaden package positioning to include continuous outcomes. Existing
-  survival estimators, metric definitions and numerical references are unchanged.
+## Compatibility and input handling
 
-# PAmeasures 2.0.0.9000 (development)
+* All primary function names use `pa_`. `pam.nlm()` is the sole supported
+  historical public function name. The PAmeasures 0.1.0 names `pam.censor()`,
+  `pam.coxph()` and `pam.survreg()`, the `tm_` interfaces and earlier TimeMetric
+  script aliases are not exported. Full API compatibility with 0.1.0 is not
+  claimed. The `moore` dataset is retained.
+* Validate paired finite vectors explicitly for continuous outcomes. Constant
+  predictions use an intercept-only correction. Undefined denominators return
+  NA with a warning while retaining any other defined measure. Inputs causing
+  overflow or underflow in squared deviations require rescaling. These
+  documented edge rules replace historical incidental NaN/Inf behavior.
+* Retain the GPL-3 license, original PAmeasures authorship and TimeMetric MIT
+  notices for the adapted source.
 
-* Begin the PAmeasures 2.0.0 revival from TimeMetric's `paper` branch at
-  f9fd19f73d7abefc8cb1c54c415ce99c1fd96ba0. Preserve its Git history and
-  record that commit with the `timemetric-paper-baseline-2026-10-26` tag.
-* Rename the package and active namespace references to PAmeasures; retain
-  the `tm_` API, existing script aliases and statistical implementations.
-  Original PAmeasures 0.1.0 API compatibility is not promised.
-* Move development to Larryzza/PAmeasures, update package help, installation
-  instructions and citation metadata, and retain historical audit records.
-* Distribute the revival under GPL-3, preserving TimeMetric MIT notices and
-  original PAmeasures author attribution.
-* Include the current manuscript figure-refresh driver with explicit input
-  paths, plus archived copies of earlier helpers. Generated results and
-  clinical data are not included.
+## Documentation and analysis workflows
+
+* Update package help, examples and citation metadata for the unified API.
+* Include repository scripts for the paper simulations, real-data analyses
+  and manuscript figures. A unified runner checks dependencies and runs all
+  analyses, with simulation checkpoints for resumption. Manuscript refreshes
+  can redraw saved results without refitting models. Generated results and
+  clinical predictions are excluded from the distributed source package.
+* Require a new simulation output directory when computation sources,
+  settings or package versions change, preventing incompatible checkpoints
+  from being mixed.
 
 # TimeMetric 0.2.1
 
