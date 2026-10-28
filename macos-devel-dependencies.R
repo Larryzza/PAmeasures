@@ -5,7 +5,7 @@ fields <- intersect(c("Depends", "Imports", "LinkingTo", "Suggests"), colnames(d
 required <- trimws(unlist(strsplit(paste(d[1L, fields], collapse = ","), ",")))
 required <- unique(sub("[[:space:]]*[(].*$", "", required))
 required <- unique(c(setdiff(required[nzchar(required)], "R"),
-                     "rcmdcheck", "tinytex", "jsonlite", "V8"))
+                     "rcmdcheck", "tinytex", "jsonlite", "V8", "xml2"))
 dir.create("dependency-install-logs", showWarnings = FALSE)
 available <- vapply(required, requireNamespace, logical(1), quietly = TRUE)
 writeLines(paste(required, available), "dependency-status-before.txt")

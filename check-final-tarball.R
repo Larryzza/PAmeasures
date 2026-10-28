@@ -1,7 +1,22 @@
 cat(R.version.string, "\n")
 print(Sys.which(c("pdflatex", "makeindex", "pandoc", "tidy")))
 stopifnot(nzchar(Sys.which("pandoc")), nzchar(Sys.which("tidy")),
-          requireNamespace("V8", quietly = TRUE))
+          requireNamespace("V8", quietly = TRUE), requireNamespace("xml2", quietly = TRUE))
+stopifnot(tolower(Sys.getenv("_R_CHECK_CRAN_INCOMING_CHECK_FILE_URIS_")) == "true")
+# Check links in the extracted submission archive, rather than the full repository.
+check_readme_file_uris <- function(dir) {
+  dir <- normalizePath(dir)
+  wd <- getwd(); setwd(dir); on.exit(setwd(wd))
+  db <- get("url_db_from_package_README_md", asNamespace("tools"))(dir)
+  stopifnot(nrow(db) > 0L)
+  parts <- get("parse_URI_reference", asNamespace("tools"))(db$URL)
+  local <- which(parts[, "scheme"] %in% c("", "file"))
+  missing <- local[!file.exists(file.path(dir, dirname(db$Parent[local]), parts[local, "path"]))]
+  if (length(missing)) stop("Invalid README file URIs: ", paste(db$URL[missing], collapse = ", "))
+  cat("::notice title=README URI preflight::", nrow(db),
+      " links parsed; 0 invalid file URIs; CRAN file-URI check enabled.\n", sep = "")
+}
+check_readme_file_uris("PAmeasures")
 result <- rcmdcheck::rcmdcheck(
   path = "submission/PAmeasures_2.0.0.tar.gz",
   args = c("--as-cran", "--run-donttest"),

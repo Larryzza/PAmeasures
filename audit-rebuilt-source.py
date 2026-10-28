@@ -26,7 +26,8 @@ def dcf(data):
 a,b=members(original),members(rebuilt)
 if set(a)!=set(b): raise RuntimeError("Rebuild changed the archive file list")
 changed=[name for name in sorted(a) if a[name]!=b[name]]
-allowed={"PAmeasures/DESCRIPTION","PAmeasures/build/partial.rdb"}
+allowed={"PAmeasures/DESCRIPTION","PAmeasures/build/partial.rdb",
+         "PAmeasures/README.md","PAmeasures/tests/testthat/test-paper-fhs-fit-path.R"}
 if set(changed)-allowed: raise RuntimeError("Unexpected source changes: "+str(changed))
 da,db=dcf(a["PAmeasures/DESCRIPTION"]),dcf(b["PAmeasures/DESCRIPTION"])
 changed_fields=[key for key in set(da)|set(db) if da.get(key)!=db.get(key)]
@@ -35,10 +36,25 @@ if db.get("Package")!="PAmeasures" or db.get("Version")!="2.0.0": raise RuntimeE
 for name,data in b.items():
     for forbidden in [b"/Users/",b"Dropbox/",b"xywang@ucla.edu",b"BEGIN OPENSSH PRIVATE KEY"]:
         if forbidden in data: raise RuntimeError("Private/local marker found in "+name)
+for archive_name,reviewed in [
+    ("PAmeasures/README.md","resubmission/README.md"),
+    ("PAmeasures/tests/testthat/test-paper-fhs-fit-path.R","resubmission/test-paper-fhs-fit-path.R")]:
+    if b[archive_name]!=Path(reviewed).read_bytes():
+        raise RuntimeError("Rebuild does not contain the reviewed correction: "+archive_name)
+# File targets must be present in the source archive, independently of a checkout.
+from urllib.parse import urlsplit,unquote
+import posixpath
+local_links=[]
+for value in re.findall(r"\]\(([^)\s]+)\)",b["PAmeasures/README.md"].decode()):
+    parts=urlsplit(value)
+    if parts.scheme or not parts.path: continue
+    local_links.append(value)
+    target=posixpath.normpath(posixpath.join("PAmeasures",unquote(parts.path)))
+    if target not in b: raise RuntimeError("Broken README file URI: "+value)
 sha=hashlib.sha256(rebuilt.read_bytes()).hexdigest()
 summary=dict(R=Path("submission/R-build-version.txt").read_text().strip(),source_sha256=sha,
              bytes=rebuilt.stat().st_size,files=len(b),changed_files=changed,
-             changed_description_fields=sorted(changed_fields),unchanged_other_source_files=True)
+             changed_description_fields=sorted(changed_fields),unchanged_other_source_files=True,readme_local_file_links=len(local_links),invalid_readme_file_uris=0)
 Path("submission/SHA256SUMS").write_text(sha+"  PAmeasures_2.0.0.tar.gz\n")
 Path("submission/build-audit.json").write_text(json.dumps(summary,indent=2)+"\n")
 Path("submission/source-manifest.json").write_text(json.dumps([

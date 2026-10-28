@@ -5,6 +5,10 @@ root <- getwd()
 dir.create("build-stage", showWarnings = FALSE)
 dir.create("submission", showWarnings = FALSE)
 untar("PAmeasures_2.0.0.tar.gz", exdir = "build-stage")
+# Apply only the reviewed README correction and the installed-test guard.
+stopifnot(file.copy("resubmission/README.md", "build-stage/PAmeasures/README.md", overwrite = TRUE))
+stopifnot(file.copy("resubmission/test-paper-fhs-fit-path.R",
+                   "build-stage/PAmeasures/tests/testthat/test-paper-fhs-fit-path.R", overwrite = TRUE))
 writeLines(R.version.string, "submission/R-build-version.txt")
 setwd("build-stage")
 output <- system2(file.path(R.home("bin"), "R"), c("CMD", "build", "PAmeasures"),
