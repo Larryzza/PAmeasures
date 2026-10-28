@@ -54,6 +54,21 @@ jobs:
           test -r /opt/R/arm64/include/libintl.h
           test -r /opt/R/arm64/lib/libintl.a
           ls -l /opt/R/arm64/include/libintl.h /opt/R/arm64/lib/libintl.a
+      - name: Configure the Flang intrinsic module search path
+        shell: bash
+        run: |
+          set -euo pipefail
+          modules=/opt/R/flang-23/lib/clang/23/finclude/flang/arm64-apple-darwin22.6.0
+          if [ ! -r "$modules/iso_fortran_env.mod" ]; then
+            archive="$RUNNER_TEMP/flang-23.1.1.tar.xz"
+            curl --fail --silent --show-error --location --retry 3 \
+              https://github.com/R-macos/llvm-project/releases/download/23.1.1/flang-23.1.1-darwin22.6.0.tar.xz \
+              -o "$archive"
+            echo "d622136b9c0c2030986cc786edd673ae5a52acdd25e5123d12c9edca5f84016d  $archive" | shasum -a 256 -c -
+            sudo tar -xJf "$archive" -C /
+          fi
+          test -r "$modules/iso_fortran_env.mod"
+          Rscript configure-flang-modules.R
       - name: Record compiler configuration and probe C/Fortran compilation
         shell: Rscript {0}
         run: |
@@ -66,7 +81,7 @@ jobs:
           }))
           writeLines(config, "compiler-config.txt")
           writeLines(c("#include <libintl.h>", "void c_probe(double *x) { *x = 1.0; }"), "c-compiler-probe.c")
-          writeLines(c("subroutine f_probe(x)", "real(8) :: x", "x = 1.0d0", "end subroutine"), "fortran-compiler-probe.f90")
+          writeLines(c("subroutine f_probe(x)", "use, intrinsic :: iso_fortran_env, only: real64", "real(real64) :: x", "x = 1.0_real64", "end subroutine"), "fortran-compiler-probe.f90")
           output <- system2(file.path(R.home("bin"), "R"),
             c("CMD", "SHLIB", "c-compiler-probe.c", "fortran-compiler-probe.f90"), stdout = TRUE, stderr = TRUE)
           writeLines(output, "compiler-probe.log")
@@ -140,6 +155,11 @@ jobs:
             source_sha256 = as.character(tools::sha256sum("PAmeasures_2.0.0.tar.gz")),
             errors = result$errors, warnings = result$warnings, notes = result$notes)
           jsonlite::write_json(summary, "check-summary.json", pretty = TRUE, auto_unbox = TRUE)
+          public_summary <- list(R = summary$R, platform = summary$platform,
+            source_sha256 = summary$source_sha256, errors = length(summary$errors),
+            warnings = length(summary$warnings), notes = length(summary$notes))
+          cat("::notice title=Source tarball check summary::",
+              jsonlite::toJSON(public_summary, auto_unbox = TRUE), "\n", sep = "")
           for (kind in c("errors", "warnings", "notes")) {
             values <- summary[[kind]]
             for (value in values) {
@@ -170,6 +190,7 @@ jobs:
             dependency-sessionInfo.txt
             dependency-error-summary.txt
             compiler-config.txt
+            flang-module-config.txt
             compiler-probe.log
             index-smoke.*
           retention-days: 14
