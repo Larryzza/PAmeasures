@@ -1,7 +1,9 @@
 test_that("FHS figure consumers resolve new fits and retain historical runs", {
   root <- skip_without_source_tree()
+  path <- file.path(root, "figures", "original_format.R")
+  skip_if_not(file.exists(path), "figure helpers are excluded from installed builds")
   helper <- new.env(parent = globalenv())
-  sys.source(file.path(root, "figures", "original_format.R"), envir = helper)
+  sys.source(path, envir = helper)
   out <- tempfile("fhs_fit_")
   dir.create(file.path(out, "framingham"), recursive = TRUE)
   on.exit(unlink(out, recursive = TRUE), add = TRUE)
