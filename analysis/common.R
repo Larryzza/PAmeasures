@@ -49,16 +49,6 @@ paper_manifest <- function(root, out, settings) {
   invisible(sig)
 }
 
-paper_legacy_cox <- function(root) {
-  code <- paper_git(root, "show", "e925507a30c4f56dcd3ef6693676f18128dd8767:R/tm_predict_coxph.R")
-  e <- new.env(parent = asNamespace("PAmeasures"))
-  # Historical source keeps its original git path; adapt identifiers only in
-  # the isolated legacy environment so it can use this checkout's helpers.
-  code <- gsub("\\btm_", "pa_", code, perl = TRUE)
-  eval(parse(text = code), envir = e)
-  e$pa_predict_coxph
-}
-
 paper_write_md <- function(d, file) {
   rows <- apply(d, 1, function(x) paste0("| ", paste(x, collapse = " | "), " |"))
   writeLines(c(paste0("| ", paste(names(d), collapse = " | "), " |"),

@@ -10,15 +10,9 @@
 predictive performance across right-censored survival data, competing risks,
 and two-phase sampling designs (case-cohort and nested case-control).
 
-This repository contains **PAmeasures 2.0.0**, extending the original package
-with survival evaluation methods adapted from TimeMetric. Continuous-outcome
-accuracy is available through `pa_nlm()` and the supported historical
-`pam.nlm()` entry point. All twenty primary interfaces use the `pa_` prefix.
-The historical `pam.censor()`, `pam.coxph()` and `pam.survreg()` interfaces are
-not exported; use the corresponding survival capabilities through the `pa_`
-interfaces. See the [API transition guide](https://github.com/Larryzza/PAmeasures/blob/main/docs/pa-api-transition.md) for
-compatibility details and the [migration record](https://github.com/Larryzza/PAmeasures/blob/main/docs/migration-to-pameasures.md)
-for source provenance and historical validation.
+**PAmeasures 2.0.0** is available on
+[CRAN](https://CRAN.R-project.org/package=PAmeasures).
+It provides a consistent `pa_` interface for prediction and evaluation.
 
 It separates **prediction** from **evaluation**: the evaluation functions take
 predicted survival probabilities or cumulative incidence functions from any
@@ -27,7 +21,16 @@ metrics as one fitted by it.
 
 ## Installation
 
-Install the version in this repository from GitHub:
+Install the released version from CRAN:
+
+```r
+install.packages("PAmeasures")
+```
+
+If a binary is not yet available for your Windows or macOS R version, install
+from source with `install.packages("PAmeasures", type = "source")`.
+
+For the development version from GitHub:
 
 ```r
 # install.packages("remotes")
@@ -254,153 +257,39 @@ prediction order.
 Both are optional; the function reports which package to install if one is
 needed and absent.
 
-## Function naming
+## Compatibility
 
-All 20 primary functions use `pa_`. The former 19 `tm_` entry points map
-directly to the corresponding `pa_` names, with the same arguments and survival
-calculations. For example, use `pa_survival_eval()` and `pa_predict_coxph()`.
-The earlier 15 TimeMetric script aliases have been removed. `pam.nlm()` is
-retained as the sole historical public alias, with its four-decimal character
-format. See the [API transition guide](https://github.com/Larryzza/PAmeasures/blob/main/docs/pa-api-transition.md).
+Current functions use the `pa_` prefix. For continuous outcomes, `pam.nlm()`
+is also supported for compatibility with earlier PAmeasures releases.
+See the [API transition guide](https://github.com/Larryzza/PAmeasures/blob/main/docs/pa-api-transition.md)
+for earlier function names and their current equivalents.
 
-## Paper analyses and figures
+## Citation
 
-To rerun every simulation and all three real-data analyses with one command,
-run from this checkout:
-
-```sh
-# Check dependencies and historical PBC source without fitting anything.
-Rscript --vanilla figures/run_all.R
-
-# Refit real-data models, then run all four full simulation parts (100 repeats).
-Rscript --vanilla figures/run_all.R --mode=full --output=results/reruns/pa_full
-```
-
-The unified runner loads this checkout's PAmeasures code. Outputs are grouped
-under the selected directory: `real_data/` for fits and diagnostics, `paper/`
-for real-data manuscript figures/tables, and `simulations/` for simulation
-checkpoints, metrics and figures. `run_all_status.csv` records both exit codes;
-a failed real-data step does not prevent the simulation step from running.
-Existing global manuscript exports and manuscript files are not replaced.
-Use a new output directory for a fresh run or after computation sources or
-package versions change. Reusing an unchanged run resumes simulation
-checkpoints; the real-data analyses are refitted each time. Simulation 3 can
-return a nonzero status for unestimable ICI repetitions even when Figure 6
-is produced; inspect its diagnostics and finite-count file as described in
-[the simulation notes](https://github.com/Larryzza/PAmeasures/blob/main/docs/simulation-ici.md).
-
-In RStudio, from this checkout:
+To cite the package in a publication, run:
 
 ```r
-source("figures/run_all.R")
-run_all() # check only
-run_all(mode = "full", output = "results/reruns/pa_full")
+citation("PAmeasures")
 ```
 
-The runner propagates `.libPaths()` to its child R sessions. For a dependency
-in a separate library, add that directory to `.libPaths()` in RStudio, or set
-`R_LIBS=/path/to/library` before `Rscript` in the terminal.
+The package DOI is
+[10.32614/CRAN.package.PAmeasures](https://doi.org/10.32614/CRAN.package.PAmeasures).
+Include the package version used in your analysis.
 
-Run these commands from this checkout. They load its local package code rather
-than an older installed PAmeasures version. The analyses also need `pkgload`,
-`cmprsk`, `randomForestSRC`, and `riskCommunicator` (the Framingham data source).
+## Reproducing the paper analyses
 
-```sh
-# Recompute all real-data analyses and export their manuscript figures/tables.
-Rscript --vanilla figures/run_real_data.R
+Scripts for the simulations and three real-data examples in the accompanying
+tutorial are included in this repository.
 
-# Add ICI to saved PBC/FHS results, preserving existing fits and other metrics.
-# The GBSG sampling-design result is carried forward unchanged.
-Rscript --vanilla figures/reevaluate_real_calibration.R --output=results/real_data/runs/cohort_ici
+To reproduce these analyses, clone the GitHub repository and follow the
+[paper reproduction guide](https://github.com/Larryzza/PAmeasures/blob/main/docs/reproduce-paper.md),
+which describes data requirements, additional dependencies, and commands for
+running the analyses and generating figures and tables.
 
-# Publication is deferred until GBSG is ready. Pass the cohort output explicitly.
-# Use new output directories; existing runs are never overwritten.
-Rscript --vanilla figures/reevaluate_sample_calibration.R --input=results/real_data/runs/cohort_ici --output=results/real_data/runs/all_ici
-
-# Run or resume the full simulation including ICI.
-Rscript --vanilla figures/run_simulations.R --mode=full --output=results/simulations/ici_full
-
-# Redraw completed results only, without refitting or rerunning simulations.
-Rscript --vanilla figures/redraw_original.R
-# Optional: --section=real or --section=simulations
-# For the new ICI run, add --sim-output=results/simulations/ici_full
-```
-
-The presentation entry points in `figures/` preserve the selected manuscript
-`.updated.pdf` style, including R/L component dots in Simulation 2. The
-lower-level drivers in `analysis/` produce diagnostic plots; use the redraw
-entry afterward if those drivers were run directly. `paper.code.Rmd` displays
-the completed results through the same figure/table outputs; it does not rerun
-models or simulations. With `rmarkdown`, `knitr` and Pandoc available, render it
-with:
-
-```r
-rmarkdown::render("paper.code.Rmd", output_dir = "results/report")
-# Optional: params = list(redraw_figures = TRUE)
-# For ICI simulations: params = list(simulation_output = "results/simulations/ici_full")
-```
-
-Rendering requires all four full simulation parts and all three real-data
-exports; smoke or incomplete results are rejected.
-
-The migrated manuscript figure-refresh driver is
-[`manuscript/update_all_figures.R`](https://github.com/Larryzza/PAmeasures/blob/main/manuscript/update_all_figures.R). It accepts
-an explicit manuscript directory and saved-result paths; see
-[`manuscript/README.md`](https://github.com/Larryzza/PAmeasures/blob/main/manuscript/README.md). Historical results and clinical
-inputs are not distributed in this repository. Existing TimeMetric checkpoint
-signatures differ after migration, so use a new output directory for new runs.
-`paper.md` contains the software-paper draft.
-
-Local outputs, excluded from Git:
-
-| Location | Contents |
-|---|---|
-| `results/simulations/full/` | Completed simulation, models, checkpoints, raw and summary metrics, figures |
-| `results/simulations/ici_full/` | New simulation run including ICI, kept separate from historical results |
-| `results/real_data/runs/<run>/` | Real-data models, predictions and diagnostics |
-| `results/real_data/paper/` | Final real-data figures and tables, with their source-run manifest |
-
-The recorded current real-data run is selected through
-`results/real_data/paper/source_manifest.csv`; redraw and FHS horizon commands
-read that record rather than a historical directory. FHS uses examination 3 as
-time zero and a 12-year horizon (4380 days). To re-evaluate its existing training
-fit at a selected horizon (changed source/settings create a separate output):
-
-```sh
-Rscript --vanilla figures/run_fhs_horizon.R --years=12
-```
-
-Keep full simulation models and checkpoints for resumption. Statistical inputs
-in `R/`, `analysis/` and `DESCRIPTION` are fingerprinted; changes require a new
-simulation output directory rather than silently mixing versions. Smoke runs
-are optional, write to a separate directory, and are not manuscript results.
-The existing simulation designs are all right-censored. They now include ICI
-with a five-knot Cox spline calibration curve at the existing `t_star` for each
-job. E50/E90 are not included. ICI is retained without rounding for aggregation.
-Per-model horizons, prediction-grid times, calibration methods and errors are
-written to `tables/calibration_diagnostics.csv`. In Simulation 3, ICI follows
-the existing large-sample uncensored reference and error-summary calculation.
-Old checkpoints without ICI are not treated as complete, and the updated report
-requires ICI rows rather than silently showing historical results.
-
-Only display the plan, without fitting or evaluating anything:
-
-```sh
-Rscript --vanilla figures/run_simulations.R --mode=plan
-```
-
-To select a part or a repetition range, append
-`--part=sim2_linear,sim2_nonlinear` or `--repeats=1:10` to the full-run command.
-Repeat the same command to resume an unchanged run. Before launching, ensure
-`pmcalibration`, `Hmisc` and the other package dependencies are available in
-the R library used by `Rscript`. See [simulation launch instructions](https://github.com/Larryzza/PAmeasures/blob/main/docs/simulation-ici.md)
-for terminal and RStudio commands.
-
-To run package checks without creating paper results:
-
-```sh
-Rscript --vanilla -e 'testthat::test_local(".", reporter="summary")'
-```
+These scripts are separate from the package's standard prediction and
+evaluation workflow. Full reproduction requires additional dependencies and
+substantial computation; saved analysis results are not included in the
+repository.
 
 ## Contributors
 

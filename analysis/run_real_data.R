@@ -30,7 +30,7 @@ status_file <- file.path(out, "run_status.csv")
 status <- if (file.exists(status_file)) utils::read.csv(status_file) else
   data.frame(Dataset = character(), Status = character(), Exit_code = integer(),
               Output = character(), Log = character())
-table_files <- c(pbc = "metrics_after.csv", framingham = "metrics.csv", gbsg = "metrics.csv")
+table_files <- c(pbc = "metrics.csv", framingham = "metrics.csv", gbsg = "metrics.csv")
 for (d in unique(selected)) {
   message("Running ", d, " with this checkout...")
   target <- file.path(out, d)

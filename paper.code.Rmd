@@ -109,42 +109,15 @@ figures and tables; it does not fit models, run simulations, or append rows to
 historical CSV files. The calculation code lives in `analysis/`, and the
 manuscript presentation code lives in `figures/`.
 
-From the repository directory, run these commands explicitly when results need
-to be recomputed. They load this checkout's package code using `pkgload`.
+For data requirements, dependencies, and the full reproduction workflow, see
+[the paper reproduction guide](https://github.com/Larryzza/PAmeasures/blob/main/docs/reproduce-paper.md).
+The guide includes the report-rendering command with explicit paths to the
+completed simulation and real-data outputs.
 
-```{bash reproduce, eval=FALSE, echo=TRUE}
-# Full simulations: substantial computation, with checkpoint resumption.
-Rscript --vanilla figures/run_simulations.R --mode=full --output=results/simulations/ici_full
-
-# PBC, Framingham and GBSG2, with final figures/tables in one paper folder.
-Rscript --vanilla figures/run_real_data.R
-
-# Add ICI to saved cohort predictions without refitting models.
-Rscript --vanilla figures/reevaluate_real_calibration.R
-
-# Validate and add weighted ICI to saved GBSG predictions without refitting.
-Rscript --vanilla figures/reevaluate_sample_calibration.R
-
-# Figures only, using completed results and the selected manuscript style.
-Rscript --vanilla figures/redraw_original.R --sim-output=results/simulations/ici_full
-```
-
-Render this report after the runs finish. `rmarkdown`, `knitr` and Pandoc are
-needed in addition to the analysis dependencies listed in the README.
-
-```{r render-instructions, eval=FALSE, echo=TRUE}
-rmarkdown::render("paper.code.Rmd", output_dir = "results/report",
-                  params = list(simulation_output = "results/simulations/ici_full"))
-# Optional: refresh graphics through the same presentation entry point.
-rmarkdown::render("paper.code.Rmd", output_dir = "results/report",
-                  params = list(simulation_output = "results/simulations/ici_full",
-                                redraw_figures = TRUE))
-```
-
-The default inputs are `results/simulations/ici_full/` and
-`results/real_data/paper/`; use the document parameters to select other completed
-outputs. Results are kept outside Git. A fresh checkout must compute them
-before this report can be rendered. Smoke-test results are not accepted here.
+Rendering reads saved results and requires all four full simulation parts
+with complete finite metrics and all three real-data exports. Incomplete or
+smoke-test results are not accepted. Use the `simulation_output` and
+`real_paper_output` parameters to select the completed run.
 
 # Simulation studies
 

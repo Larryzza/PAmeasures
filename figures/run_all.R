@@ -27,9 +27,7 @@ run_all <- function(mode = "check", output = file.path(.pa_run_root, "results",
   helper <- new.env(parent = globalenv())
   sys.source(file.path(root, "analysis", "common.R"), envir = helper)
   helper$paper_load(root)
-  # PBC compares the current predictor with a historical source implementation.
-  helper$paper_legacy_cox(root)
-  cat("Preflight passed: local PAmeasures, dependencies and PBC historical source.\n",
+  cat("Preflight passed: local PAmeasures and dependencies.\n",
       "Real data: PBC, Framingham (examination 3, 12 years), GBSG2.\n",
       "Simulations: sim1, sim2_linear, sim2_nonlinear, sim3; 100 repetitions per cell; ICI included.\n",
       "Output: ", output, "\n", sep = "")

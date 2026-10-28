@@ -52,9 +52,24 @@ paper_framingham_fit <- function(out) {
   found[1L]
 }
 
+# Read current PBC outputs, while allowing figures from earlier saved runs.
+paper_pbc_fit <- function(out) {
+  candidates <- file.path(out, "pbc", c("pbc.rds", "pbc_comparison.rds"))
+  found <- candidates[file.exists(candidates)]
+  if (!length(found)) stop("Missing PBC predictions. Run figures/run_real_data.R first.")
+  normalizePath(found[1L], mustWork = TRUE)
+}
+
+paper_real_predictions <- function(result) {
+  if (!is.null(result$predictions)) return(result$predictions)
+  if (!is.null(result$after)) return(result$after)
+  stop("Saved result has no predictions.")
+}
+
 paper_original_real <- function(root, out, datasets = c("pbc", "framingham", "gbsg")) {
-  files <- c(pbc = "pbc/pbc_comparison.rds",
+  files <- c(pbc = NA_character_,
              framingham = "framingham/framingham_visit3_10y.rds", gbsg = "gbsg/gbsg2.rds")
+  if ("pbc" %in% datasets) files[["pbc"]] <- paper_pbc_fit(out)
   if ("framingham" %in% datasets)
     files[["framingham"]] <- normalizePath(paper_framingham_fit(out), mustWork = TRUE)
   stems <- c(pbc = "paper.fig1", framingham = "paper.fig2", gbsg = "paper.fig3")
@@ -76,7 +91,7 @@ paper_original_real <- function(root, out, datasets = c("pbc", "framingham", "gb
     path <- if (startsWith(files[[d]], "/")) files[[d]] else file.path(out, files[[d]])
     if (!file.exists(path)) stop("Run the updated real-data analysis first: missing ", path)
     result <- readRDS(path)
-    predictions <- if (d == "pbc") result$after else result$predictions
+    predictions <- paper_real_predictions(result)
     tau <- if (d == "framingham") result$settings$tau else NULL
     plot <- paper_original_real_plot(d, predictions, tau)
     dest <- file.path(out, d)

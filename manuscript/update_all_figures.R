@@ -39,7 +39,7 @@ update_all_figures <- function(manuscript_dir = NULL,
     stop("The saved FHS 12-year selection is missing or out of date.")
   fhs <- active$Source_predictions
   if (!startsWith(fhs, "/")) fhs <- file.path(real_output, fhs)
-  inputs <- c(pbc = file.path(real_output, "pbc", "pbc_comparison.rds"),
+  inputs <- c(pbc = helper$paper_pbc_fit(real_output),
               framingham = fhs, gbsg = file.path(real_output, "gbsg", "gbsg2.rds"))
   sim_files <- c("completion.csv", "tables/metrics_raw.csv", "tables/sim3_errors.csv",
                  "tables/calibration_diagnostics.csv")
@@ -68,7 +68,7 @@ update_all_figures <- function(manuscript_dir = NULL,
   real_stems <- c(pbc = "paper.fig1", framingham = "paper.fig2", gbsg = "paper.fig3")
   for (dataset in names(inputs)) {
     result <- readRDS(inputs[[dataset]])
-    predictions <- if (dataset == "pbc") result$after else result$predictions
+    predictions <- helper$paper_real_predictions(result)
     tau <- if (dataset == "framingham") result$settings$tau else NULL
     plot <- helper$paper_original_real_plot(dataset, predictions, tau)
     helper$paper_original_save(plot, file.path(stage, "ready"), real_stems[[dataset]],
