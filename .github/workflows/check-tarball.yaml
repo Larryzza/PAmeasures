@@ -11,7 +11,7 @@ jobs:
   check:
     name: ${{ matrix.os }} (R ${{ matrix.r }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -40,6 +40,20 @@ jobs:
           stopifnot(identical(unname(actual), expected))
           cat("Source SHA256:", actual, "\n")
           untar("PAmeasures_2.0.0.tar.gz")
+      - name: Install gettext headers and library from the R macOS toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "arm64"
+          archive="$RUNNER_TEMP/gettext-0.22.5-arm64.tar.xz"
+          curl --fail --silent --show-error --location --retry 3 \
+            https://mac.r-project.org/bin/darwin20/arm64/gettext-0.22.5-darwin.20-arm64.tar.xz \
+            -o "$archive"
+          echo "c95b5f28eadfac4ce5b31a8359afa3671bfbd059e002f0279996500a5e9f6d40  $archive" | shasum -a 256 -c -
+          sudo tar -xJf "$archive" -C /
+          test -r /opt/R/arm64/include/libintl.h
+          test -r /opt/R/arm64/lib/libintl.a
+          ls -l /opt/R/arm64/include/libintl.h /opt/R/arm64/lib/libintl.a
       - name: Record compiler configuration and probe C/Fortran compilation
         shell: Rscript {0}
         run: |
@@ -47,11 +61,11 @@ jobs:
           library <- file.path(Sys.getenv("RUNNER_TEMP"), "Library")
           dir.create(library, recursive = TRUE, showWarnings = FALSE)
           cat("R_LIBS_USER=", library, "\n", file = Sys.getenv("GITHUB_ENV"), append = TRUE, sep = "")
-          config <- unlist(lapply(c("CC", "CFLAGS", "CXX17", "FC", "FFLAGS", "FLIBS"), function(key) {
+          config <- unlist(lapply(c("CC", "CFLAGS", "CPPFLAGS", "LDFLAGS", "CXX17", "FC", "FFLAGS", "FLIBS"), function(key) {
             c(key, system2(file.path(R.home("bin"), "R"), c("CMD", "config", key), stdout = TRUE))
           }))
           writeLines(config, "compiler-config.txt")
-          writeLines("void c_probe(double *x) { *x = 1.0; }", "c-compiler-probe.c")
+          writeLines(c("#include <libintl.h>", "void c_probe(double *x) { *x = 1.0; }"), "c-compiler-probe.c")
           writeLines(c("subroutine f_probe(x)", "real(8) :: x", "x = 1.0d0", "end subroutine"), "fortran-compiler-probe.f90")
           output <- system2(file.path(R.home("bin"), "R"),
             c("CMD", "SHLIB", "c-compiler-probe.c", "fortran-compiler-probe.f90"), stdout = TRUE, stderr = TRUE)
@@ -63,7 +77,7 @@ jobs:
             cat("::error title=C and Fortran preflight::", message, "\n", sep = "")
             stop("Compiler preflight failed; see compiler-probe.log")
           }
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         id: dependencies-cache
         with:
           path: ${{ env.R_LIBS_USER }}
@@ -136,12 +150,12 @@ jobs:
             }
           }
           stopifnot(length(result$errors) == 0L, length(result$warnings) == 0L)
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@v5
         if: always() && (steps.install-source-dependencies.outcome == 'success' || steps.install-source-dependencies.outcome == 'failure') && steps.dependencies-cache.outputs.cache-hit != 'true'
         with:
           path: ${{ env.R_LIBS_USER }}
           key: macos-devel-source-v3-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('PAmeasures/DESCRIPTION') }}-${{ github.run_id }}-${{ github.run_attempt }}
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: check-${{ matrix.os }}-${{ matrix.r }}
