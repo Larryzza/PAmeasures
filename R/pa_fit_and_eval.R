@@ -20,14 +20,14 @@
 #'     \item "ici", "e50", "e90": Absolute calibration error summaries.
 #'   }
 #'
-#' @param predicted_data (Optional) A data frame containing validation data. If `NULL`, the function 
-#' uses the same data as `data` for model evaluation.
+#' @param predicted_data (Optional) A data frame containing validation data. If \code{NULL}, the function
+#' uses \code{train_data} for model evaluation.
 #' @param t_star (Optional) Positive evaluation time for Brier score, AUC, and
 #'   calibration; the median evaluation follow-up if omitted.
 #' @param tau (Optional) A time point for truncating the survival time. If provided, the function evaluates predictions up to this time point.
-#' @param calibration_args Optional named list passed to [pa_calibration()].
-#'   For sampling-adjusted calibration use [pa_sample_design()] or
-#'   [pa_calibration()] directly; weights cannot be supplied through this list.
+#' @param calibration_args Optional named list passed to \code{\link{pa_calibration}()}.
+#'   For sampling-adjusted calibration use \code{\link{pa_sample_design}()} or
+#'   \code{\link{pa_calibration}()} directly; weights cannot be supplied through this list.
 #' @details Calibration evaluates model-predicted event probabilities exactly
 #'   at \code{t_star} (the median evaluation follow-up if omitted).
 #'

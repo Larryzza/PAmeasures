@@ -17,13 +17,18 @@ pa_summarize_cr(
 )
 }
 \arguments{
-\item{models}{A **named list**; each element is a list with components:
+\item{models}{A named list of prediction objects, such as those returned
+by \code{pa_predict_cif()}. Each entry must contain:
 \itemize{
-  \item \code{pred_cif}   -- numeric matrix of predicted CIF values (rows: time grid; cols: subjects)
-  \item \code{time.cif}   -- numeric vector of the time grid corresponding to \code{pred_cif} rows
-  \item \code{event_time} -- numeric vector of observed times
-  \item \code{status}     -- integer vector of event codes (0=censoring; \code{event_type}=target; others=competing)
-}}
+  \item \code{cif_pred} -- numeric matrix with the prediction time grid
+    in the first column and one target-event CIF column per subject.
+  \item \code{times} -- observed follow-up times, in subject-column order.
+  \item \code{status} -- event codes (0 = censoring;
+    \code{event_type} = target event; other positive codes = competing events).
+}
+For external predictions, construct this format as shown in the example.
+The separate \code{pred_cif}, \code{time.cif}, and \code{event_time}
+arguments belong to \code{pa_survival_eval_cr()}, not to this wrapper.}
 
 \item{metrics}{Character vector of metrics to compute (passed through to
 \code{pa_survival_eval_cr()}); use \code{"all"} for all supported.}
@@ -38,13 +43,13 @@ and calibration. Defaults to the median observed follow-up.}
 \item{digits}{Number of decimal places to round the metric values (default = 2).}
 
 \item{censoring}{Censoring estimator for generalized R-squared metrics,
-`"cox"` (default) or `"km"`; passed to [pa_survival_eval_cr()].}
+\code{"cox"} (default) or \code{"km"}; passed to \code{\link{pa_survival_eval_cr}()}.}
 
 \item{censor_covariates}{Optional numeric censoring-model covariates shared
 across models. Rows must match each model's subject order. Passed to
-[pa_survival_eval_cr()]; used only with `censoring = "cox"`.}
+\code{\link{pa_survival_eval_cr}()}; used only with \code{censoring = "cox"}.}
 
-\item{calibration_args}{Optional named list passed to [pa_calibration_cr()].}
+\item{calibration_args}{Optional named list passed to \code{\link{pa_calibration_cr}()}.}
 }
 \value{
 A data.frame with:
@@ -59,7 +64,7 @@ Calls \code{pa_survival_eval_cr()} for each model in a named list and
 returns a wide table where rows are metrics and columns are model names.
 }
 \details{
-See [pa_survival_eval_cr()] for the event-observation weighting
+See \code{\link{pa_survival_eval_cr}()} for the event-observation weighting
   rule, original-time support requirements and probability floor.
 }
 \examples{
@@ -77,4 +82,11 @@ p <- pa_predict_cif(model1 = m1, model2 = m2, newdata = cr,
                     covs = c("X1", "X2"), event.type = 1, tau = max(cr$time))
 
 pa_summarize_cr(list(csh = p), event_type = 1)
+
+# External CIF matrix: rows are grid times, columns are subjects.
+external_cif <- p$cif_pred[, -1, drop = FALSE]
+external_grid <- p$cif_pred[, 1]
+external <- list(cif_pred = cbind(time = external_grid, external_cif),
+                 times = p$times, status = p$status)
+pa_summarize_cr(list(external = external), metrics = "brier_score")
 }

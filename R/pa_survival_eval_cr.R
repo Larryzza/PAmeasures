@@ -10,9 +10,9 @@
 #' @param time.cif A numeric vector of time points corresponding to the predicted CIFs.
 #' @param status A numeric vector indicating the event type for each subject: by default
 #'   \itemize{
-#'     \item `0` for censored cases.
-#'     \item `1` for the primary event of interest.
-#'     \item `2` (or other values) for competing events.
+#'     \item \code{0} for censored cases.
+#'     \item \code{1} for the primary event of interest.
+#'     \item \code{2} (or other values) for competing events.
 #'   }
 #' @param metrics A character vector specifying the performance metrics to calculate. 
 #'   The default \code{NULL} computes pseudo R-squared (integrated and point),
@@ -20,32 +20,32 @@
 #'   include the components and E50/E90 as well.
 #'   Valid options include:
 #'   \itemize{
-#'     \item `"pseudo_r2"`
-#'     \item `"r_square"`
-#'     \item `"l_square"`
-#'     \item `"pseudo_r2_point"`
-#'     \item `"r2_point"`
-#'     \item `"l2_point"`
-#'     \item `"c_index"`
-#'     \item `"brier_score"`
-#'     \item `"td_auc"`
-#'     \item `"ici"`, `"e50"`, `"e90"`
+#'     \item \code{"pseudo_r2"}
+#'     \item \code{"r_square"}
+#'     \item \code{"l_square"}
+#'     \item \code{"pseudo_r2_point"}
+#'     \item \code{"r2_point"}
+#'     \item \code{"l2_point"}
+#'     \item \code{"c_index"}
+#'     \item \code{"brier_score"}
+#'     \item \code{"td_auc"}
+#'     \item \code{"ici"}, \code{"e50"}, \code{"e90"}
 #'   }
 #' @param t_star Optional numeric value specifying a reference time for evaluating point-version Pseudo_R_square, 
 #'   the Brier score, time-dependent AUC, and calibration. Defaults to the median
-#'   of `event_time`.
+#'   of \code{event_time}.
 #' @param tau Optional numeric value specifying a restricted time horizon for model evaluation. 
 #'   Defaults to the maximum observed follow-up time.
-#' @param event_type An integer indicating the primary event type of interest (default = `1`).
+#' @param event_type An integer indicating the primary event type of interest (default = \code{1}).
 #' @param censoring Censoring estimator for the generalized R-squared metrics:
-#'   `"cox"` (default, optionally conditional on `censor_covariates`) or `"km"`.
+#'   \code{"cox"} (default, optionally conditional on \code{censor_covariates}) or \code{"km"}.
 #'   Other metrics retain their own censoring adjustments.
 #' @param censor_covariates Optional numeric vector, matrix or data frame of
-#'   censoring-model covariates, in the same subject order as `event_time` and
-#'   the columns of `pred_cif`. Requires `censoring = "cox"`. With `NULL`, the
+#'   censoring-model covariates, in the same subject order as \code{event_time} and
+#'   the columns of \code{pred_cif}. Requires \code{censoring = "cox"}. With \code{NULL}, the
 #'   Cox censoring model has no covariates. The Cox censoring model uses
 #'   Breslow ties, so without covariates it equals exp(-Nelson-Aalen).
-#' @param calibration_args Optional named list passed to [pa_calibration_cr()],
+#' @param calibration_args Optional named list passed to \code{\link{pa_calibration_cr}()},
 #'   e.g. \code{list(bandwidth = 0.2)}. These settings affect calibration only.
 #'
 #' @details
@@ -53,26 +53,26 @@
 #' estimated on the original follow-up times, treating any observed event type
 #' as an observed event. The unnormalized weight is
 #' \eqn{I(status_i > 0)/\widehat G(Y_i-\mid X_i)}; weights are normalized to sum
-#' to one. A censored subject has zero weight even if follow-up exceeds `tau`.
+#' to one. A censored subject has zero weight even if follow-up exceeds \code{tau}.
 #' Restricting the working outcome therefore does not limit censoring support
-#' requirements to `tau`: support at contributing original event times is needed.
+#' requirements to \code{tau}: support at contributing original event times is needed.
 #' Cox weights require conditional independent censoring and a valid censoring
 #' model; marginal weights require the corresponding marginal independence.
 #' Censoring survival probabilities are floored at \eqn{10^{-4}}.
-#' The interval outcome is the target-event time capped at `tau`, with competing
-#' events assigned to `tau`. The point outcome is `I(T <= t_star, D = event_type)`,
+#' The interval outcome is the target-event time capped at \code{tau}, with competing
+#' events assigned to \code{tau}. The point outcome is \code{I(T <= t_star, D = event_type)},
 #' including target events at the evaluation time, as in the CIF. Normalized ratio
 #' estimates are not asserted to be exactly unbiased in finite samples.
 #' Calibration uses the target-event CIF at or before \code{t_star} on the
 #' supplied grid and evaluates the outcome at \code{t_star}. It uses the local
-#' Aalen--Johansen estimator described in [pa_calibration_cr()]; \code{censoring}
+#' Aalen--Johansen estimator described in \code{\link{pa_calibration_cr}()}; \code{censoring}
 #' and \code{censor_covariates} do not control this estimator. A failed curve
 #' fit warns and returns missing calibration metrics without discarding others.
 #'
 #' @return A data frame with two columns:
 #'   \itemize{
-#'     \item `"Metric"`: Name of the evaluated metric.
-#'     \item `"Value"`: Computed value of the corresponding metric.
+#'     \item \code{"Metric"}: Name of the evaluated metric.
+#'     \item \code{"Value"}: Computed value of the corresponding metric.
 #'   }
 #'
 #' 
@@ -476,13 +476,18 @@ C_cr <- function(time, status, predicted, tau = NULL, Cause_int = 1) {
 #' Calls \code{pa_survival_eval_cr()} for each model in a named list and
 #' returns a wide table where rows are metrics and columns are model names.
 #'
-#' @param models A **named list**; each element is a list with components:
+#' @param models A named list of prediction objects, such as those returned
+#'   by \code{pa_predict_cif()}. Each entry must contain:
 #'   \itemize{
-#'     \item \code{pred_cif}   -- numeric matrix of predicted CIF values (rows: time grid; cols: subjects)
-#'     \item \code{time.cif}   -- numeric vector of the time grid corresponding to \code{pred_cif} rows
-#'     \item \code{event_time} -- numeric vector of observed times
-#'     \item \code{status}     -- integer vector of event codes (0=censoring; \code{event_type}=target; others=competing)
+#'     \item \code{cif_pred} -- numeric matrix with the prediction time grid
+#'       in the first column and one target-event CIF column per subject.
+#'     \item \code{times} -- observed follow-up times, in subject-column order.
+#'     \item \code{status} -- event codes (0 = censoring;
+#'       \code{event_type} = target event; other positive codes = competing events).
 #'   }
+#'   For external predictions, construct this format as shown in the example.
+#'   The separate \code{pred_cif}, \code{time.cif}, and \code{event_time}
+#'   arguments belong to \code{pa_survival_eval_cr()}, not to this wrapper.
 #' @param metrics Character vector of metrics to compute (passed through to
 #'   \code{pa_survival_eval_cr()}); use \code{"all"} for all supported.
 #' @param t_star (Optional) Evaluation time for Brier score, AUC, point R2,
@@ -491,12 +496,12 @@ C_cr <- function(time, status, predicted, tau = NULL, Cause_int = 1) {
 #' @param event_type Integer code for the cause of interest (passed through).
 #' @param digits Number of decimal places to round the metric values (default = 2).
 #' @param censoring Censoring estimator for generalized R-squared metrics,
-#'   `"cox"` (default) or `"km"`; passed to [pa_survival_eval_cr()].
+#'   \code{"cox"} (default) or \code{"km"}; passed to \code{\link{pa_survival_eval_cr}()}.
 #' @param censor_covariates Optional numeric censoring-model covariates shared
 #'   across models. Rows must match each model's subject order. Passed to
-#'   [pa_survival_eval_cr()]; used only with `censoring = "cox"`.
-#' @param calibration_args Optional named list passed to [pa_calibration_cr()].
-#' @details See [pa_survival_eval_cr()] for the event-observation weighting
+#'   \code{\link{pa_survival_eval_cr}()}; used only with \code{censoring = "cox"}.
+#' @param calibration_args Optional named list passed to \code{\link{pa_calibration_cr}()}.
+#' @details See \code{\link{pa_survival_eval_cr}()} for the event-observation weighting
 #'   rule, original-time support requirements and probability floor.
 #'
 #' @return A data.frame with:
@@ -521,6 +526,13 @@ C_cr <- function(time, status, predicted, tau = NULL, Cause_int = 1) {
 #'                     covs = c("X1", "X2"), event.type = 1, tau = max(cr$time))
 #'
 #' pa_summarize_cr(list(csh = p), event_type = 1)
+#'
+#' # External CIF matrix: rows are grid times, columns are subjects.
+#' external_cif <- p$cif_pred[, -1, drop = FALSE]
+#' external_grid <- p$cif_pred[, 1]
+#' external <- list(cif_pred = cbind(time = external_grid, external_cif),
+#'                  times = p$times, status = p$status)
+#' pa_summarize_cr(list(external = external), metrics = "brier_score")
 pa_summarize_cr <- function(models,
                            metrics = NULL,
                            t_star = NULL,

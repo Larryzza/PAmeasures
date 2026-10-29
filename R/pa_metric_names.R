@@ -67,8 +67,8 @@ pa_metric_aliases <- function() {
 
 #' Canonical metric names
 #'
-#' The metric identifiers accepted by the `metrics` argument of the evaluation
-#' functions, and emitted in the `Metric` column of their results.
+#' The metric identifiers accepted by the \code{metrics} argument of the evaluation
+#' functions, and emitted in the \code{Metric} column of their results.
 #'
 #' @return A character vector of canonical metric names.
 #' @examples

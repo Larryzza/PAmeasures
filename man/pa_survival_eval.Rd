@@ -48,8 +48,8 @@ coded as above.}
   \item "pseudo_r2" - Pseudo R-squared measure
   \item "r_square" - Explained variation R^2
   \item "l_square" - L-squared measure
-  \item "Harrell's C" - Harrell's concordance index
-  \item "Uno's C" - Uno's concordance index
+  \item "harrell_c" - Harrell's concordance index
+  \item "uno_c" - Uno's concordance index
   \item "brier_score" - Overall probability prediction error
   \item "td_auc" - Time-dependent area under the curve (AUC)
   \item "ici", "e50", "e90" - Absolute calibration error summaries
@@ -59,14 +59,14 @@ The default \code{NULL} includes ICI but omits E50 and E90. Use
 
 \item{t_star}{(Optional) Evaluation time for point R-squared, Brier score,
 time-dependent AUC, and calibration.
-If NULL, it defaults to the median survival time.}
+If NULL, it defaults to the median observed follow-up time.}
 
-\item{tau}{(Optional) A numeric value specifying the truncation time for calculating explained variation metrics. 
+\item{tau}{(Optional) A numeric value specifying the truncation time for calculating explained variation metrics.
 If NULL, it defaults to the maximum observed survival time.}
 
-\item{calibration_args}{Optional named list passed to [pa_calibration()],
+\item{calibration_args}{Optional named list passed to \code{\link{pa_calibration}()},
 e.g. \code{list(nk = 3)}. These settings affect calibration only.
-For sampling weights use [pa_sample_design()] or [pa_calibration()]
+For sampling weights use \code{\link{pa_sample_design}()} or \code{\link{pa_calibration}()}
 directly, rather than passing weights through this list.}
 }
 \value{
@@ -75,19 +75,19 @@ A data frame with two columns:
   \item{Value}{The corresponding computed value.}
 }
 \description{
-This function calculates various predictive performance metrics for survival models based on 
-predicted survival probabilities and observed survival data. It supports a range of evaluation 
+This function calculates various predictive performance metrics for survival models based on
+predicted survival probabilities and observed survival data. It supports a range of evaluation
 measures, including explained variation, concordance indices, Brier Score, and time-dependent AUC.
 }
 \details{
-Point R-squared uses the event indicator `I(T <= t_star)` and
-  the predicted event probability `1 - S` at the selected prediction-grid
+Point R-squared uses the event indicator \code{I(T <= t_star)} and
+  the predicted event probability \code{1 - S} at the selected prediction-grid
   column. Events at the evaluation time are included.
   Calibration uses \code{1 - S(t_star)} from the last supplied grid column
   at or before \code{t_star}, interpreting the grid as a right-continuous
   step function (risk zero before its first time). Its outcome horizon is
   exactly \code{t_star}, not the nearest future grid time. See
-  [pa_calibration()] for the estimator and boundary-probability policy.
+  \code{\link{pa_calibration}()} for the estimator and boundary-probability policy.
   A failed calibration fit warns and returns missing calibration metrics;
   other requested metrics are retained.
 }
@@ -123,6 +123,6 @@ Biometrics 56, 249--255.
 Lusa, L., R. Miceli and L. Mariani (2007). Estimation of predictive accuracy in survival analysis
 using R and S-PLUS. Computer Methods and Programs in Biomedicine 87, 132--137.
 
-Potapov, S., Adler, W., Schmid, M., Bertrand, F. (2024). survAUC: Estimating Time-Dependent AUC for Censored Survival Data. 
+Potapov, S., Adler, W., Schmid, M., Bertrand, F. (2024). survAUC: Estimating Time-Dependent AUC for Censored Survival Data.
 R package version 1.3-0. DOI: \doi{10.32614/CRAN.package.survAUC}. Available at \url{https://CRAN.R-project.org/package=survAUC}.
 }

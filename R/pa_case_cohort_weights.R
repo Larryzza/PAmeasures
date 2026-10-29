@@ -3,14 +3,26 @@
 # -------------------------------------------------------------------
 #' Case-cohort sampling weights
 #'
-#' Computes Prentice-style weights for case-cohort designs. If `strata`
-#' is provided, stratified case-cohort weights are computed.
+#' Computes static sampling weights for case-cohort evaluation. If \code{strata}
+#' is provided, non-case weights are calibrated within each stratum.
 #'
 #' @param time Numeric vector of follow-up times.
 #' @param status Numeric \{0,1\}, 1 = event, 0 = censored.
 #' @param subcohort Logical vector; TRUE if in subcohort.
 #' @param strata Optional factor/character for strata (stratified cc).
-#' @return Numeric vector of weights.
+#' @details Supply the full phase-one cohort, not only sampled subjects.
+#' Cases receive weight 1. Non-cases receive the number of full-cohort non-cases
+#' divided by the number of subcohort non-cases, within each stratum if supplied.
+#' These are calibrated inverse-inclusion weights, not the time-dependent
+#' risk-set construction of the Prentice Cox estimator. Passing these as
+#' ordinary Cox case weights does not implement that estimator.
+#'
+#' Retain only the random subcohort and all cases for evaluation, and align
+#' weights with the evaluation subjects. At least one sampled non-case is
+#' needed in every stratum containing non-cases to obtain finite weights.
+#' @return Numeric vector of weights in full-cohort input order. Weights for
+#'   non-sampled non-cases are also returned and must be excluded from the
+#'   sampled analysis dataset.
 #' @export
 #' @examples
 #' # Compute weights using the full cohort, then retain the random subcohort

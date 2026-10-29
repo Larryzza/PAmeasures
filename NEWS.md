@@ -1,3 +1,17 @@
+# PAmeasures 2.0.0.9000 (development)
+
+* Apply the calibrated or supplied log-censoring shift in
+  `pa_simulate_fine_gray()`. In 2.0.0 the shift was calculated but unused:
+  positive censoring targets and `mu.c.time` did not control the generated
+  censoring. Simulated competing-risk data with positive censoring change;
+  uncensored data and an explicit zero shift are unchanged.
+* Correct manual input and return structures, the L-squared interpretation,
+  plotting units and score direction, case-cohort weight terminology, and
+  conditional simulator outputs. Clarify log-censoring parameters and the
+  baseline cause probability, and repair function links and inline markup.
+* Keep historical metric test datasets fixed with an explicit zero censoring
+  shift; add tests for target-calibrated and user-specified censoring.
+
 # PAmeasures 2.0.0
 
 ## New features

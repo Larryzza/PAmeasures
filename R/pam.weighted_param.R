@@ -6,11 +6,11 @@
 #' @param time A numeric vector representing the observed follow-up time for each individual.
 #' @param status A numeric vector representing the event status, where 1 indicates an event (e.g., death, disease onset) and 0 indicates censoring.
 #' @param design A character string specifying the study design. It can be one of the following:
-#'   - `full`: Full cohort analysis (no subsampling). Weights will all be 1.
-#'   - `casecohort`:  Unstratified case-cohort design.
-#'   - `strat_casecohort`: Stratified case-cohort design.
-#'   - `ncc`: Unmatched nested case-control design.
-#'   - `matched_ncc`: Matched nested case-control design.
+#'   - \code{full}: Full cohort analysis (no subsampling). Weights will all be 1.
+#'   - \code{casecohort}:  Unstratified case-cohort design.
+#'   - \code{strat_casecohort}: Stratified case-cohort design.
+#'   - \code{ncc}: Unmatched nested case-control design.
+#'   - \code{matched_ncc}: Matched nested case-control design.
 #' @param subcohort A  logical vector (TRUE/FALSE) indicating whether an individual is part of the subcohort. This is required for case-cohort designs.
 #' @param strata A factor or character vector specifying the stratum or matching set for each individual. This is required for stratified case-cohort and matched NCC designs.
 #' @param  m An integer specifying the number of controls selected for each case. This is required for both NCC designs.

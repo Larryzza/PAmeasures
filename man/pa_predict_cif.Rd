@@ -16,17 +16,17 @@ pa_predict_cif(
 )
 }
 \arguments{
-\item{model1}{The fitted model for the target cause (either a `coxph` or `survreg` object).}
+\item{model1}{The fitted model for the target cause (either a \code{coxph} or \code{survreg} object).}
 
-\item{model2}{The fitted model for competing causes (either a `coxph` or `survreg` object).}
+\item{model2}{The fitted model for competing causes (either a \code{coxph} or \code{survreg} object).}
 
-\item{fg_model}{Optional Fine-Gray model object (`crr` from `cmprsk` package).}
+\item{fg_model}{Optional Fine-Gray model object (\code{crr} from \code{cmprsk} package).}
 
 \item{cr_model}{Optional competing risks random forest model object.}
 
 \item{tau}{The maximum time horizon for prediction.}
 
-\item{newdata}{A data frame containing observed event times (`time`), event indicators (`status`).}
+\item{newdata}{A data frame containing observed event times (\code{time}), event indicators (\code{status}).}
 
 \item{event.type}{The event type of interest for which CIF is to be predicted.}
 

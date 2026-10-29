@@ -1,20 +1,20 @@
-#' Quick Diagnostic Plot for Survival Model Predicted Probabilities
+#' Descriptive Plot of Predicted and Observed Survival Times
 #'
 #' @description
-#' Produces a quick diagnostic plot visualizing predicted survival or event
-#' probabilities (e.g., from a Weibull AFT model) against the subject-specific
-#' linear predictors (risk scores). The plot combines a smoothed line of
-#' predicted values and points representing observed times, using shape to
-#' indicate censoring status. This visualization provides a simple check of
-#' how predicted risks correspond to observed outcomes.
+#' Plots a model-derived survival-time summary and observed follow-up times
+#' against the model's linear predictor. Event and censoring status are shown
+#' with different point shapes. This is a descriptive display, not a
+#' probability-calibration curve.
 #'
 #' @param data A data frame (or list-like object) containing at least the
 #'   following columns:
 #'   \describe{
-#'     \item{`linear.pred`}{Model linear predictor (risk score).}
-#'     \item{`pred`}{Predicted probability or median survival value.}
-#'     \item{`times`}{Observed event or censoring time.}
-#'     \item{`status`}{Event indicator (0 = censored, 1 = event; optionally
+#'     \item{\code{linear.pred}}{Model linear predictor (risk score).}
+#'     \item{\code{pred}}{Predicted survival-time summary, in the same units as
+#'       \code{times}. The package prediction helpers supply a restricted mean or
+#'       an integrated time summary, rather than a probability or median.}
+#'     \item{\code{times}}{Observed event or censoring time.}
+#'     \item{\code{status}}{Event indicator (0 = censored, 1 = event; optionally
 #'       can include more levels if defined in \code{label_name}).}
 #'   }
 #' @param title Optional plot title (default = \code{NULL}).
@@ -29,9 +29,10 @@
 #'   to \code{c(1, 19)} for two levels (censored vs event) or
 #'   \code{c(2, 19, 1)} for three levels.
 #' @param legend_name Character string for the legend title (default = "status").
-#' @param invert_linear Logical; if \code{TRUE} (default), plots the negative
-#'   of \code{linear.pred} so that higher values correspond to higher risk.
-#'   Set to \code{FALSE} if you want higher values correspond to lower risk.
+#' @param invert_linear Logical. If \code{TRUE}, negate \code{linear.pred}.
+#'   For a Cox log-hazard score, use \code{FALSE} to make larger x values
+#'   indicate higher risk. For an AFT location score, use \code{TRUE} for that
+#'   orientation. The default \code{TRUE} is retained for compatibility.
 #' @param sample_index Optional integer vector selecting which subjects to
 #'   plot, e.g. \code{sample(seq_len(n), 200)} to thin a crowded chart. If
 #'   \code{NULL} (default), every subject is plotted.
@@ -39,9 +40,9 @@
 #'   this value are capped at it and a dashed horizontal reference line is
 #'   drawn, which keeps a few long follow-up times from compressing the plot.
 #' @details
-#' The function is primarily designed for quick visual diagnostics in survival
+#' The function is primarily designed for descriptive diagnostics in survival
 #' model development. The line (\code{pred} vs \code{linear.pred}) shows the
-#' fitted or predicted trend, while the overlaid points (\code{times} vs
+#' predicted values joined in x order, without smoothing, while the overlaid points (\code{times} vs
 #' \code{linear.pred}) illustrate observed event times, distinguished by
 #' censoring status. For more elaborate visualization (e.g., confidence bands,
 #' multiple models), use faceting or combine plots with \pkg{patchwork}.
@@ -60,7 +61,7 @@
 #' pred <- pa_predict_coxph(model = fit, covs = c("x1", "x2"), new_data = d)
 #'
 #' # observed time against predicted risk score, shaped by event status
-#' pa_plot_pred(pred, title = "Cox model")
+#' pa_plot_pred(pred, title = "Cox model", invert_linear = FALSE)
 pa_plot_pred <- function(data,
                       title = NULL,
                       xlab = "Risk Score",
@@ -137,7 +138,9 @@ pa_plot_pred <- function(data,
 #' @param ncol Number of columns in the panel layout (default = 2).
 #' @param tag_levels Letter style for tags: \code{"a"}, \code{"A"}, \code{"1"}, \code{"i"}, or \code{"I"}.
 #'
-#' @param invert_linear Logical or logical vector; if length 1, recycled to all panels.
+#' @param invert_linear Logical or logical vector; if length 1, recycled to all
+#'   panels. Use \code{FALSE} for Cox log-hazard scores and \code{TRUE} for AFT
+#'   location scores when larger x values should indicate higher risk.
 #' @param xlab,ylab Axis labels applied to all panels (defaults are "Risk Score" and "Days").
 #' @param label_name Character vector of labels for status legend (e.g., \code{c("censored", "event")}).
 #' @param levels Numeric vector for \code{status} level ordering.
@@ -159,8 +162,7 @@ pa_plot_pred <- function(data,
 #' @export
 #'
 #' @examples
-#' # One panel per model. The previous example referenced undefined objects and
-#' # so could not be executed; this one runs.
+#' # One panel per model, with larger x values indicating higher risk.
 #' d <- pa_sim_cox_weibull(n = 150, pi_c = 0.3, v = 2,
 #'                         beta = c(0.5, -0.5), seed = 2025)
 #' d <- d[, c("time", "status", "x1", "x2")]
@@ -174,6 +176,7 @@ pa_plot_pred <- function(data,
 #' pa_plot_summary(
 #'   list(p_cox, p_wei),
 #'   titles = c("Cox PH", "Weibull AFT"),
+#'   invert_linear = c(FALSE, TRUE),
 #'   ncol = 2,
 #'   legend_name = "Status"
 #' )

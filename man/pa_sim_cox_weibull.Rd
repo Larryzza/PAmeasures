@@ -19,8 +19,9 @@ pa_sim_cox_weibull(
 \arguments{
 \item{n}{Integer. Sample size.}
 
-\item{pi_c}{Numeric in \eqn{[0, 0.99]}. Target censoring proportion. Ignored if both
-\code{mu} and \code{sd} are provided.}
+\item{pi_c}{Numeric in \eqn{[0, 1)}. Zero returns uncensored data. For a
+positive value, this is the target censoring proportion when \code{mu}
+is omitted; supplying \code{mu} overrides target calibration.}
 
 \item{v}{Positive numeric. Weibull shape in \eqn{H_0(t) = (0.5 t)^v}.}
 
@@ -40,8 +41,9 @@ no calibration is performed.}
 \item{interact}{Logical (default \code{FALSE}). 
 If \code{TRUE}, include pre-defined interaction terms as described above.}
 
-\item{nonlinear}{Logical. If `TRUE`, generates two covariates plus their
-interaction and a quadratic term; `beta` must then have length 4.}
+\item{nonlinear}{Logical. If \code{TRUE}, the latent event-time model uses
+\eqn{x_1, x_2, x_1 x_2, x_1^2}, in that coefficient order, and \code{beta}
+must have length 4. Takes precedence over \code{interact}.}
 }
 \value{
 A \code{data.frame} with columns:
@@ -49,12 +51,15 @@ A \code{data.frame} with columns:
   \item \code{time}: observed time \eqn{T_i = \min(Y_i, C_i)}.
   \item \code{status}: event indicator \eqn{1\{Y_i \le C_i\}}.
   \item \code{x1, x2, ...}: simulated covariates.
-  \item \code{x1:x2, x1:x3, ...}: interaction terms (if \code{interact = TRUE}).
-  \item \code{y_true}: latent event time \eqn{Y_i}.
-  \item \code{cens_time}: censoring time \eqn{C_i}.
+  \item \code{y_true}: latent event time \eqn{Y_i}, only when \code{pi_c > 0}.
+  \item \code{cens_time}: censoring time \eqn{C_i}, only when \code{pi_c > 0}.
 }
 
-Attributes include:
+Interaction and quadratic terms are used internally to generate event
+times, but only the original covariates are returned as columns.
+With \code{pi_c = 0}, \code{time} is the latent event time and all
+\code{status} values are 1; no model or censoring attributes are attached.
+With \code{pi_c > 0}, additional attributes are:
 \itemize{
   \item \code{mu}: censoring shift used.
   \item \code{sd_log}: standard deviation used in \eqn{\log C}.
@@ -62,8 +67,6 @@ Attributes include:
   \item \code{pi_c_target}: requested censoring rate.
   \item \code{pi_c_observed}: realized censoring rate.
   \item \code{v}, \code{beta}: model parameters.
-  \item \code{interact}: logical flag indicating whether interactions were included.
-  \item \code{nonlinear}: logical flag indicating whether polynomial and interactions term were included.
 }
 }
 \description{
@@ -74,7 +77,8 @@ inverse transform:
 where \eqn{H_0^{-1}(s) = 2 s^{1/v}}. 
 
 Covariates are simulated from a standard normal distribution.
-When \code{interact = FALSE}, the design matrix \eqn{Z} contains only main effects.
+With both \code{interact = FALSE} and \code{nonlinear = FALSE}, the design
+matrix \eqn{Z} contains only main effects.
 When \code{interact = TRUE}, the function automatically detects whether \code{length(beta)} 
 equals 3 or 7:
 \itemize{

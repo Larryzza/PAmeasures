@@ -40,7 +40,7 @@
 #'                       data = pbc,x=TRUE,y=TRUE)
 #' taulist <- seq(0, max(pbc$time), 300)
 #' # Choose a specific time point (t_star) for calculating the Brier Score 
-#' # For simplicity, we use the median survival time as t_star.
+#' # For simplicity, we use the median observed follow-up time as t_star.
 #' t_star <- median(pbc$time)
 #' 
 #' pam.Brier(fit.coxph.full, pbc, t_star)

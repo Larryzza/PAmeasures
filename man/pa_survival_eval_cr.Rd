@@ -28,9 +28,9 @@ row per value of \code{time.cif} and one column per subject.}
 
 \item{status}{A numeric vector indicating the event type for each subject: by default
 \itemize{
-  \item `0` for censored cases.
-  \item `1` for the primary event of interest.
-  \item `2` (or other values) for competing events.
+  \item \code{0} for censored cases.
+  \item \code{1} for the primary event of interest.
+  \item \code{2} (or other values) for competing events.
 }}
 
 \item{metrics}{A character vector specifying the performance metrics to calculate. 
@@ -39,45 +39,45 @@ C-index, Brier score, time-dependent AUC, and ICI. Use \code{"all"} to
 include the components and E50/E90 as well.
 Valid options include:
 \itemize{
-  \item `"pseudo_r2"`
-  \item `"r_square"`
-  \item `"l_square"`
-  \item `"pseudo_r2_point"`
-  \item `"r2_point"`
-  \item `"l2_point"`
-  \item `"c_index"`
-  \item `"brier_score"`
-  \item `"td_auc"`
-  \item `"ici"`, `"e50"`, `"e90"`
+  \item \code{"pseudo_r2"}
+  \item \code{"r_square"}
+  \item \code{"l_square"}
+  \item \code{"pseudo_r2_point"}
+  \item \code{"r2_point"}
+  \item \code{"l2_point"}
+  \item \code{"c_index"}
+  \item \code{"brier_score"}
+  \item \code{"td_auc"}
+  \item \code{"ici"}, \code{"e50"}, \code{"e90"}
 }}
 
 \item{t_star}{Optional numeric value specifying a reference time for evaluating point-version Pseudo_R_square, 
 the Brier score, time-dependent AUC, and calibration. Defaults to the median
-of `event_time`.}
+of \code{event_time}.}
 
 \item{tau}{Optional numeric value specifying a restricted time horizon for model evaluation. 
 Defaults to the maximum observed follow-up time.}
 
-\item{event_type}{An integer indicating the primary event type of interest (default = `1`).}
+\item{event_type}{An integer indicating the primary event type of interest (default = \code{1}).}
 
 \item{censoring}{Censoring estimator for the generalized R-squared metrics:
-`"cox"` (default, optionally conditional on `censor_covariates`) or `"km"`.
+\code{"cox"} (default, optionally conditional on \code{censor_covariates}) or \code{"km"}.
 Other metrics retain their own censoring adjustments.}
 
 \item{censor_covariates}{Optional numeric vector, matrix or data frame of
-censoring-model covariates, in the same subject order as `event_time` and
-the columns of `pred_cif`. Requires `censoring = "cox"`. With `NULL`, the
+censoring-model covariates, in the same subject order as \code{event_time} and
+the columns of \code{pred_cif}. Requires \code{censoring = "cox"}. With \code{NULL}, the
 Cox censoring model has no covariates. The Cox censoring model uses
 Breslow ties, so without covariates it equals exp(-Nelson-Aalen).}
 
-\item{calibration_args}{Optional named list passed to [pa_calibration_cr()],
+\item{calibration_args}{Optional named list passed to \code{\link{pa_calibration_cr}()},
 e.g. \code{list(bandwidth = 0.2)}. These settings affect calibration only.}
 }
 \value{
 A data frame with two columns:
   \itemize{
-    \item `"Metric"`: Name of the evaluated metric.
-    \item `"Value"`: Computed value of the corresponding metric.
+    \item \code{"Metric"}: Name of the evaluated metric.
+    \item \code{"Value"}: Computed value of the corresponding metric.
   }
 }
 \description{
@@ -90,19 +90,19 @@ The generalized R-squared metrics use event-observation IPCW. Censoring is
 estimated on the original follow-up times, treating any observed event type
 as an observed event. The unnormalized weight is
 \eqn{I(status_i > 0)/\widehat G(Y_i-\mid X_i)}; weights are normalized to sum
-to one. A censored subject has zero weight even if follow-up exceeds `tau`.
+to one. A censored subject has zero weight even if follow-up exceeds \code{tau}.
 Restricting the working outcome therefore does not limit censoring support
-requirements to `tau`: support at contributing original event times is needed.
+requirements to \code{tau}: support at contributing original event times is needed.
 Cox weights require conditional independent censoring and a valid censoring
 model; marginal weights require the corresponding marginal independence.
 Censoring survival probabilities are floored at \eqn{10^{-4}}.
-The interval outcome is the target-event time capped at `tau`, with competing
-events assigned to `tau`. The point outcome is `I(T <= t_star, D = event_type)`,
+The interval outcome is the target-event time capped at \code{tau}, with competing
+events assigned to \code{tau}. The point outcome is \code{I(T <= t_star, D = event_type)},
 including target events at the evaluation time, as in the CIF. Normalized ratio
 estimates are not asserted to be exactly unbiased in finite samples.
 Calibration uses the target-event CIF at or before \code{t_star} on the
 supplied grid and evaluates the outcome at \code{t_star}. It uses the local
-Aalen--Johansen estimator described in [pa_calibration_cr()]; \code{censoring}
+Aalen--Johansen estimator described in \code{\link{pa_calibration_cr}()}; \code{censoring}
 and \code{censor_covariates} do not control this estimator. A failed curve
 fit warns and returns missing calibration metrics without discarding others.
 }

@@ -1,31 +1,46 @@
 #' @title Prediction Accuracy Measures for Parametric Survival Regression Models
 #'
-#' @description This function computes Calculates a set of measures, $R^2$ and $L^2$, $Pseudo-R^2$ for evaluating the predictive accuracy of parametric survival regression models. 
-#' R-squared quantifies the proportion of variability in the response that is explained by a corrected prediction function derived from the original model. L-squared measures the proportion of the prediction error from the original model that is explained by the corrected prediction function, effectively capturing the improvement in prediction accuracy. Together, these metrics provide a comprehensive assessment of the predictive performance of a survival regression model.
+#' @description
+#' Returns subject-specific survival probabilities and a time summary from a
+#' fitted model when \code{predict = TRUE}. With \code{predict = FALSE}, returns
+#' R-squared, L-squared and pseudo-R-squared instead. R-squared measures explained
+#' variation after affine correction. L-squared is the corrected prediction
+#' error divided by the original prediction error; it is not the fraction of
+#' error removed by correction. Pseudo-R-squared is their product.
 #'
-#' @param model An object of class survreg representing a fitted parametric survival regression model. The survreg call must include x = TRUE and y = TRUE to ensure the design matrix and response vector are stored in the model object.
+#' @param model An object of class \code{survreg} fitted with distribution
+#'   \code{"exponential"}, \code{"weibull"}, or \code{"lognormal"}. Fit with
+#'   \code{x = TRUE} and \code{y = TRUE} to store the design and response.
 #' @param covs A vector of covariate names to be used for prediction when new_data is provided.
 #' @param tau (Optional) A restriction time for computing restricted survival time. If provided, the function evaluates predictions up to this time point. Default is 10e10.
 #' @param new_data (Optional) A new dataset for evaluating the model. If NULL, the function uses the training data stored in model.
 #' @param predict (Optional) A logical value indicating whether to return individual predictions. Default is TRUE. 
-#' @details With `predict = FALSE`, R-squared metrics return missing values
+#' @details With \code{predict = FALSE}, R-squared metrics return missing values
 #'   with a warning if censoring weights cannot be normalized, for example
 #'   when the training censoring survival is zero at an observed evaluation
-#'   event. Individual predictions remain available with `predict = TRUE`.
+#'   event. Individual predictions remain available with \code{predict = TRUE}.
 #' @return
-#' A **named list** of model-specific prediction objects.  
-#' Each element of the returned list corresponds to one fitted model and contains:
+#' With \code{predict = TRUE}, a single prediction list containing:
 #' \itemize{
 #'   \item \code{model} -- the fitted survival model object.
 #'   \item \code{times} -- numeric vector of observed follow-up times for the evaluation dataset.
 #'   \item \code{status} -- event indicators (1 = event, 0 = censored).
 #'   \item \code{surv_prob} -- an \eqn{n \times K} matrix of predicted
 #'         subject-specific survival probabilities on a common time grid.
-#'   \item \code{pred} -- predicted mean survival time  
-#'         (restricted or unrestricted, depending on the function).
+#'   \item \code{pred} -- model-based restricted mean survival time
+#'     \eqn{E[\min(T, \tau) \mid X]}, calculated analytically up to
+#'     \code{tau}; it is not the median survival time.
+#'   \item \code{linear.pred} -- the model's linear predictor, aligned with
+#'     the returned subjects.
 #'   \item \code{covs} -- character vector of covariate names used for prediction.
 #'   \item \code{new_data} -- dataset on which the predictions were computed.
 #' }
+#' Subjects are sorted by observed follow-up time. The columns of
+#' \code{surv_prob} correspond to the sorted follow-up times, including ties.
+#' With \code{predict = FALSE}, the result is a list of formatted character
+#' scalars named \code{R.squared}, \code{L.squared}, and \code{Psuedo.R}.
+#' The last spelling is retained for compatibility.
+
 #' 
 #' @examples
 #' data(pbc, package = "survival")

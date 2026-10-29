@@ -8,7 +8,8 @@
 #' where \eqn{H_0^{-1}(s) = 2 s^{1/v}}. 
 #' 
 #' Covariates are simulated from a standard normal distribution.
-#' When \code{interact = FALSE}, the design matrix \eqn{Z} contains only main effects.
+#' With both \code{interact = FALSE} and \code{nonlinear = FALSE}, the design
+#' matrix \eqn{Z} contains only main effects.
 #' When \code{interact = TRUE}, the function automatically detects whether \code{length(beta)} 
 #' equals 3 or 7:
 #' \itemize{
@@ -32,8 +33,9 @@
 #' }
 #'
 #' @param n Integer. Sample size.
-#' @param pi_c Numeric in \eqn{[0, 0.99]}. Target censoring proportion. Ignored if both
-#'   \code{mu} and \code{sd} are provided.
+#' @param pi_c Numeric in \eqn{[0, 1)}. Zero returns uncensored data. For a
+#'   positive value, this is the target censoring proportion when \code{mu}
+#'   is omitted; supplying \code{mu} overrides target calibration.
 #' @param v Positive numeric. Weibull shape in \eqn{H_0(t) = (0.5 t)^v}.
 #' @param beta Numeric vector of regression coefficients. 
 #'   If \code{interact = FALSE}, its length defines the number of main effects. 
@@ -44,8 +46,9 @@
 #' @param sd Optional positive numeric. Standard deviation used in 
 #'   \eqn{\log C = \mu + r_i}. If \code{NULL}, defaults to \eqn{\mathrm{sd}(\log Y)}.
 #' @param seed Optional integer seed for reproducibility.
-#' @param nonlinear Logical. If `TRUE`, generates two covariates plus their
-#'   interaction and a quadratic term; `beta` must then have length 4.
+#' @param nonlinear Logical. If \code{TRUE}, the latent event-time model uses
+#'   \eqn{x_1, x_2, x_1 x_2, x_1^2}, in that coefficient order, and \code{beta}
+#'   must have length 4. Takes precedence over \code{interact}.
 #' @param interact Logical (default \code{FALSE}). 
 #'   If \code{TRUE}, include pre-defined interaction terms as described above.
 #'
@@ -54,12 +57,15 @@
 #'   \item \code{time}: observed time \eqn{T_i = \min(Y_i, C_i)}.
 #'   \item \code{status}: event indicator \eqn{1\{Y_i \le C_i\}}.
 #'   \item \code{x1, x2, ...}: simulated covariates.
-#'   \item \code{x1:x2, x1:x3, ...}: interaction terms (if \code{interact = TRUE}).
-#'   \item \code{y_true}: latent event time \eqn{Y_i}.
-#'   \item \code{cens_time}: censoring time \eqn{C_i}.
+#'   \item \code{y_true}: latent event time \eqn{Y_i}, only when \code{pi_c > 0}.
+#'   \item \code{cens_time}: censoring time \eqn{C_i}, only when \code{pi_c > 0}.
 #' }
 #'
-#' Attributes include:
+#' Interaction and quadratic terms are used internally to generate event
+#' times, but only the original covariates are returned as columns.
+#' With \code{pi_c = 0}, \code{time} is the latent event time and all
+#' \code{status} values are 1; no model or censoring attributes are attached.
+#' With \code{pi_c > 0}, additional attributes are:
 #' \itemize{
 #'   \item \code{mu}: censoring shift used.
 #'   \item \code{sd_log}: standard deviation used in \eqn{\log C}.
@@ -67,8 +73,6 @@
 #'   \item \code{pi_c_target}: requested censoring rate.
 #'   \item \code{pi_c_observed}: realized censoring rate.
 #'   \item \code{v}, \code{beta}: model parameters.
-#'   \item \code{interact}: logical flag indicating whether interactions were included.
-#'   \item \code{nonlinear}: logical flag indicating whether polynomial and interactions term were included.
 #' }
 #'
 #' @examples
@@ -114,7 +118,7 @@ pa_sim_cox_weibull <- function(n, pi_c, v, beta, mu = NULL,
         "x1^2" = X[,1] * X[,1]
       )
     } else {
-      stop("When nonlinear = TRUE, length(beta) must be 4 (X1, X2, x1:x2, X2^2).")
+      stop("When nonlinear = TRUE, length(beta) must be 4 (x1, x2, x1:x2, x1^2).")
     }
   } else {
     if (length(beta) == 3) {

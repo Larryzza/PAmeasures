@@ -3,7 +3,7 @@
 # -------------------------------------------------------------------
 #' Nested case-control (NCC) sampling weights
 #'
-#' Computes inverse-selection weights for NCC designs. If `strata` is
+#' Computes inverse-selection weights for NCC designs. If \code{strata} is
 #' provided, matched NCC weights are computed.
 #'
 #' @param time Numeric vector of follow-up times.

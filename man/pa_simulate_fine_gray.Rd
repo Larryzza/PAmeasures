@@ -31,24 +31,33 @@ pa_simulate_fine_gray(
 
 \item{beta2}{A numeric vector of coefficients for cause 2.}
 
-\item{lambda1}{A numeric value for the Weibull scale parameter for cause 1.}
+\item{lambda1}{Positive coefficient in the baseline term
+\eqn{1 - \exp(-\lambda_1 t^v)} for cause 1.}
 
 \item{X}{A matrix of covariates, if not provided, covariates are generated from a
 standard normal distribution.}
 
 \item{mu}{A numeric value for the mean of the generated covariates.}
 
-\item{p}{A numeric value for the marginal probability of a cause 1 event.}
+\item{p}{Baseline probability of a cause 1 event when the cause-1 linear
+predictor is zero. Conditional on covariates, this probability is
+\eqn{1 - (1-p)^{\exp(X\beta_1)}}; it is not generally the marginal
+probability across the generated covariates.}
 
-\item{c_scale}{A numeric value to scale the standard deviation of censoring times.}
+\item{c_scale}{Positive multiplier for the default standard deviation of
+log censoring times.}
 
-\item{censor}{A numeric value representing the desired censoring proportion.}
+\item{censor}{Target censoring proportion. Zero produces uncensored data.
+For a positive value, the log-censoring shift is calibrated to this target
+unless \code{mu.c.time} is supplied. Because calibration uses the generated
+sample, the attained fraction can differ by approximately one subject.}
 
-\item{sd.time}{A numeric value for the standard deviation of censoring times.
-If NULL, it's calculated based on event times.}
+\item{sd.time}{Standard deviation of log censoring times. If \code{NULL},
+it is calculated from the log cause-1 event times and \code{c_scale}.}
 
-\item{mu.c.time}{A numeric value for the mean of censoring times. If NULL and `censor > 0`,
-it is calculated using `uniroot` to achieve the desired censoring.}
+\item{mu.c.time}{Optional additive shift of log censoring times. When
+\code{censor > 0}, a supplied shift overrides target calibration; otherwise
+it is found using \code{uniroot()}. Ignored when \code{censor = 0}.}
 
 \item{independent_c}{A logical value. If TRUE, censoring times are independent of covariates.}
 
@@ -60,8 +69,8 @@ seeded with it for reproducibility. The default \code{NULL} uses the current ran
 without resetting it; random draws advance its state.}
 }
 \value{
-A data frame containing the simulated data with columns `obs.times`, `obs.event`, and the covariates `X`.
-  Alternatively, if `report.mu_and_sd` is TRUE, it returns a data frame with censoring
+A data frame containing the simulated data with columns \code{obs.times}, \code{obs.event}, and the covariates \code{X}.
+  Alternatively, if \code{report.mu_and_sd} is TRUE, it returns a data frame with censoring
   parameters and event time quantiles.
 }
 \description{

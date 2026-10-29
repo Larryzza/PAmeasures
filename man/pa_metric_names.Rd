@@ -10,8 +10,8 @@ pa_metric_names()
 A character vector of canonical metric names.
 }
 \description{
-The metric identifiers accepted by the `metrics` argument of the evaluation
-functions, and emitted in the `Metric` column of their results.
+The metric identifiers accepted by the \code{metrics} argument of the evaluation
+functions, and emitted in the \code{Metric} column of their results.
 }
 \examples{
 pa_metric_names()

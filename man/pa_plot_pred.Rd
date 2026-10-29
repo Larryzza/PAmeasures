@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{pa_plot_pred}
 \alias{pa_plot_pred}
-\title{Quick Diagnostic Plot for Survival Model Predicted Probabilities}
+\title{Descriptive Plot of Predicted and Observed Survival Times}
 \usage{
 pa_plot_pred(
   data,
@@ -22,10 +22,12 @@ pa_plot_pred(
 \item{data}{A data frame (or list-like object) containing at least the
 following columns:
 \describe{
-  \item{`linear.pred`}{Model linear predictor (risk score).}
-  \item{`pred`}{Predicted probability or median survival value.}
-  \item{`times`}{Observed event or censoring time.}
-  \item{`status`}{Event indicator (0 = censored, 1 = event; optionally
+  \item{\code{linear.pred}}{Model linear predictor (risk score).}
+  \item{\code{pred}}{Predicted survival-time summary, in the same units as
+    \code{times}. The package prediction helpers supply a restricted mean or
+    an integrated time summary, rather than a probability or median.}
+  \item{\code{times}}{Observed event or censoring time.}
+  \item{\code{status}}{Event indicator (0 = censored, 1 = event; optionally
     can include more levels if defined in \code{label_name}).}
 }}
 
@@ -47,9 +49,10 @@ to \code{c(1, 19)} for two levels (censored vs event) or
 
 \item{legend_name}{Character string for the legend title (default = "status").}
 
-\item{invert_linear}{Logical; if \code{TRUE} (default), plots the negative
-of \code{linear.pred} so that higher values correspond to higher risk.
-Set to \code{FALSE} if you want higher values correspond to lower risk.}
+\item{invert_linear}{Logical. If \code{TRUE}, negate \code{linear.pred}.
+For a Cox log-hazard score, use \code{FALSE} to make larger x values
+indicate higher risk. For an AFT location score, use \code{TRUE} for that
+orientation. The default \code{TRUE} is retained for compatibility.}
 
 \item{sample_index}{Optional integer vector selecting which subjects to
 plot, e.g. \code{sample(seq_len(n), 200)} to thin a crowded chart. If
@@ -63,17 +66,15 @@ drawn, which keeps a few long follow-up times from compressing the plot.}
 A \code{ggplot} object that can be further customized.
 }
 \description{
-Produces a quick diagnostic plot visualizing predicted survival or event
-probabilities (e.g., from a Weibull AFT model) against the subject-specific
-linear predictors (risk scores). The plot combines a smoothed line of
-predicted values and points representing observed times, using shape to
-indicate censoring status. This visualization provides a simple check of
-how predicted risks correspond to observed outcomes.
+Plots a model-derived survival-time summary and observed follow-up times
+against the model's linear predictor. Event and censoring status are shown
+with different point shapes. This is a descriptive display, not a
+probability-calibration curve.
 }
 \details{
-The function is primarily designed for quick visual diagnostics in survival
+The function is primarily designed for descriptive diagnostics in survival
 model development. The line (\code{pred} vs \code{linear.pred}) shows the
-fitted or predicted trend, while the overlaid points (\code{times} vs
+predicted values joined in x order, without smoothing, while the overlaid points (\code{times} vs
 \code{linear.pred}) illustrate observed event times, distinguished by
 censoring status. For more elaborate visualization (e.g., confidence bands,
 multiple models), use faceting or combine plots with \pkg{patchwork}.
@@ -87,5 +88,5 @@ fit <- survival::coxph(survival::Surv(time, status) ~ x1 + x2,
 pred <- pa_predict_coxph(model = fit, covs = c("x1", "x2"), new_data = d)
 
 # observed time against predicted risk score, shaped by event status
-pa_plot_pred(pred, title = "Cox model")
+pa_plot_pred(pred, title = "Cox model", invert_linear = FALSE)
 }

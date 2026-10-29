@@ -20,7 +20,7 @@ phase-one cohort, not IDs of sampled case-control sets.}
 Numeric vector of weights, in full-cohort input order.
 }
 \description{
-Computes inverse-selection weights for NCC designs. If `strata` is
+Computes inverse-selection weights for NCC designs. If \code{strata} is
 provided, matched NCC weights are computed.
 }
 \details{

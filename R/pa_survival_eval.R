@@ -1,7 +1,7 @@
 #' Compute Survival Model Evaluation Metrics
 #'
-#' This function calculates various predictive performance metrics for survival models based on 
-#' predicted survival probabilities and observed survival data. It supports a range of evaluation 
+#' This function calculates various predictive performance metrics for survival models based on
+#' predicted survival probabilities and observed survival data. It supports a range of evaluation
 #' measures, including explained variation, concordance indices, Brier Score, and time-dependent AUC.
 #' @param model A fitted survival model object. Optional for the metrics
 #'   computed directly from \code{predicted_probability}.
@@ -21,40 +21,40 @@
 #'   prediction from \code{model}. If supplied, it should contain the variables
 #'   needed by those procedures and columns \code{time} and \code{status}
 #'   coded as above.
-#'   
+#'
 #' @param metrics A character vector specifying the evaluation metrics to compute. Options include:
 #'   \itemize{
 #'     \item "pseudo_r2" - Pseudo R-squared measure
 #'     \item "r_square" - Explained variation R^2
 #'     \item "l_square" - L-squared measure
-#'     \item "Harrell's C" - Harrell's concordance index
-#'     \item "Uno's C" - Uno's concordance index
+#'     \item "harrell_c" - Harrell's concordance index
+#'     \item "uno_c" - Uno's concordance index
 #'     \item "brier_score" - Overall probability prediction error
 #'     \item "td_auc" - Time-dependent area under the curve (AUC)
 #'     \item "ici", "e50", "e90" - Absolute calibration error summaries
 #'   }
 #'   The default \code{NULL} includes ICI but omits E50 and E90. Use
 #'   \code{"all"} to include every supported metric.
-#'   
-#'   
+#'
+#'
 #' @param t_star (Optional) Evaluation time for point R-squared, Brier score,
 #'   time-dependent AUC, and calibration.
-#'   If NULL, it defaults to the median survival time.
-#' @param tau (Optional) A numeric value specifying the truncation time for calculating explained variation metrics. 
+#'   If NULL, it defaults to the median observed follow-up time.
+#' @param tau (Optional) A numeric value specifying the truncation time for calculating explained variation metrics.
 #'   If NULL, it defaults to the maximum observed survival time.
-#' @param calibration_args Optional named list passed to [pa_calibration()],
+#' @param calibration_args Optional named list passed to \code{\link{pa_calibration}()},
 #'   e.g. \code{list(nk = 3)}. These settings affect calibration only.
-#'   For sampling weights use [pa_sample_design()] or [pa_calibration()]
+#'   For sampling weights use \code{\link{pa_sample_design}()} or \code{\link{pa_calibration}()}
 #'   directly, rather than passing weights through this list.
 #'
-#' @details Point R-squared uses the event indicator `I(T <= t_star)` and
-#'   the predicted event probability `1 - S` at the selected prediction-grid
+#' @details Point R-squared uses the event indicator \code{I(T <= t_star)} and
+#'   the predicted event probability \code{1 - S} at the selected prediction-grid
 #'   column. Events at the evaluation time are included.
 #'   Calibration uses \code{1 - S(t_star)} from the last supplied grid column
 #'   at or before \code{t_star}, interpreting the grid as a right-continuous
 #'   step function (risk zero before its first time). Its outcome horizon is
 #'   exactly \code{t_star}, not the nearest future grid time. See
-#'   [pa_calibration()] for the estimator and boundary-probability policy.
+#'   \code{\link{pa_calibration}()} for the estimator and boundary-probability policy.
 #'   A failed calibration fit warns and returns missing calibration metrics;
 #'   other requested metrics are retained.
 #'
@@ -65,11 +65,11 @@
 #' @references
 #' Schemper, M. and R. Henderson (2000). Predictive accuracy and explained variation in Cox regression.
 #' Biometrics 56, 249--255.
-#' 
+#'
 #' Lusa, L., R. Miceli and L. Mariani (2007). Estimation of predictive accuracy in survival analysis
 #' using R and S-PLUS. Computer Methods and Programs in Biomedicine 87, 132--137.
-#' 
-#' Potapov, S., Adler, W., Schmid, M., Bertrand, F. (2024). survAUC: Estimating Time-Dependent AUC for Censored Survival Data. 
+#'
+#' Potapov, S., Adler, W., Schmid, M., Bertrand, F. (2024). survAUC: Estimating Time-Dependent AUC for Censored Survival Data.
 #' R package version 1.3-0. DOI: \doi{10.32614/CRAN.package.survAUC}. Available at \url{https://CRAN.R-project.org/package=survAUC}.
 #'
 #' @export
@@ -273,7 +273,7 @@ pa_survival_eval <- function (model, event_time,
 #' outputs a wide table: each row corresponds to one metric and each column
 #' corresponds to a model.
 #'
-#' @param models A **named list** in which each element corresponds to a fitted model.  
+#' @param models A \strong{named list} in which each element corresponds to a fitted model.
 #'   Each model entry must itself be a list containing:
 #'   \itemize{
 #'     \item \code{times} -- numeric vector of observed follow-up times.
@@ -291,7 +291,7 @@ pa_survival_eval <- function (model, event_time,
 #'   Defaults to the median observed follow-up.
 #' @param tau Optional numeric scalar, specify the max time horizon for R2 measure and concordance measure (default = 10e10).
 #' @param digits Number of decimal places to round the metric values (default = 2).
-#' @param calibration_args Optional named list passed to [pa_calibration()].
+#' @param calibration_args Optional named list passed to \code{\link{pa_calibration}()}.
 #'
 #' @return A data frame with:
 #'   \itemize{
@@ -401,7 +401,7 @@ pa_summarize <- function(models,
 #' Integrate Predicted Survival Probabilities Over Time
 #'
 #' @description
-#' Computes an integrated survival (or risk) measure by summing predicted probabilities 
+#' Computes an integrated survival (or risk) measure by summing predicted probabilities
 #' across observed follow-up times, weighted by the time increments between events.
 #' This function is intended for internal use within the package.
 #'
@@ -409,9 +409,9 @@ pa_summarize <- function(models,
 #' probabilities at observed times, with one row per subject (matching the order of \code{event_time})
 #' and one or more columns for different prediction models or time points.
 #' @param event_time A numeric vector of observed event or censoring times.
-#' @param status A binary vector indicating event occurrence 
+#' @param status A binary vector indicating event occurrence
 #' (1 = event, 0 = censored) for each subject.
-#' @param tau Optional numeric value specifying the maximum truncation time. 
+#' @param tau Optional numeric value specifying the maximum truncation time.
 #' If \code{NULL} (default), the maximum observed event time is used.
 #'
 #' @return

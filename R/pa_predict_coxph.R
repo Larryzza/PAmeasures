@@ -1,11 +1,14 @@
 #' @title Prediction Accuracy Measures for Cox Proportional Hazards Model
 #'
-#' @description This function calculates a set of measures, $R^2$ and $L^2$, $Pseudo-R^2$, for a Cox proportional hazards model. When predict = TRUE, 
-#' it returns the predicted survival times alongside observed values and event status. 
-#' R-squared quantifies the proportion of variability in the observed survival times explained by the model's predictions,
-#' while L-squared measures the proportion of prediction error explained by a corrected prediction function. Together, these metrics provide a comprehensive evaluation of the predictive power of the Cox model.
+#' @description
+#' Returns subject-specific survival probabilities and a time summary from a
+#' fitted model when \code{predict = TRUE}. With \code{predict = FALSE}, returns
+#' R-squared, L-squared and pseudo-R-squared instead. R-squared measures explained
+#' variation after affine correction. L-squared is the corrected prediction
+#' error divided by the original prediction error; it is not the fraction of
+#' error removed by correction. Pseudo-R-squared is their product.
 #'
-#' @param model An object of class `coxph` representing a fitted Cox proportional hazards regression model. The model must be fitted with `x = TRUE` and `y = TRUE` to include the design matrix and response vector.
+#' @param model An object of class \code{coxph} representing a fitted Cox proportional hazards regression model. The model must be fitted with \code{x = TRUE} and \code{y = TRUE} to include the design matrix and response vector.
 #' @param covs A character vector specifying the names of the covariates used in the model.
 #' @param tau (Optional) A restriction time for computing restricted survival time. If provided, the function evaluates predictions up to this time point. Default is 10e10.
 #' @param new_data Optional evaluation data. Its outcomes are returned for metric
@@ -14,13 +17,12 @@
 #' @param predict A logical value indicating whether to return individual predictions. Default is TRUE.
 #' @details Probabilities use the fitted training baseline, including its case
 #'   weights, strata, tie method and offsets. Offset centering follows the
-#'   weighted training mean used by [survival::survfit()].
-#'   With `predict = FALSE`, R-squared metrics return missing values with a
+#'   weighted training mean used by \code{\link[survival]{survfit}()}.
+#'   With \code{predict = FALSE}, R-squared metrics return missing values with a
 #'   warning if censoring weights cannot be normalized, for example when the
 #'   training censoring survival is zero at an observed evaluation event.
 #' @return
-#' A **named list** of model-specific prediction objects.  
-#' Each element of the returned list corresponds to one fitted model and contains:
+#' With \code{predict = TRUE}, a single prediction list containing:
 #' \itemize{
 #'   \item \code{model} -- the fitted survival model object.
 #'   \item \code{times} -- numeric vector of observed follow-up times for the evaluation dataset.
@@ -31,9 +33,17 @@
 #'         on the evaluation grid, up to its maximum time or tau, whichever is
 #'         smaller. This preserves the legacy integration rule; it is not an
 #'         identified unrestricted mean. Fix the grid and tau for comparisons.
+#'   \item \code{linear.pred} -- the model's linear predictor, aligned with
+#'     the returned subjects.
 #'   \item \code{covs} -- character vector of covariate names used for prediction.
 #'   \item \code{new_data} -- dataset on which the predictions were computed.
 #' }
+#' Subjects are sorted by observed follow-up time. The columns of
+#' \code{surv_prob} correspond to the sorted follow-up times, including ties.
+#' With \code{predict = FALSE}, the result is a list of formatted character
+#' scalars named \code{R.squared}, \code{L.squared}, and \code{Psuedo.R}.
+#' The last spelling is retained for compatibility.
+
 #' 
 #' @references
 #' Li, G., & Wang, X. (2016). Prediction Accuracy Measures for a Nonlinear Model and for Right-Censored Time-to-Event Data.

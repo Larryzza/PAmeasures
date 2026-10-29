@@ -14,7 +14,7 @@ pa_summarize(
 )
 }
 \arguments{
-\item{models}{A **named list** in which each element corresponds to a fitted model.
+\item{models}{A \strong{named list} in which each element corresponds to a fitted model.
 Each model entry must itself be a list containing:
 \itemize{
   \item \code{times} -- numeric vector of observed follow-up times.
@@ -37,7 +37,7 @@ Defaults to the median observed follow-up.}
 
 \item{digits}{Number of decimal places to round the metric values (default = 2).}
 
-\item{calibration_args}{Optional named list passed to [pa_calibration()].}
+\item{calibration_args}{Optional named list passed to \code{\link{pa_calibration}()}.}
 }
 \value{
 A data frame with:

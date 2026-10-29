@@ -1,6 +1,6 @@
 #' Find the mean of censoring times
 #'
-#' This function is an internal helper used to find the shift `c_mu` needed
+#' This function is an internal helper used to find the shift \code{c_mu} needed
 #' to achieve a desired censoring proportion.
 #'
 #' @param c_mu A numeric value representing the shift to be applied to censoring times.
@@ -44,17 +44,26 @@ find_mu_c <- function(c_mu, censor, cens.times, event.times, f.event, n) {
 #' @param v A numeric value for the Weibull shape parameter.
 #' @param beta1 A numeric vector of coefficients for cause 1.
 #' @param beta2 A numeric vector of coefficients for cause 2.
-#' @param lambda1 A numeric value for the Weibull scale parameter for cause 1.
+#' @param lambda1 Positive coefficient in the baseline term
+#'   \eqn{1 - \exp(-\lambda_1 t^v)} for cause 1.
 #' @param X A matrix of covariates, if not provided, covariates are generated from a
 #'   standard normal distribution.
 #' @param mu A numeric value for the mean of the generated covariates.
-#' @param p A numeric value for the marginal probability of a cause 1 event.
-#' @param c_scale A numeric value to scale the standard deviation of censoring times.
-#' @param censor A numeric value representing the desired censoring proportion.
-#' @param sd.time A numeric value for the standard deviation of censoring times.
-#'   If NULL, it's calculated based on event times.
-#' @param mu.c.time A numeric value for the mean of censoring times. If NULL and `censor > 0`,
-#'   it is calculated using `uniroot` to achieve the desired censoring.
+#' @param p Baseline probability of a cause 1 event when the cause-1 linear
+#'   predictor is zero. Conditional on covariates, this probability is
+#'   \eqn{1 - (1-p)^{\exp(X\beta_1)}}; it is not generally the marginal
+#'   probability across the generated covariates.
+#' @param c_scale Positive multiplier for the default standard deviation of
+#'   log censoring times.
+#' @param censor Target censoring proportion. Zero produces uncensored data.
+#'   For a positive value, the log-censoring shift is calibrated to this target
+#'   unless \code{mu.c.time} is supplied. Because calibration uses the generated
+#'   sample, the attained fraction can differ by approximately one subject.
+#' @param sd.time Standard deviation of log censoring times. If \code{NULL},
+#'   it is calculated from the log cause-1 event times and \code{c_scale}.
+#' @param mu.c.time Optional additive shift of log censoring times. When
+#'   \code{censor > 0}, a supplied shift overrides target calibration; otherwise
+#'   it is found using \code{uniroot()}. Ignored when \code{censor = 0}.
 #' @param independent_c A logical value. If TRUE, censoring times are independent of covariates.
 #' @param report.mu_and_sd A logical value. If TRUE, a summary of censoring parameters
 #'   and event time quantiles is returned instead of the full dataset.
@@ -62,8 +71,8 @@ find_mu_c <- function(c_mu, censor, cens.times, event.times, f.event, n) {
 #'   seeded with it for reproducibility. The default \code{NULL} uses the current random number stream
 #'   without resetting it; random draws advance its state.
 #'
-#' @return A data frame containing the simulated data with columns `obs.times`, `obs.event`, and the covariates `X`.
-#'   Alternatively, if `report.mu_and_sd` is TRUE, it returns a data frame with censoring
+#' @return A data frame containing the simulated data with columns \code{obs.times}, \code{obs.event}, and the covariates \code{X}.
+#'   Alternatively, if \code{report.mu_and_sd} is TRUE, it returns a data frame with censoring
 #'   parameters and event time quantiles.
 #'
 #' @examples
@@ -126,8 +135,8 @@ pa_simulate_fine_gray <- function (n, v, beta1, beta2, lambda1 = 1,
                         n = n)
       mu.c.time <- result$root
     }
-    # This requires the `magrittr` package for the %>% operator.
-    # It is good practice to explicitly import it in the Roxygen comments with @importFrom magrittr %>%
+    # Apply the calibrated or user-specified shift on the log-time scale.
+    cens.times <- cens.times + mu.c.time
     obs.times <- pmin(log(ftime), cens.times) %>% exp
     obs.event <- c(log(ftime) <= cens.times) * c.ind
   }else{

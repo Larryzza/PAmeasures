@@ -6,11 +6,11 @@
 #' accelerated failure time (AFT) models (Weibull, Log-normal, Log-logistic), Fine-Gray models, 
 #' and competing risks random survival forests.
 #'
-#' @param model1 The fitted model for the target cause (either a `coxph` or `survreg` object).
-#' @param model2 The fitted model for competing causes (either a `coxph` or `survreg` object).
-#' @param fg_model Optional Fine-Gray model object (`crr` from `cmprsk` package).
+#' @param model1 The fitted model for the target cause (either a \code{coxph} or \code{survreg} object).
+#' @param model2 The fitted model for competing causes (either a \code{coxph} or \code{survreg} object).
+#' @param fg_model Optional Fine-Gray model object (\code{crr} from \code{cmprsk} package).
 #' @param cr_model Optional competing risks random forest model object.
-#' @param newdata A data frame containing observed event times (`time`), event indicators (`status`).
+#' @param newdata A data frame containing observed event times (\code{time}), event indicators (\code{status}).
 #' @param event.type The event type of interest for which CIF is to be predicted.
 #' @param tau The maximum time horizon for prediction.
 #' @param covs A character vector specifying the names of the covariates used in the model.

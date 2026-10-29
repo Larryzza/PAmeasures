@@ -28,7 +28,10 @@ fx_surv_uncensored <- function() {
 fx_cr <- function() {
   pa_simulate_fine_gray(
     n = 200, v = 2, beta1 = c(0.5, -0.5), beta2 = c(-0.3, 0.3),
-    censor = 0.3, seed = 1003
+    # Preserve the original fixed dataset used by metric characterization.
+    # In 2.0.0 the simulator omitted the shift; explicitly zero is equivalent.
+    # Target-calibrated censoring is tested in test-simulation-censoring.R.
+    censor = 0.3, mu.c.time = 0, seed = 1003
   )
 }
 

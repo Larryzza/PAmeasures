@@ -22,13 +22,13 @@ survival times), and \code{surv_prob} (subjects by sorted observed times).}
 
 \item{t_star}{(Optional) Evaluation time for Brier score, time-dependent
 AUC, and calibration.
-If NULL, it defaults to the median survival time.}
+If NULL, it defaults to the median observed follow-up time.}
 
-\item{tau}{(Optional) A numeric value specifying the truncation time for calculating explained variation metrics. 
+\item{tau}{(Optional) A numeric value specifying the truncation time for calculating explained variation metrics.
 If NULL, it defaults to the maximum observed survival time.}
 
 \item{km_cens_fit}{Kaplan-Meier estimate of the censoring distribution, a
-`survival::survfit` object. Not required when only calibration is requested.}
+\code{survival::survfit} object. Not required when only calibration is requested.}
 
 \item{case_weights}{Numeric sampling weights in the same subject order as
 \code{pred_results}. Prediction helpers sort subjects by observed time;
@@ -44,11 +44,11 @@ e.g. \code{list(nk = 3)}. Sampling weights are supplied by
 }
 \value{
 A tibble with columns:
-  - `Metric`: name of metric
-  - `Value`: numeric value
+  - \code{Metric}: name of metric
+  - \code{Value}: numeric value
 }
 \description{
-This function constructs a standardized evaluation dataset (`dat1`) from the
+This function constructs a standardized evaluation dataset (\code{dat1}) from the
 analysis dataset, predicted survival probabilities, and sampling weights, and
 computes key performance metrics in a tidy table format.
 Works for common two-phase sampling designs:
@@ -59,7 +59,7 @@ Works for common two-phase sampling designs:
 Calibration uses the event risk from the last prediction-grid
   column at or before \code{t_star}, with the exact requested outcome
   horizon. Both the Cox spline calibration model and absolute-error
-  summaries use sampling weights; see [pa_calibration()].
+  summaries use sampling weights; see \code{\link{pa_calibration}()}.
   Calibration-only inputs need \code{times}, \code{status}, and
   \code{surv_prob}, without fitted models or mean time predictions.
 }

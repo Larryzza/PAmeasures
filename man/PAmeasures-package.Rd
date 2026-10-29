@@ -12,18 +12,18 @@ competing risks, and two-phase designs such as nested case-control and
 case-cohort studies.
 }
 \details{
-All primary interfaces use the `pa_` prefix. [pa_nlm()] assesses continuous
-outcomes; [pam.nlm()] retains the historical four-decimal character format.
+All primary interfaces use the \code{pa_} prefix. \code{\link{pa_nlm}()} assesses continuous
+outcomes; \code{\link{pam.nlm}()} retains the historical four-decimal character format.
 }
 \section{Optional backends}{
 
-Two prediction backends are optional and declared in `Suggests` rather than
-`Imports`, because each serves a single branch of [pa_predict_cif()]:
+Two prediction backends are optional and declared in \code{Suggests} rather than
+\code{Imports}, because each serves a single branch of \code{\link{pa_predict_cif}()}:
 
-* `randomForestSRC` supplies the `cr_model` argument (an `rfsrc` fit).
-* `cmprsk` supplies the `fg_model` argument (a Fine-Gray `crr` fit).
+* \code{randomForestSRC} supplies the \code{cr_model} argument (an \code{rfsrc} fit).
+* \code{cmprsk} supplies the \code{fg_model} argument (a Fine-Gray \code{crr} fit).
 
-Both branches check availability with `requireNamespace()` and raise an
+Both branches check availability with \code{requireNamespace()} and raise an
 informative error naming the package to install.
 }
 

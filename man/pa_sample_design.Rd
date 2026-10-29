@@ -16,42 +16,38 @@ pa_sample_design(
 )
 }
 \arguments{
-\item{models}{A **named list** in which each element corresponds to a fitted model.
-Each model entry must itself be a list containing:
-\itemize{
-  \item \code{times} -- numeric vector of observed follow-up times.
-  \item \code{surv_prob} -- an \eqn{n \times K} matrix (or data frame) of
-        subject-specific predicted survival probabilities on a common time grid.
-  \item \code{status} -- event indicator (1 = event, 0 = censored).
-  \item \code{pred} -- (optional) predicted mean survival time (restricted or unrestricted).
-  \item \code{new_data} -- (optional) dataset used for prediction.
-  \item \code{covs} -- character vector of covariate names used for prediction.
-  \item \code{model} -- (optional) the underlying fitted survival model object.
-}
-Note: If \code{pred} is provided, it will be used to calculate R2 and concordance measure.}
+\item{models}{A named list of prediction objects, such as those returned by
+\code{pa_predict_coxph()}. Each entry contains \code{times} (observed
+follow-up), \code{status} (0 = censored, 1 = event), and \code{surv_prob}
+(subjects by sorted follow-up times). Include \code{pred}, the predicted
+survival-time summary, for the standard metric workflow. Calibration-only
+evaluation does not require \code{pred} or a fitted model.}
 
 \item{case_weights}{Numeric vector of inverse-inclusion sampling weights,
 aligned with each model's evaluation subjects.}
 
-\item{km_cens}{A Kaplan-Meier fit for censoring (based on training data) used to compute IPCW.}
+\item{km_cens}{A Kaplan-Meier fit for censoring (based on training data) used
+to compute IPCW. Not required for calibration-only evaluation.}
 
 \item{metrics}{Character vector of metrics to compute (default shown below).}
 
-\item{t_star}{Optional numeric scalar, specify the time point to evaluate Brier score and AUC.Default is median of observation time.}
+\item{t_star}{Optional evaluation time for Brier score, AUC and calibration.
+Defaults to the median observed follow-up time.}
 
-\item{tau}{Optional numeric scalar, specify the max time horizon for R2 measure and concordance measure (default = 10e10).}
+\item{tau}{Optional truncation time for explained-variation metrics.
+If \code{NULL}, the single-model evaluator uses maximum observed follow-up.}
 
 \item{digits}{Integer number of decimal places to round values (default 2).}
 
-\item{calibration_args}{Optional named list passed to [pa_calibration()],
+\item{calibration_args}{Optional named list passed to \code{\link{pa_calibration}()},
 e.g. \code{list(nk = 3)}. Weights come from \code{case_weights}.}
 }
 \value{
 A data.frame: rows = metrics, columns = model names.
 }
 \description{
-For a list of models (each providing `time`, `status`, `surv_prob`, `pred`),
-calls `pa_evaluate_two_phase()` for each and returns a wide
+For a list of models (each providing \code{times}, \code{status}, \code{surv_prob}, \code{pred}),
+calls \code{pa_evaluate_two_phase()} for each and returns a wide
 comparison table with metrics as rows and model names as columns.
 }
 \examples{

@@ -37,17 +37,17 @@ use \code{"all"} to additionally include E50 and E90. Options include:
   \item "ici", "e50", "e90": Absolute calibration error summaries.
 }}
 
-\item{predicted_data}{(Optional) A data frame containing validation data. If `NULL`, the function 
-uses the same data as `data` for model evaluation.}
+\item{predicted_data}{(Optional) A data frame containing validation data. If \code{NULL}, the function
+uses \code{train_data} for model evaluation.}
 
 \item{t_star}{(Optional) Positive evaluation time for Brier score, AUC, and
 calibration; the median evaluation follow-up if omitted.}
 
 \item{tau}{(Optional) A time point for truncating the survival time. If provided, the function evaluates predictions up to this time point.}
 
-\item{calibration_args}{Optional named list passed to [pa_calibration()].
-For sampling-adjusted calibration use [pa_sample_design()] or
-[pa_calibration()] directly; weights cannot be supplied through this list.}
+\item{calibration_args}{Optional named list passed to \code{\link{pa_calibration}()}.
+For sampling-adjusted calibration use \code{\link{pa_sample_design}()} or
+\code{\link{pa_calibration}()} directly; weights cannot be supplied through this list.}
 }
 \value{
 A data frame containing the selected model's performance metrics.

@@ -35,7 +35,9 @@ if \code{NULL}, defaults to "Panel 1", "Panel 2", etc.}
 
 \item{tag_levels}{Letter style for tags: \code{"a"}, \code{"A"}, \code{"1"}, \code{"i"}, or \code{"I"}.}
 
-\item{invert_linear}{Logical or logical vector; if length 1, recycled to all panels.}
+\item{invert_linear}{Logical or logical vector; if length 1, recycled to all
+panels. Use \code{FALSE} for Cox log-hazard scores and \code{TRUE} for AFT
+location scores when larger x values should indicate higher risk.}
 
 \item{xlab, ylab}{Axis labels applied to all panels (defaults are "Risk Score" and "Days").}
 
@@ -69,8 +71,7 @@ and arranges them with letter tags. The function collects a single shared legend
 and applies global styling (titles, axis labels, legend options) across panels.
 }
 \examples{
-# One panel per model. The previous example referenced undefined objects and
-# so could not be executed; this one runs.
+# One panel per model, with larger x values indicating higher risk.
 d <- pa_sim_cox_weibull(n = 150, pi_c = 0.3, v = 2,
                         beta = c(0.5, -0.5), seed = 2025)
 d <- d[, c("time", "status", "x1", "x2")]
@@ -84,6 +85,7 @@ p_wei <- pa_predict_survreg(model = wei, covs = c("x1", "x2"), new_data = d)
 pa_plot_summary(
   list(p_cox, p_wei),
   titles = c("Cox PH", "Weibull AFT"),
+  invert_linear = c(FALSE, TRUE),
   ncol = 2,
   legend_name = "Status"
 )
