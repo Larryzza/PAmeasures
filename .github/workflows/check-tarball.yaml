@@ -1,0 +1,450 @@
+name: 'PAmeasures 2.0.1 patch: exact source-tarball checks'
+'on':
+  push:
+    branches:
+    - cran-check-2.0.1-*
+permissions:
+  contents: read
+jobs:
+  build:
+    name: Build audited source with current R release (4.6.1)
+    runs-on: ubuntu-24.04
+    container: rocker/r-ver:4.6.1
+    timeout-minutes: 15
+    outputs:
+      sha256: ${{ steps.audit.outputs.sha256 }}
+    steps:
+    - uses: actions/checkout@v5
+    - name: Prepare source audit runtime
+      run: |
+        apt-get update -qq
+        apt-get install -y python3
+    - name: Build the approved source using R release
+      shell: Rscript {0}
+      run: source("build-current-release.R")
+    - name: Audit rebuilt contents and export final digest
+      id: audit
+      run: python3 audit-rebuilt-source.py
+    - name: Provide audited source archive segment 1/5
+      run: python3 emit-rebuilt-archive.py 0
+    - name: Provide audited source archive segment 2/5
+      run: python3 emit-rebuilt-archive.py 1
+    - name: Provide audited source archive segment 3/5
+      run: python3 emit-rebuilt-archive.py 2
+    - name: Provide audited source archive segment 4/5
+      run: python3 emit-rebuilt-archive.py 3
+    - name: Provide audited source archive segment 5/5
+      run: python3 emit-rebuilt-archive.py 4
+    - uses: actions/upload-artifact@v7
+      with:
+        name: PAmeasures-2.0.1-current-release-source
+        path: submission/*
+        retention-days: 30
+    if: '!contains(github.event.head_commit.message, ''[retrieve-source]'')'
+  check:
+    name: ${{ matrix.os }} (R ${{ matrix.r }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: windows-latest
+          r: release
+        - os: windows-latest
+          r: devel
+        - os: macos-latest
+          r: release
+        - os: ubuntu-24.04
+          r: devel
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: 'yes'
+      _R_CHECK_CRAN_INCOMING_REMOTE_: true
+      _R_CHECK_FORCE_SUGGESTS_: true
+      _R_CHECK_LIMIT_CORES_: true
+      OMP_NUM_THREADS: 1
+      OPENBLAS_NUM_THREADS: 1
+      SOURCE_SHA256: ${{ needs.build.outputs.sha256 }}
+      _R_CHECK_CRAN_INCOMING_CHECK_FILE_URIS_: 'true'
+    steps:
+    - uses: actions/checkout@v5
+    - uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: ${{ matrix.r }}
+        use-public-rspm: true
+    - uses: r-lib/actions/setup-pandoc@v2
+    - uses: actions/download-artifact@v8
+      with:
+        name: PAmeasures-2.0.1-current-release-source
+        path: submission
+    - name: Verify and extract the final rebuilt source tarball
+      shell: Rscript {0}
+      run: |
+        expected <- Sys.getenv("SOURCE_SHA256")
+        actual <- unname(as.character(tools::sha256sum("submission/PAmeasures_2.0.1.tar.gz")))
+        stopifnot(nchar(expected) == 64L, identical(actual, expected))
+        cat("Final source SHA256:", actual, "\n")
+        untar("submission/PAmeasures_2.0.1.tar.gz")
+        # Preserve the previously validated cache key; dependencies are unchanged by the rebuild.
+        dir.create("cache-input", showWarnings = FALSE)
+        untar("PAmeasures_2.0.1.tar.gz", files = "PAmeasures/DESCRIPTION", exdir = "cache-input")
+    - uses: r-lib/actions/setup-r-dependencies@v2
+      id: dependencies
+      continue-on-error: true
+      with:
+        working-directory: PAmeasures
+        extra-packages: |
+          any::rcmdcheck
+          any::tinytex
+          any::jsonlite
+          any::V8
+          any::xml2
+        needs: check
+    - name: Verify all dependencies and retain complete fallback logs
+      shell: bash
+      run: |
+        set +e
+        Rscript macos-devel-dependencies.R > dependency-install-complete.log 2>&1
+        status=$?
+        set -e
+        cat dependency-install-complete.log
+        if [ "$status" -ne 0 ]; then
+          python3 summarize-install-errors.py
+        fi
+        exit "$status"
+    - name: Prepare HTML validation tool
+      shell: bash
+      run: |
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          sudo apt-get update -qq
+          sudo apt-get install -y tidy
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          brew install tidy-html5
+          echo "$(brew --prefix tidy-html5)/bin" >> "$GITHUB_PATH"
+        elif ! command -v tidy >/dev/null; then
+          choco install html-tidy -y --no-progress
+        fi
+    - name: Prepare PDF manual toolchain
+      shell: bash
+      run: |
+        set +e
+        Rscript prepare-final-manual.R > toolchain-install.log 2>&1
+        status=$?
+        set -e
+        cat toolchain-install.log
+        if [ "$status" -ne 0 ]; then
+          python3 - <<'PYTHON'
+        from pathlib import Path
+        lines=Path("toolchain-install.log").read_text(errors="replace").splitlines()[-35:]
+        message=" | ".join(lines).replace("%","%25")
+        print("::error title=PDF toolchain setup::"+message)
+        PYTHON
+        fi
+        exit "$status"
+    - name: Full CRAN-style check of the final rebuilt tarball
+      shell: Rscript {0}
+      run: source("check-final-tarball.R")
+    - uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: check-${{ matrix.os }}-${{ matrix.r }}
+        path: |
+          check/**
+          check-summary.json
+          submission/SHA256SUMS
+          submission/build-audit.json
+          dependency-*.txt
+          dependency-install-complete.log
+          dependency-install-logs/**
+          dependency-namespace-errors.txt
+          dependency-sessionInfo.txt
+          compiler-config.txt
+          compiler-probe.log
+          flang-module-config.txt
+          index-smoke.*
+          toolchain-install.log
+        retention-days: 14
+    needs: build
+  macos-devel:
+    name: ${{ matrix.os }} (R ${{ matrix.r }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - macos-latest
+        r:
+        - devel
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: 'yes'
+      _R_CHECK_CRAN_INCOMING_REMOTE_: true
+      _R_CHECK_FORCE_SUGGESTS_: true
+      _R_CHECK_LIMIT_CORES_: true
+      OMP_NUM_THREADS: 1
+      OPENBLAS_NUM_THREADS: 1
+      SOURCE_SHA256: ${{ needs.build.outputs.sha256 }}
+      _R_CHECK_CRAN_INCOMING_CHECK_FILE_URIS_: 'true'
+    steps:
+    - uses: actions/checkout@v5
+    - uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: ${{ matrix.r }}
+        use-public-rspm: true
+    - uses: r-lib/actions/setup-pandoc@v2
+    - uses: actions/download-artifact@v8
+      with:
+        name: PAmeasures-2.0.1-current-release-source
+        path: submission
+    - name: Verify and extract the final rebuilt source tarball
+      shell: Rscript {0}
+      run: |
+        expected <- Sys.getenv("SOURCE_SHA256")
+        actual <- unname(as.character(tools::sha256sum("submission/PAmeasures_2.0.1.tar.gz")))
+        stopifnot(nchar(expected) == 64L, identical(actual, expected))
+        cat("Final source SHA256:", actual, "\n")
+        untar("submission/PAmeasures_2.0.1.tar.gz")
+        # Preserve the previously validated cache key; dependencies are unchanged by the rebuild.
+        dir.create("cache-input", showWarnings = FALSE)
+        untar("PAmeasures_2.0.1.tar.gz", files = "PAmeasures/DESCRIPTION", exdir = "cache-input")
+    - name: Install gettext headers and library from the R macOS toolchain
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(uname -m)" = "arm64"
+        archive="$RUNNER_TEMP/gettext-0.22.5-arm64.tar.xz"
+        curl --fail --silent --show-error --location --retry 3 \
+          https://mac.r-project.org/bin/darwin20/arm64/gettext-0.22.5-darwin.20-arm64.tar.xz \
+          -o "$archive"
+        echo "c95b5f28eadfac4ce5b31a8359afa3671bfbd059e002f0279996500a5e9f6d40  $archive" | shasum -a 256 -c -
+        sudo tar -xJf "$archive" -C /
+        test -r /opt/R/arm64/include/libintl.h
+        test -r /opt/R/arm64/lib/libintl.a
+        ls -l /opt/R/arm64/include/libintl.h /opt/R/arm64/lib/libintl.a
+    - name: Configure the Flang intrinsic module search path
+      shell: bash
+      run: |
+        set -euo pipefail
+        modules=/opt/R/flang-23/lib/clang/23/finclude/flang/arm64-apple-darwin22.6.0
+        if [ ! -r "$modules/iso_fortran_env.mod" ]; then
+          archive="$RUNNER_TEMP/flang-23.1.1.tar.xz"
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/R-macos/llvm-project/releases/download/23.1.1/flang-23.1.1-darwin22.6.0.tar.xz \
+            -o "$archive"
+          echo "d622136b9c0c2030986cc786edd673ae5a52acdd25e5123d12c9edca5f84016d  $archive" | shasum -a 256 -c -
+          sudo tar -xJf "$archive" -C /
+        fi
+        test -r "$modules/iso_fortran_env.mod"
+        Rscript configure-flang-modules.R
+    - name: Record compiler configuration and probe C/Fortran compilation
+      shell: Rscript {0}
+      run: |
+        writeLines(R.version.string, "dependency-R-version.txt")
+        library <- file.path(Sys.getenv("RUNNER_TEMP"), "Library")
+        dir.create(library, recursive = TRUE, showWarnings = FALSE)
+        cat("R_LIBS_USER=", library, "\n", file = Sys.getenv("GITHUB_ENV"), append = TRUE, sep = "")
+        config <- unlist(lapply(c("CC", "CFLAGS", "CPPFLAGS", "LDFLAGS", "CXX17", "FC", "FFLAGS", "FCFLAGS", "FLIBS"), function(key) {
+          c(key, system2(file.path(R.home("bin"), "R"), c("CMD", "config", key), stdout = TRUE))
+        }))
+        writeLines(config, "compiler-config.txt")
+        writeLines(c("#include <libintl.h>", "void c_probe(double *x) { *x = 1.0; }"), "c-compiler-probe.c")
+        writeLines(c("subroutine f_probe(x)", "use, intrinsic :: iso_fortran_env, only: real64", "real(real64) :: x", "x = 1.0_real64", "end subroutine"), "fortran-compiler-probe.f90")
+        output <- system2(file.path(R.home("bin"), "R"),
+          c("CMD", "SHLIB", "c-compiler-probe.c", "fortran-compiler-probe.f90"), stdout = TRUE, stderr = TRUE)
+        writeLines(output, "compiler-probe.log")
+        status <- attr(output, "status")
+        if (!is.null(status) && status != 0L) {
+          message <- paste(output, collapse = " | ")
+          message <- gsub("%", "%25", message, fixed = TRUE)
+          cat("::error title=C and Fortran preflight::", message, "\n", sep = "")
+          stop("Compiler preflight failed; see compiler-probe.log")
+        }
+    - uses: actions/cache/restore@v5
+      id: dependencies-cache
+      with:
+        path: ${{ env.R_LIBS_USER }}
+        key: macos-devel-source-v3-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('cache-input/PAmeasures/DESCRIPTION') }}-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: macos-devel-source-v3-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('cache-input/PAmeasures/DESCRIPTION') }}-
+    - name: Install source dependencies with complete compiler diagnostics
+      id: install-source-dependencies
+      shell: bash
+      run: |
+        set +e
+        Rscript macos-devel-dependencies.R > dependency-install-complete.log 2>&1
+        status=$?
+        set -e
+        cat dependency-install-complete.log
+        if [ "$status" -ne 0 ]; then
+          python3 summarize-install-errors.py
+        fi
+        exit "$status"
+    - name: Prepare HTML validation tool
+      shell: bash
+      run: |
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          sudo apt-get update -qq
+          sudo apt-get install -y tidy
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          brew install tidy-html5
+          echo "$(brew --prefix tidy-html5)/bin" >> "$GITHUB_PATH"
+        elif ! command -v tidy >/dev/null; then
+          choco install html-tidy -y --no-progress
+        fi
+    - name: Prepare PDF manual toolchain
+      shell: bash
+      run: |
+        set +e
+        Rscript prepare-final-manual.R > toolchain-install.log 2>&1
+        status=$?
+        set -e
+        cat toolchain-install.log
+        if [ "$status" -ne 0 ]; then
+          python3 - <<'PYTHON'
+        from pathlib import Path
+        lines=Path("toolchain-install.log").read_text(errors="replace").splitlines()[-35:]
+        message=" | ".join(lines).replace("%","%25")
+        print("::error title=PDF toolchain setup::"+message)
+        PYTHON
+        fi
+        exit "$status"
+    - name: Full CRAN-style check of the final rebuilt tarball
+      shell: Rscript {0}
+      run: source("check-final-tarball.R")
+    - uses: actions/cache/save@v5
+      if: always() && (steps.install-source-dependencies.outcome == 'success' || steps.install-source-dependencies.outcome == 'failure') && steps.dependencies-cache.outputs.cache-hit != 'true'
+      with:
+        path: ${{ env.R_LIBS_USER }}
+        key: macos-devel-source-v3-${{ hashFiles('dependency-R-version.txt') }}-${{ hashFiles('cache-input/PAmeasures/DESCRIPTION') }}-${{ github.run_id }}-${{ github.run_attempt }}
+    - uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: check-${{ matrix.os }}-${{ matrix.r }}
+        path: |
+          check/**
+          check-summary.json
+          submission/SHA256SUMS
+          submission/build-audit.json
+          dependency-*.txt
+          dependency-install-complete.log
+          dependency-install-logs/**
+          dependency-namespace-errors.txt
+          dependency-sessionInfo.txt
+          compiler-config.txt
+          compiler-probe.log
+          flang-module-config.txt
+          index-smoke.*
+          toolchain-install.log
+        retention-days: 14
+    needs: build
+  linux-release:
+    name: ubuntu-24.04 (R release, container)
+    runs-on: ubuntu-24.04
+    container: rocker/r-ver:4.6.1
+    timeout-minutes: 60
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: 'yes'
+      _R_CHECK_CRAN_INCOMING_REMOTE_: true
+      _R_CHECK_FORCE_SUGGESTS_: true
+      _R_CHECK_LIMIT_CORES_: true
+      OMP_NUM_THREADS: 1
+      OPENBLAS_NUM_THREADS: 1
+      SOURCE_SHA256: ${{ needs.build.outputs.sha256 }}
+      _R_CHECK_CRAN_INCOMING_CHECK_FILE_URIS_: 'true'
+    steps:
+    - uses: actions/checkout@v5
+    - name: Prepare Linux build dependencies
+      run: |
+        apt-get update -qq
+        apt-get install -y sudo git curl ca-certificates pkg-config make g++ gfortran perl unzip xz-utils libcurl4-openssl-dev libssl-dev libxml2-dev libv8-dev tidy
+    - name: Configure the R installation already provided by the container
+      shell: Rscript {0}
+      run: |
+        stopifnot(getRversion() == "4.6.1")
+        cat(R.version.string, "\n")
+        profile <- file.path(Sys.getenv("RUNNER_TEMP"), "release-Rprofile")
+        writeLines('options(repos = c(CRAN = "https://packagemanager.posit.co/cran/__linux__/noble/latest"), Ncpus = 2L)', profile)
+        cat("R_PROFILE_USER=", profile, "\n", file = Sys.getenv("GITHUB_ENV"), append = TRUE, sep = "")
+    - uses: r-lib/actions/setup-pandoc@v2
+    - uses: actions/download-artifact@v8
+      with:
+        name: PAmeasures-2.0.1-current-release-source
+        path: submission
+    - name: Verify and extract the final rebuilt source tarball
+      shell: Rscript {0}
+      run: |
+        expected <- Sys.getenv("SOURCE_SHA256")
+        actual <- unname(as.character(tools::sha256sum("submission/PAmeasures_2.0.1.tar.gz")))
+        stopifnot(nchar(expected) == 64L, identical(actual, expected))
+        cat("Final source SHA256:", actual, "\n")
+        untar("submission/PAmeasures_2.0.1.tar.gz")
+        # Preserve the previously validated cache key; dependencies are unchanged by the rebuild.
+        dir.create("cache-input", showWarnings = FALSE)
+        untar("PAmeasures_2.0.1.tar.gz", files = "PAmeasures/DESCRIPTION", exdir = "cache-input")
+    - uses: r-lib/actions/setup-r-dependencies@v2
+      id: dependencies
+      continue-on-error: true
+      with:
+        working-directory: PAmeasures
+        extra-packages: |
+          any::rcmdcheck
+          any::tinytex
+          any::jsonlite
+          any::V8
+          any::xml2
+        needs: check
+    - name: Verify all dependencies and retain complete fallback logs
+      shell: bash
+      run: |
+        set +e
+        Rscript macos-devel-dependencies.R > dependency-install-complete.log 2>&1
+        status=$?
+        set -e
+        cat dependency-install-complete.log
+        if [ "$status" -ne 0 ]; then
+          python3 summarize-install-errors.py
+        fi
+        exit "$status"
+    - name: Prepare PDF manual toolchain
+      shell: bash
+      run: |
+        set +e
+        Rscript prepare-final-manual.R > toolchain-install.log 2>&1
+        status=$?
+        set -e
+        cat toolchain-install.log
+        if [ "$status" -ne 0 ]; then
+          python3 - <<'PYTHON'
+        from pathlib import Path
+        lines=Path("toolchain-install.log").read_text(errors="replace").splitlines()[-35:]
+        message=" | ".join(lines).replace("%","%25")
+        print("::error title=PDF toolchain setup::"+message)
+        PYTHON
+        fi
+        exit "$status"
+    - name: Full CRAN-style check of the final rebuilt tarball
+      shell: Rscript {0}
+      run: source("check-final-tarball.R")
+    - uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: check-ubuntu-release-container
+        path: |
+          check/**
+          check-summary.json
+          submission/SHA256SUMS
+          submission/build-audit.json
+          dependency-*.txt
+          dependency-install-complete.log
+          dependency-install-logs/**
+          dependency-namespace-errors.txt
+          dependency-sessionInfo.txt
+          compiler-config.txt
+          compiler-probe.log
+          flang-module-config.txt
+          index-smoke.*
+          toolchain-install.log
+        retention-days: 14
+    needs: build
