@@ -28,8 +28,10 @@ km_surv <- function(t, km_cens) {
 #'   If NULL, it defaults to the median observed follow-up time.
 #' @param tau (Optional) A numeric value specifying the truncation time for calculating explained variation metrics.
 #'   If NULL, it defaults to the maximum observed survival time.
-#' @param km_cens_fit Kaplan-Meier estimate of the censoring distribution, a
-#'   \code{survival::survfit} object. Not required when only calibration is requested.
+#' @param km_cens_fit A censoring Kaplan-Meier fit estimated from complete
+#'   phase-one data, supplied as a \code{survival::survfit} object.
+#'   Used for IPCW in the generalized R-squared measures, Brier score,
+#'   and time-dependent AUC. Not required for calibration-only evaluation.
 #' @param metrics Character vector of metrics. \code{NULL} uses the default
 #'   metrics, including ICI; \code{"all"} additionally returns \code{r_square},
 #'   \code{l_square}, \code{e50}, and \code{e90}.
@@ -155,7 +157,8 @@ pa_evaluate_two_phase <- function(pred_results,
                                  pred_results$time, 
                                  pred_results$status,
                                  tau = tau,
-                                 case_weight = case_weights)
+                                 case_weight = case_weights,
+                                 km_cens_fit = km_cens_fit)
       
       if ("r_square" %in% metrics) results <- append(results, list("r_square" = round(as.numeric(r_l_list$R_square), 2)))
       if ("l_square" %in% metrics) results <- append(results, list("l_square" = round(as.numeric(r_l_list$L_square), 2)))
@@ -231,8 +234,10 @@ pa_evaluate_two_phase <- function(pred_results,
 #'   evaluation does not require \code{pred} or a fitted model.
 #' @param case_weights Numeric vector of inverse-inclusion sampling weights,
 #'   aligned with each model's evaluation subjects.
-#' @param km_cens A Kaplan-Meier fit for censoring (based on training data) used
-#'   to compute IPCW. Not required for calibration-only evaluation.
+#' @param km_cens A censoring Kaplan-Meier fit estimated from complete
+#'   phase-one data, supplied as a \code{survival::survfit} object.
+#'   Used for IPCW in the generalized R-squared measures, Brier score,
+#'   and time-dependent AUC. Not required for calibration-only evaluation.
 #' @param metrics Character vector of metrics to compute (default shown below).
 #' @param t_star Optional evaluation time for Brier score, AUC and calibration.
 #'   Defaults to the median observed follow-up time.

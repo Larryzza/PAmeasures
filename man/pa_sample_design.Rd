@@ -26,8 +26,10 @@ evaluation does not require \code{pred} or a fitted model.}
 \item{case_weights}{Numeric vector of inverse-inclusion sampling weights,
 aligned with each model's evaluation subjects.}
 
-\item{km_cens}{A Kaplan-Meier fit for censoring (based on training data) used
-to compute IPCW. Not required for calibration-only evaluation.}
+\item{km_cens}{A censoring Kaplan-Meier fit estimated from complete
+phase-one data, supplied as a \code{survival::survfit} object.
+Used for IPCW in the generalized R-squared measures, Brier score,
+and time-dependent AUC. Not required for calibration-only evaluation.}
 
 \item{metrics}{Character vector of metrics to compute (default shown below).}
 

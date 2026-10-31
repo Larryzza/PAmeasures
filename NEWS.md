@@ -1,5 +1,10 @@
 # PAmeasures 2.0.0.9000 (development)
 
+* Use the supplied phase-one censoring Kaplan--Meier fit for two-phase
+  R-squared, L-squared and pseudo-R-squared, rather than re-estimating
+  censoring without sampling weights on the selected evaluation sample.
+  Reject zero censoring support at contributing events; ordinary
+  right-censored calls retain their existing censoring estimation.
 * Apply the calibrated or supplied log-censoring shift in
   `pa_simulate_fine_gray()`. In 2.0.0 the shift was calculated but unused:
   positive censoring targets and `mu.c.time` did not control the generated

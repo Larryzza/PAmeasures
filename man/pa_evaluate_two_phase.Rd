@@ -27,8 +27,10 @@ If NULL, it defaults to the median observed follow-up time.}
 \item{tau}{(Optional) A numeric value specifying the truncation time for calculating explained variation metrics.
 If NULL, it defaults to the maximum observed survival time.}
 
-\item{km_cens_fit}{Kaplan-Meier estimate of the censoring distribution, a
-\code{survival::survfit} object. Not required when only calibration is requested.}
+\item{km_cens_fit}{A censoring Kaplan-Meier fit estimated from complete
+phase-one data, supplied as a \code{survival::survfit} object.
+Used for IPCW in the generalized R-squared measures, Brier score,
+and time-dependent AUC. Not required for calibration-only evaluation.}
 
 \item{case_weights}{Numeric sampling weights in the same subject order as
 \code{pred_results}. Prediction helpers sort subjects by observed time;

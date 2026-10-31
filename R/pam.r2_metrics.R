@@ -8,6 +8,11 @@
 #' @param status A numeric vector indicating the event occurrence (1 for event, 0 for censoring).
 #' @param tau An optional numeric value for restricted time horizon. Default is NULL (no restriction).
 #' @param case_weight An optional numeric value for case specific weight. Default is NULL.
+#' @param km_cens_fit Optional external censoring Kaplan-Meier fit.
+#'   For outcome-dependent sampling, supply an estimate from complete
+#'   phase-one data. Evaluated at the left limits of observed times,
+#'   capped at \code{tau} when restriction is requested.
+#'   If NULL, censoring is estimated from the supplied evaluation data.
 #'
 #' @return A list with R^2 , L^2, and pseudoR^2.
 #'
@@ -20,7 +25,7 @@
 #' @keywords internal
 #' @noRd
 pam.r2_metrics <- function(predicted_data, survival_time, status, 
-                           tau = NULL, case_weight = NULL) {
+                           tau = NULL, case_weight = NULL, km_cens_fit = NULL) {
   
   # Apply restriction if tau is provided
   if (!is.null(tau)) {
@@ -37,9 +42,30 @@ pam.r2_metrics <- function(predicted_data, survival_time, status,
   if (!is.null(case_weight)) case_weight <- case_weight[y.order]
   
   # Calculate inverse probability of censoring weights (IPCW)
-  fit.km.censoring <- survfit(Surv(y, 1 - delta) ~ 1)
+  if (is.null(km_cens_fit)) {
+    fit.km.censoring <- survfit(Surv(y, 1 - delta) ~ 1)
+  } else {
+    if (!inherits(km_cens_fit, "survfit") ||
+        !is.null(km_cens_fit$strata) || is.matrix(km_cens_fit$surv)) {
+      stop("'km_cens_fit' must be a single marginal censoring Kaplan-Meier fit.",
+           call. = FALSE)
+    }
+    fit.km.censoring <- km_cens_fit
+  }
   km.censoring.minus <- pa_censoring_left_limit(fit.km.censoring, y)
-  ratio.km <- delta / km.censoring.minus
+  if (!is.null(km_cens_fit)) {
+    contributes <- delta == 1
+    if (!is.null(case_weight)) contributes <- contributes & case_weight > 0
+    if (any(!is.finite(km.censoring.minus[contributes]) |
+            km.censoring.minus[contributes] <= 0)) {
+      stop("Censoring survival must be positive and finite at contributing event times.",
+           call. = FALSE)
+    }
+    ratio.km <- numeric(length(y))
+    ratio.km[contributes] <- delta[contributes] / km.censoring.minus[contributes]
+  } else {
+    ratio.km <- delta / km.censoring.minus
+  }
   
   # Handle NaN and Inf values
   ratio.km[is.nan(ratio.km)] <- 0
