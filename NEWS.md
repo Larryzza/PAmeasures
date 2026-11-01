@@ -1,5 +1,11 @@
 # PAmeasures 2.0.0.9000 (development)
 
+* Align `pa_fit_and_eval()` Brier score and time-dependent AUC with
+  `pa_survival_eval()` / `pa_summarize()`: use conditional-probability Brier
+  and empirical AUC from `tdROC` instead of IPCW Brier and Kaplan--Meier AUC.
+  Brier's default horizon now uses median evaluation follow-up rather than
+  median training event time. Both metrics use the nearest observed evaluation
+  time (earlier at equal distance), including for explicit horizons.
 * Use the supplied phase-one censoring Kaplan--Meier fit for two-phase
   R-squared, L-squared and pseudo-R-squared, rather than re-estimating
   censoring without sampling weights on the selected evaluation sample.

@@ -56,8 +56,16 @@ A data frame containing the selected model's performance metrics.
 This function computes a comprehensive set of performance metrics for survival analysis models. It provides metrics such as R_square, L_square, Pseudo_R, Harrell's C, Uno's C, Brier Score, and Time-dependent AUC. Users can specify particular metrics and model types, enabling tailored performance evaluation for various survival models.
 }
 \details{
-Calibration evaluates model-predicted event probabilities exactly
-  at \code{t_star} (the median evaluation follow-up if omitted).
+Brier score and AUC use the same conditional-probability estimators
+  as \code{\link{pa_survival_eval}()}: Brier score and empirical AUC from
+  \pkg{tdROC}, using the event risk \code{1 - S(t)}. The requested horizon
+  defaults to the median evaluation follow-up. Both metrics use the nearest
+  observed evaluation time, choosing the earlier time if equally close.
+  Values retain the evaluator's four-decimal intermediate precision before
+  this function's final two-decimal rounding. Historical results may differ
+  from the former IPCW Brier and Kaplan-Meier AUC implementations.
+  Calibration continues to evaluate model-predicted event probabilities
+  exactly at \code{t_star} (the median evaluation follow-up if omitted).
 
 Rows with missing values in \code{time}, \code{status}, or a
   requested covariate are excluded from training and evaluation with a

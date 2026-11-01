@@ -28,8 +28,16 @@
 #' @param calibration_args Optional named list passed to \code{\link{pa_calibration}()}.
 #'   For sampling-adjusted calibration use \code{\link{pa_sample_design}()} or
 #'   \code{\link{pa_calibration}()} directly; weights cannot be supplied through this list.
-#' @details Calibration evaluates model-predicted event probabilities exactly
-#'   at \code{t_star} (the median evaluation follow-up if omitted).
+#' @details Brier score and AUC use the same conditional-probability estimators
+#'   as \code{\link{pa_survival_eval}()}: Brier score and empirical AUC from
+#'   \pkg{tdROC}, using the event risk \code{1 - S(t)}. The requested horizon
+#'   defaults to the median evaluation follow-up. Both metrics use the nearest
+#'   observed evaluation time, choosing the earlier time if equally close.
+#'   Values retain the evaluator's four-decimal intermediate precision before
+#'   this function's final two-decimal rounding. Historical results may differ
+#'   from the former IPCW Brier and Kaplan-Meier AUC implementations.
+#'   Calibration continues to evaluate model-predicted event probabilities
+#'   exactly at \code{t_star} (the median evaluation follow-up if omitted).
 #'
 #' @details Rows with missing values in \code{time}, \code{status}, or a
 #'   requested covariate are excluded from training and evaluation with a
@@ -160,32 +168,22 @@ pa_fit_and_eval <- function (train_data, covariates, models = "coxph",
       metrics_results[[fit_name]]$"uno_c" <- pam.concordance(fits[[fit_name]], newdata = test_data, timewt="n/G2")$concordance
     }
     
-    if ("brier_score" %in% metrics) {
-      if (is.null(t_star)) {
-        metrics_results[[fit_name]]$"brier_score" <- pam.Brier(fits[[fit_name]], test_data)
-      }
-      else{
-        metrics_results[[fit_name]]$"brier_score" <- pam.Brier(fits[[fit_name]], test_data, t_star)
-      }
-      
-    }
-    
-    if ("td_auc" %in% metrics) {
-      if(!is.null(t_star)){
-        pred_time <- t_star
+    probability_metrics <- intersect(c("brier_score", "td_auc"), metrics)
+    if (length(probability_metrics)) {
+      prediction <- if (fit_name == "coxph") {
+        pa_predict_coxph(fits[[fit_name]], covs = covariates,
+                         tau = tau, new_data = test_data)
       } else {
-        pred_time <- quantile(test_data[[time_var]], 0.5, na.rm = TRUE)
+        pa_predict_survreg(fits[[fit_name]], covs = covariates,
+                           tau = tau, new_data = test_data)
       }
-      marker <- predict(fits[[fit_name]], newdata = test_data, type = "lp")
-      # Cox scores increase with risk; AFT location scores increase with time.
-      # Do not choose orientation using validation outcomes: an AUC below 0.5
-      # is evidence of poor discrimination and must not be folded above 0.5.
-      if (fit_name != "coxph") marker <- -marker
-      auc <- survivalROC::survivalROC(
-        Stime = test_data[[time_var]], status = test_data[[status_var]],
-        marker = marker, predict.time = pred_time, method = "KM"
-      )$AUC
-      metrics_results[[fit_name]]$"td_auc" <- auc
+      probability_results <- pa_survival_eval(
+        model = fits[[fit_name]], event_time = prediction$times,
+        predicted_probability = prediction$surv_prob,
+        status = prediction$status, covariates = covariates,
+        metrics = probability_metrics, t_star = t_star)
+      metrics_results[[fit_name]][probability_results$Metric] <-
+        as.list(probability_results$Value)
     }
   }
   
@@ -227,7 +225,7 @@ pa_fit_and_eval <- function (train_data, covariates, models = "coxph",
 }
 
 # Keep model fitting and every metric on the same rows. In particular, do not
-# let survivalROC drop missing rows itself: it reports that through cat().
+# let different metric backends select different complete evaluation rows.
 pa_complete_survival_rows <- function(data, columns, label) {
   if (!is.data.frame(data) || !all(columns %in% names(data))) {
     stop("'", label, "' must be a data frame containing: ",

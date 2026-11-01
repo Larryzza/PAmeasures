@@ -41,6 +41,8 @@
 # the historical CSV remains untouched.
 # CR C-index now uses the independently enumerated reciprocal-IPCW reference
 # below, following the intentional correction of Wolbers equation (3.4).
+# fit_and_eval_all Brier/AUC now intentionally follow the unchanged summary
+# probability estimators; use that reference and preserve the historical CSV.
 
 baseline_rows <- function() {
   path <- testthat::test_path("fixtures", "metric-baseline.csv")
@@ -235,7 +237,9 @@ for (scenario_name in names(inv_builders)) {
         inv_cr_event_reference() else numeric()
       point_reference <- if (scn %in% c("eval_default", "eval_all"))
         inv_survival_point_reference() else numeric()
-      method_reference <- c(cr_reference, point_reference)
+      probability_reference <- if (scn == "fit_and_eval_all")
+        round(inv_eval(c("brier_score", "td_auc")), 2) else numeric()
+      method_reference <- c(cr_reference, point_reference, probability_reference)
 
       for (i in seq_len(nrow(expected))) {
         m <- expected$Metric[i]
