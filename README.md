@@ -291,6 +291,10 @@ evaluation workflow. Full reproduction requires additional dependencies and
 substantial computation; saved analysis results are not included in the
 repository.
 
+## Development history
+
+PAmeasures 2.0.0 integrates the original PA-measure implementations from PAmeasures 0.1.0 with the survival prediction and evaluation framework developed as [TimeMetric](https://github.com/toz015/TimeMetric). The current repository continues this development, with earlier work documented in the [TimeMetric commit history](https://github.com/toz015/TimeMetric/commits/main/) and [merged pull requests](https://github.com/toz015/TimeMetric/pulls?q=is%3Apr+is%3Amerged). The transition to PAmeasures and preservation of the imported development history are described in the [migration guide](docs/migration-to-pameasures.md) and [history-cleanup record](docs/workspace-history-cleanup.md).
+
 ## Contributors
 
 Developed by **Li's Lab** (UCLA): Tong Zhu, Zian Zhuang, Wen Su, Xiaowu Dai and
