@@ -37,6 +37,13 @@ For the development version from GitHub:
 remotes::install_github("Larryzza/PAmeasures")
 ```
 
+The development version, `2.0.0.9000`, includes fixes made after CRAN 2.0.0.
+For JOSS review, use the exact commit linked in the submission record:
+
+```r
+remotes::install_github("Larryzza/PAmeasures", ref = "<reviewed commit SHA>")
+```
+
 ## Quick start
 
 For observed and predicted continuous outcomes from any regression model:
@@ -307,9 +314,9 @@ under the name [TimeMetric](https://github.com/toz015/TimeMetric) and subsequent
 
 ## License
 
-PAmeasures is distributed under GPL-3. Historical TimeMetric MIT notices are
-preserved in `LICENSE.md` and `inst/licenses/TimeMetric-MIT.txt`; see
-`inst/COPYRIGHTS` for the source lineage.
+PAmeasures is distributed under GPL-3; the full text is in `LICENSE.md`.
+The historical TimeMetric MIT notice is preserved in
+`inst/licenses/TimeMetric-MIT.txt`; see `inst/COPYRIGHTS` for the source lineage.
 
 ## References
 

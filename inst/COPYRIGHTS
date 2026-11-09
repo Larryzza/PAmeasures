@@ -14,5 +14,5 @@ Source: https://github.com/toz015/TimeMetric
 Starting commit: f9fd19f73d7abefc8cb1c54c415ce99c1fd96ba0
 Authors: Tong Zhu, Zian Zhuang, Wen Su, Xiaowu Dai and Gang Li
 The TimeMetric source declared MIT + file LICENSE. The original full MIT
-notice is preserved in licenses/TimeMetric-MIT.txt and LICENSE.md. That
-notice does not replace GPL-3 obligations for inherited PAmeasures material.
+notice is preserved in licenses/TimeMetric-MIT.txt. That notice does not
+replace GPL-3 obligations for inherited PAmeasures material.
